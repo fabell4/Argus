@@ -1,0 +1,1 @@
+{"poll_interval_minutes": 5, "enabled_exporters": ["sqlite"], "scanning_disabled": false, "scheduler_paused": false, "next_poll_at": null, "last_poll_at": null, "alert_config": {}}

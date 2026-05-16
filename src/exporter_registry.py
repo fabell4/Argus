@@ -1,0 +1,38 @@
+"""Registry mapping exporter names to factory callables."""
+from __future__ import annotations
+
+import logging
+from typing import TYPE_CHECKING, Callable
+
+from src import config
+from src.exporters.sqlite_exporter import SQLiteExporter
+from src.exporters.prometheus_exporter import PrometheusExporter
+
+if TYPE_CHECKING:
+    from src.exporters.base_exporter import BaseExporter
+
+_LOG = logging.getLogger(__name__)
+
+
+def _build_influxdb() -> "BaseExporter | None":
+    if not config.INFLUXDB_URL or not config.INFLUXDB_TOKEN:
+        _LOG.warning("InfluxDB exporter requested but INFLUXDB_URL/INFLUXDB_TOKEN not set.")
+        return None
+    from src.exporters.influxdb_exporter import InfluxDBExporter
+    return InfluxDBExporter(
+        url=config.INFLUXDB_URL,
+        token=config.INFLUXDB_TOKEN,
+        org=config.INFLUXDB_ORG,
+        bucket=config.INFLUXDB_BUCKET,
+    )
+
+
+EXPORTER_REGISTRY: dict[str, Callable[[], "BaseExporter | None"]] = {
+    "sqlite": lambda: SQLiteExporter(
+        db_path=config.SQLITE_PATH,
+        retention_days=config.SQLITE_RETENTION_DAYS,
+        max_rows=config.SQLITE_MAX_ROWS,
+    ),
+    "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
+    "influxdb": _build_influxdb,
+}

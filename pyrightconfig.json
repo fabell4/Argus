@@ -1,0 +1,6 @@
+{
+  "include": ["src/**", "tests/**"],
+  "exclude": ["frontend/**", ".venv/**"],
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "strict"
+}

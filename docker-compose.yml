@@ -1,20 +1,38 @@
 services:
-  backend:
-    build:
-      context: ./backend
-    container_name: argus-backend
+  argus-scheduler:
+    build: .
+    container_name: argus-scheduler
     restart: unless-stopped
-    environment:
-      - ALLOWED_ORIGINS=http://localhost:3000
+    command: python -m src.main
+    env_file: .env
+    volumes:
+      - argus-data:/app/data
+      - argus-logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9100/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  argus-api:
+    build: .
+    container_name: argus-api
+    restart: unless-stopped
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000
+    env_file: .env
     ports:
       - "8000:8000"
-
-  frontend:
-    build:
-      context: ./frontend
-    container_name: argus-frontend
-    restart: unless-stopped
+    volumes:
+      - argus-data:/app/data
+      - argus-logs:/app/logs
     depends_on:
-      - backend
-    ports:
-      - "3000:80"
+      - argus-scheduler
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  argus-data:
+  argus-logs:
