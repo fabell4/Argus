@@ -21,6 +21,7 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements-dev.txt
+export ALLOWED_ORIGINS=http://localhost:5173
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -42,6 +43,8 @@ docker compose up --build -d
 
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:8000/api/v1/health
+
+The backend CORS policy is configured with `ALLOWED_ORIGINS` (comma-separated).
 
 ## Open source best practices
 

@@ -4,6 +4,8 @@ services:
       context: ./backend
     container_name: argus-backend
     restart: unless-stopped
+    environment:
+      - ALLOWED_ORIGINS=http://localhost:3000
     ports:
       - "8000:8000"
 
