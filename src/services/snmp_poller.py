@@ -53,7 +53,7 @@ class SNMPPoller:
     def _snmp_get(self, oids: list[str]) -> dict[str, Any]:
         """Perform SNMP GET for each OID; returns {oid: value} dict."""
         try:
-            from pysnmp.hlapi import (  # type: ignore[import]
+            from pysnmp.hlapi import (
                 CommunityData,
                 ContextData,
                 ObjectIdentity,

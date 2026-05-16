@@ -10,7 +10,7 @@ import json
 import logging
 import os
 import tempfile
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import Any
 
 from src import config
@@ -38,7 +38,8 @@ _DEFAULTS: dict[str, Any] = {
 def _load_raw() -> dict[str, Any]:
     try:
         with open(_CONFIG_PATH, encoding="utf-8") as fh:
-            return json.load(fh)
+            data: dict[str, Any] = json.load(fh)
+            return data
     except FileNotFoundError:
         return {}
     except json.JSONDecodeError:
@@ -141,7 +142,8 @@ def set_last_poll_at(dt: datetime) -> None:
 def trigger_poll() -> None:
     """Signal the scheduler to run an immediate poll."""
     os.makedirs("data", exist_ok=True)
-    open(_RUN_TRIGGER, "w").close()
+    with open(_RUN_TRIGGER, "w", encoding="utf-8") as f:
+        f.write("")
 
 
 def consume_poll_trigger() -> bool:
@@ -157,7 +159,8 @@ def consume_poll_trigger() -> bool:
 
 def mark_running() -> None:
     os.makedirs("data", exist_ok=True)
-    open(_RUNNING_SENTINEL, "w").close()
+    with open(_RUNNING_SENTINEL, "w", encoding="utf-8") as f:
+        f.write("")
 
 
 def mark_done() -> None:

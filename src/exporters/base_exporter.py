@@ -12,4 +12,3 @@ class BaseExporter(ABC):
     @abstractmethod
     def export(self, snapshot: PowerSnapshot) -> None:
         """Persist or forward a single PowerSnapshot."""
-        ...

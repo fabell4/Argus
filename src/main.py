@@ -81,7 +81,7 @@ def build_scheduler(interval_minutes: int) -> BackgroundScheduler:
 
 def poll_once() -> None:
     """Execute one full poll cycle: collect → dispatch → detect events."""
-    global _scheduler_status
+    global _scheduler_status  # pylint: disable=global-statement
     runtime_config.mark_running()
     _LOG.info("Starting poll cycle.")
     try:
@@ -98,7 +98,7 @@ def poll_once() -> None:
         try:
             _dispatcher.dispatch(snapshot)
         except DispatchError as exc:
-            _LOG.error("One or more exporters failed: %s", exc.failures)
+            _LOG.exception("One or more exporters failed: %s", exc.failures)
 
         now = datetime.now(timezone.utc)
         runtime_config.set_last_poll_at(now)
@@ -110,8 +110,8 @@ def poll_once() -> None:
             {"last_snapshot": snapshot.to_dict(), "events": [e.to_dict() for e in events]}
         )
         _LOG.info("Poll cycle complete. Events detected: %d", len(events))
-    except Exception as exc:  # noqa: BLE001
-        _LOG.error("Poll cycle failed: %s", exc)
+    except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-exception-caught
+        _LOG.exception("Poll cycle failed: %s", exc)
         if _alert_manager:
             _alert_manager.record_failure(str(exc), datetime.now(timezone.utc))
         _scheduler_status = {"status": "error", "last_error": str(exc)}
@@ -125,7 +125,7 @@ def poll_once() -> None:
 
 def _poll_once_for_changes() -> None:
     """Called every 30 s by the control loop to react to UI-driven changes."""
-    global _dispatcher, _scheduler
+    global _dispatcher, _scheduler  # pylint: disable=global-variable-not-assigned
 
     if runtime_config.consume_poll_trigger():
         _LOG.info("Manual poll trigger detected.")
@@ -161,7 +161,7 @@ def _build_health_status() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    global _dispatcher, _alert_manager, _scheduler, _health_server
+    global _dispatcher, _alert_manager, _scheduler, _health_server  # pylint: disable=global-statement
 
     logging.basicConfig(level=getattr(logging, config.LOG_LEVEL, logging.INFO))
     _LOG.info("Argus scheduler starting.")
@@ -184,7 +184,8 @@ def main() -> None:
     _health_server = HealthServer(port=config.HEALTH_PORT, status_fn=_build_health_status)
     _health_server.start()
 
-    def _shutdown(signum: int, frame: Any) -> None:
+    def _shutdown(_signum: int, _frame: Any) -> None:  # pylint: disable=unused-argument
+        """Signal handler for graceful shutdown."""
         _LOG.info("Shutting down Argus scheduler.")
         if _scheduler and _scheduler.running:
             _scheduler.shutdown(wait=False)
@@ -200,8 +201,8 @@ def main() -> None:
             next_job = _scheduler.get_job("argus_poll")
             if next_job and next_job.next_run_time:
                 runtime_config.set_next_poll_at(next_job.next_run_time)
-        except Exception as exc:  # noqa: BLE001
-            _LOG.error("Control loop error: %s", exc)
+        except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-exception-caught
+            _LOG.exception("Control loop error: %s", exc)
         time.sleep(30)
 
 

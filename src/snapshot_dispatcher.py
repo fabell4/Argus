@@ -41,8 +41,8 @@ class SnapshotDispatcher:
             name = type(exporter).__name__
             try:
                 exporter.export(snapshot)
-            except Exception as exc:  # noqa: BLE001
-                _LOG.error("Exporter %s failed: %s", name, exc)
+            except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-exception-caught
+                _LOG.exception("Exporter %s failed: %s", name, exc)
                 failures[name] = str(exc)
         if failures:
             raise DispatchError(failures)

@@ -85,8 +85,8 @@ class AlertManager:
                 try:
                     future.result(timeout=15)
                     _LOG.info("Alert sent via %s.", name)
-                except Exception as exc:  # noqa: BLE001
-                    _LOG.error("Alert via %s failed: %s", name, exc)
+                except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-exception-caught
+                    _LOG.exception("Alert via %s failed: %s", name, exc)
 
     def send_test_alert(self) -> None:
         """Send a test notification to all providers."""
@@ -95,8 +95,8 @@ class AlertManager:
             try:
                 provider.send_alert(0, "Test alert from Argus", now)
                 _LOG.info("Test alert sent via %s.", type(provider).__name__)
-            except Exception as exc:  # noqa: BLE001
-                _LOG.error("Test alert via %s failed: %s", type(provider).__name__, exc)
+            except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-exception-caught
+                _LOG.exception("Test alert via %s failed: %s", type(provider).__name__, exc)
 
     # ------------------------------------------------------------------
     # Properties

@@ -36,7 +36,8 @@ class _RequestSizeLimitMiddleware(BaseHTTPMiddleware):
         content_length = request.headers.get("content-length")
         if content_length and int(content_length) > _MAX_REQUEST_BYTES:
             return Response(content="Request body too large.", status_code=413)
-        return await call_next(request)
+        response: Response = await call_next(request)
+        return response
 
 
 class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -54,7 +55,7 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
 # ---------------------------------------------------------------------------
 
 @asynccontextmanager
-async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+async def _lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     _LOG.info("Argus API starting.")
     yield
     _LOG.info("Argus API shutting down.")
@@ -106,7 +107,8 @@ def create_app() -> FastAPI:
         application.mount("/assets", StaticFiles(directory=f"{_STATIC_DIR}/assets"), name="assets")
 
         @application.get("/{full_path:path}", include_in_schema=False)
-        def spa_fallback(full_path: str) -> FileResponse:
+        def spa_fallback(full_path: str) -> FileResponse:  # pylint: disable=unused-argument
+            """Serve the SPA for all unmatched routes."""
             return FileResponse(f"{_STATIC_DIR}/index.html")
 
     return application

@@ -5,7 +5,6 @@ import logging
 import os
 import sqlite3
 import threading
-from datetime import datetime, timezone
 
 from src.exporters.base_exporter import BaseExporter
 from src.models.power_snapshot import PowerSnapshot
@@ -107,9 +106,6 @@ class SQLiteExporter(BaseExporter):
     def _prune(self) -> None:
         with self._lock, self._connect() as conn:
             if self._retention_days > 0:
-                cutoff = datetime.now(timezone.utc).replace(
-                    day=datetime.now(timezone.utc).day - 0
-                )
                 conn.execute(
                     "DELETE FROM power_snapshots WHERE timestamp < datetime('now', ?)",
                     (f"-{self._retention_days} days",),

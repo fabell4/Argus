@@ -56,5 +56,5 @@ class _HealthHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(self, fmt: str, *args: Any) -> None:  # noqa: ANN401
-        pass  # suppress default access logging
+    def log_message(self, fmt: str, *args: Any) -> None:  # noqa: ANN401  # pylint: disable=arguments-differ
+        """Suppress default HTTP access logging."""

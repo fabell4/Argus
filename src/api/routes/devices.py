@@ -30,7 +30,8 @@ def _load_devices() -> list[dict[str, Any]]:
     if not os.path.exists(_DEVICES_FILE):
         return []
     with open(_DEVICES_FILE, encoding="utf-8") as fh:
-        return json.load(fh)
+        devices: list[dict[str, Any]] = json.load(fh)
+        return devices
 
 
 def _save_devices(devices: list[dict[str, Any]]) -> None:
@@ -39,12 +40,12 @@ def _save_devices(devices: list[dict[str, Any]]) -> None:
         json.dump(devices, fh, indent=2)
 
 
-@router.get("/devices", response_model=list[DeviceSchema])
+@router.get("/devices")
 def list_devices() -> list[DeviceSchema]:
     return [DeviceSchema(**d) for d in _load_devices()]
 
 
-@router.get("/devices/{device_id}", response_model=DeviceSchema)
+@router.get("/devices/{device_id}")
 def get_device(device_id: str) -> DeviceSchema:
     for d in _load_devices():
         if d["id"] == device_id:
@@ -52,7 +53,7 @@ def get_device(device_id: str) -> DeviceSchema:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found.")
 
 
-@router.put("/devices", response_model=list[DeviceSchema], dependencies=[Depends(require_api_key)])
+@router.put("/devices", dependencies=[Depends(require_api_key)])
 def replace_devices(devices: list[DeviceSchema]) -> list[DeviceSchema]:
     _save_devices([d.model_dump() for d in devices])
     return devices
