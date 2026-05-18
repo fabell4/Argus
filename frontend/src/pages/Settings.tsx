@@ -66,7 +66,7 @@ export function Settings() {
 
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
         <h2 className="text-lg font-semibold text-slate-200">Exporters</h2>
-        {(['sqlite', 'prometheus', 'influxdb'] as const).map((exporter) => (
+        {(['sqlite', 'prometheus', 'influxdb', 'loki'] as const).map((exporter) => (
           <label key={exporter} className="flex items-center gap-2.5 cursor-pointer">
             <input
               type="checkbox"

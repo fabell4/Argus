@@ -35,6 +35,7 @@ class SNMPPoller:
         oids: dict[str, str] | None = None,
         timeout: int | None = None,
         retries: int | None = None,
+        max_retries: int = 1,
     ) -> None:
         self._host = host
         self._port = port
@@ -45,10 +46,31 @@ class SNMPPoller:
         self._oids = oids or _UPS_MIB
         self._timeout = timeout if timeout is not None else config.SNMP_TIMEOUT
         self._retries = retries if retries is not None else config.SNMP_RETRIES
+        self._max_retries = max_retries
 
     def poll(self) -> PowerSnapshot:
-        raw = self._snmp_get(list(self._oids.keys()))
-        return self._build_snapshot(raw)
+        """Perform SNMP GET for all OIDs and return a PowerSnapshot.
+
+        Retries once on transient OS-level errors. SNMP protocol-level retries
+        are handled internally by pysnmp via the ``retries`` parameter.
+        """
+        last_exc: OSError | None = None
+        for attempt in range(self._max_retries + 1):
+            try:
+                raw = self._snmp_get(list(self._oids.keys()))
+                return self._build_snapshot(raw)
+            except OSError as exc:
+                last_exc = exc
+                if attempt < self._max_retries:
+                    _LOG.warning(
+                        "SNMP poll attempt %d/%d failed (%s); retrying.",
+                        attempt + 1,
+                        self._max_retries + 1,
+                        exc,
+                    )
+        if last_exc is not None:
+            raise last_exc
+        return self._build_snapshot({})
 
     def _snmp_get(self, oids: list[str]) -> dict[str, Any]:
         """Perform SNMP GET for each OID; returns {oid: value} dict."""

@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
@@ -37,12 +37,12 @@ def _get_conn() -> sqlite3.Connection:
     return conn
 
 
-@router.get("/events", response_model=EventsPage)
+@router.get("/events")
 def list_events(
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=50, ge=1, le=_PAGE_SIZE_MAX),
-    device_id: str | None = Query(default=None),
-    event_type: str | None = Query(default=None),
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=_PAGE_SIZE_MAX)] = 50,
+    device_id: Annotated[str | None, Query()] = None,
+    event_type: Annotated[str | None, Query()] = None,
 ) -> EventsPage:
     try:
         conn = _get_conn()

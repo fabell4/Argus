@@ -1,0 +1,4 @@
+[BASIC]
+# Allow UPPER_CASE constants, __dunder__ names, and _lower_case private
+# module-level state variables (e.g. _scheduler, _alert_manager).
+const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__)|(_[a-z][a-z_0-9]*))$

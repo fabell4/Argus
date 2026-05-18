@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import sqlite3
-from typing import Any
+from typing import Annotated, Any
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
@@ -42,11 +42,11 @@ def _get_conn() -> sqlite3.Connection:
     return conn
 
 
-@router.get("/snapshots", response_model=SnapshotsPage)
+@router.get("/snapshots")
 def list_snapshots(
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=50, ge=1, le=_PAGE_SIZE_MAX),
-    device_id: str | None = Query(default=None),
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=_PAGE_SIZE_MAX)] = 50,
+    device_id: Annotated[str | None, Query()] = None,
 ) -> SnapshotsPage:
     try:
         conn = _get_conn()
@@ -76,8 +76,8 @@ def list_snapshots(
         ) from exc
 
 
-@router.get("/snapshots/latest", response_model=SnapshotSchema | None)
-def latest_snapshot(device_id: str | None = Query(default=None)) -> SnapshotSchema | None:
+@router.get("/snapshots/latest")
+def latest_snapshot(device_id: Annotated[str | None, Query()] = None) -> SnapshotSchema | None:
     try:
         conn = _get_conn()
         where = "WHERE device_id = ?" if device_id else ""

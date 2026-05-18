@@ -111,3 +111,27 @@ jobs:
           name: frontend-dist
           path: frontend/dist/
           retention-days: 7
+
+  # ---------------------------------------------------------------------------
+  # Docker — validate multi-architecture build (linux/amd64 + linux/arm64)
+  # ---------------------------------------------------------------------------
+  docker:
+    name: Docker multi-arch build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6.0.2
+
+      - name: Set up QEMU (cross-compilation support)
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image for linux/amd64 and linux/arm64 (no push)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: false

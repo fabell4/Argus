@@ -96,6 +96,11 @@ NTFY_URL: str = _get_str("NTFY_URL", "")
 NTFY_TOPIC: str = _get_str("NTFY_TOPIC", "")
 APPRISE_URL: str = _get_str("APPRISE_URL", "")
 
+# --- Loki ---
+LOKI_URL: str = _get_str("LOKI_URL", "")
+LOKI_JOB_LABEL: str = _get_str("LOKI_JOB_LABEL", "argus_power")
+LOKI_TIMEOUT_SECONDS: float = float(_get_int("LOKI_TIMEOUT_SECONDS", 5))
+
 # --- Health ---
 HEALTH_PORT: int = _get_int("HEALTH_PORT", 9100)
 

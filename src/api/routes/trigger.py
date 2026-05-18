@@ -21,7 +21,6 @@ class TriggerResponse(BaseModel):
 
 @router.post(
     "/trigger",
-    response_model=TriggerResponse,
     dependencies=[Depends(require_api_key)],
 )
 def trigger_poll() -> TriggerResponse:
@@ -35,7 +34,7 @@ def trigger_poll() -> TriggerResponse:
     return TriggerResponse(status="accepted", message="Poll trigger queued.")
 
 
-@router.get("/trigger/status", response_model=TriggerResponse)
+@router.get("/trigger/status")
 def poll_status() -> TriggerResponse:
     if runtime_config.is_running():
         return TriggerResponse(status="running", message="Poll in progress.")

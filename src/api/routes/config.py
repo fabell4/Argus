@@ -9,7 +9,7 @@ from src.api.auth import require_api_key
 
 router = APIRouter(tags=["config"])
 
-_VALID_EXPORTERS = {"sqlite", "prometheus", "influxdb"}
+_VALID_EXPORTERS = {"sqlite", "prometheus", "influxdb", "loki"}
 
 
 class RuntimeConfigSchema(BaseModel):
@@ -34,7 +34,7 @@ class RuntimeConfigSchema(BaseModel):
         return v
 
 
-@router.get("/config", response_model=RuntimeConfigSchema)
+@router.get("/config")
 def get_config() -> RuntimeConfigSchema:
     data = runtime_config.load()
     return RuntimeConfigSchema(
@@ -47,7 +47,6 @@ def get_config() -> RuntimeConfigSchema:
 
 @router.put(
     "/config",
-    response_model=RuntimeConfigSchema,
     dependencies=[Depends(require_api_key)],
 )
 def update_config(body: RuntimeConfigSchema) -> RuntimeConfigSchema:

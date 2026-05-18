@@ -4,6 +4,7 @@ from __future__ import annotations
 import logging
 import socket
 from datetime import datetime, timezone
+from typing import Any
 
 from src.constants import DeviceType
 from src.models.power_snapshot import PowerSnapshot
@@ -35,6 +36,7 @@ class NUTPoller:
         password: str = "",
         ups_name: str = "ups",
         timeout: int = 10,
+        max_retries: int = 1,
     ) -> None:
         self._host = host
         self._port = port
@@ -42,11 +44,33 @@ class NUTPoller:
         self._password = password
         self._ups_name = ups_name
         self._timeout = timeout
+        self._max_retries = max_retries
 
     def poll(self) -> PowerSnapshot:
-        """Connect to NUT, retrieve all variables, and return a PowerSnapshot."""
-        raw = self._fetch_vars()
-        return self._build_snapshot(raw)
+        """Connect to NUT, retrieve all variables, and return a PowerSnapshot.
+
+        Retries up to ``max_retries`` times on transient socket errors.
+        Authentication failures and protocol errors (``RuntimeError``) propagate
+        immediately and are not retried.
+        """
+        last_exc: OSError = OSError(
+            f"All {self._max_retries + 1} poll attempt(s) for "
+            f"{self._ups_name}@{self._host}:{self._port} failed."
+        )
+        for attempt in range(self._max_retries + 1):
+            try:
+                raw = self._fetch_vars()
+                return self._build_snapshot(raw)
+            except OSError as exc:
+                last_exc = exc
+                if attempt < self._max_retries:
+                    _LOG.warning(
+                        "NUT poll attempt %d/%d failed (%s); retrying.",
+                        attempt + 1,
+                        self._max_retries + 1,
+                        exc,
+                    )
+        raise last_exc
 
     def _fetch_vars(self) -> dict[str, str]:
         """Open a socket to NUT and retrieve all UPS variables."""
@@ -87,32 +111,46 @@ class NUTPoller:
             fh.flush()
             return variables
 
+    @staticmethod
+    def _apply_field(
+        field: str, nut_key: str, value: str, kwargs: dict[str, Any]
+    ) -> None:
+        """Parse a single NUT variable and store it in ``kwargs``."""
+        if field == "ups_status":
+            kwargs[field] = value
+            return
+        try:
+            kwargs[field] = float(value)
+        except ValueError:
+            _LOG.warning("Could not parse NUT var %s=%r as float.", nut_key, value)
+
+    @staticmethod
+    def _derive_power_watts(
+        raw: dict[str, str], kwargs: dict[str, Any]
+    ) -> None:
+        """Derive power_watts from nominal capacity and load_percent when not directly available."""
+        if kwargs.get("power_watts") is not None:
+            return
+        nominal_raw = raw.get("ups.realpower.nominal") or raw.get("ups.power.nominal")
+        if not nominal_raw:
+            return
+        load = kwargs.get("load_percent")
+        if load is None:
+            return
+        try:
+            kwargs["power_watts"] = float(nominal_raw) * (float(load) / 100.0)
+        except (ValueError, TypeError):
+            pass
+
     def _build_snapshot(self, raw: dict[str, str]) -> PowerSnapshot:
-        kwargs: dict[str, object] = {
+        kwargs: dict[str, Any] = {
             "timestamp": datetime.now(timezone.utc),
             "device_id": f"nut:{self._ups_name}@{self._host}",
             "device_type": DeviceType.UPS,
         }
         for nut_key, field in _NUT_FIELD_MAP.items():
             value = raw.get(nut_key)
-            if value is None:
-                continue
-            if field == "ups_status":
-                kwargs[field] = value
-            else:
-                try:
-                    kwargs[field] = float(value)
-                except ValueError:
-                    _LOG.warning("Could not parse NUT var %s=%r as float.", nut_key, value)
-
-        # Derive power_watts from load_percent + nominal power if direct reading unavailable
-        if kwargs.get("power_watts") is None:
-            nominal_raw = raw.get("ups.realpower.nominal") or raw.get("ups.power.nominal")
-            if nominal_raw and kwargs.get("load_percent") is not None:
-                try:
-                    nominal = float(nominal_raw)
-                    kwargs["power_watts"] = nominal * (kwargs["load_percent"] / 100.0)  # type: ignore[operator]
-                except ValueError:
-                    pass
-
-        return PowerSnapshot(**kwargs)  # type: ignore[arg-type]
+            if value is not None:
+                self._apply_field(field, nut_key, value, kwargs)
+        self._derive_power_watts(raw, kwargs)
+        return PowerSnapshot(**kwargs)

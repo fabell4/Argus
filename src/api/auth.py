@@ -32,7 +32,7 @@ class _RateLimiter:
 _rate_limiter = _RateLimiter(max_calls=config.RATE_LIMIT_PER_MINUTE)
 
 
-async def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
+def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
     """FastAPI dependency that enforces API key auth and rate limiting."""
     if not config.API_KEY:
         return  # API key auth disabled

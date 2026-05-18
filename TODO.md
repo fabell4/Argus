@@ -67,20 +67,20 @@
 
 ---
 
-## Phase 1 — Stability
+## Phase 1 — Stability ✅
 
 _Goal: make the deployed instance reliable before adding features. Required before alpha tag._
 
-- [ ] Retry logic in `NUTPoller` and `SNMPPoller` — one retry on transient socket/SNMP failure
+- [x] Retry logic in `NUTPoller` and `SNMPPoller` — one retry on transient socket/SNMP failure
   to handle first-run hangs and brief network blips
-- [ ] Docker `HEALTHCHECK` — point to `GET /api/health` once verified stable
-- [ ] Multi-architecture Docker build — add `linux/arm64` target for Raspberry Pi / ARM servers
+- [x] Docker `HEALTHCHECK` — point to `GET /api/health` once verified stable
+- [x] Multi-architecture Docker build — add `linux/arm64` target for Raspberry Pi / ARM servers
   (common UPS monitoring hardware)
-- [ ] Environment validation on startup — warn on scheduler start if a configured alert provider
+- [x] Environment validation on startup — warn on scheduler start if a configured alert provider
   URL is unreachable; log clearly rather than failing silently
-- [ ] Pause/resume polling toggle — runtime flag to pause/resume the scheduler without
+- [x] Pause/resume polling toggle — runtime flag to pause/resume the scheduler without
   restarting the container; expose via `PUT /api/config` and a UI button (default: enabled)
-- [ ] Loki exporter — ship `PowerSnapshot` and `PowerEvent` records as structured log lines to
+- [x] Loki exporter — ship `PowerSnapshot` and `PowerEvent` records as structured log lines to
   a Loki push endpoint; mirrors Hermes's `LokiExporter` pattern adapted for power telemetry
 
 > 🏁 **Alpha release gate** — all Phase 1 items must be complete before tagging an alpha release.

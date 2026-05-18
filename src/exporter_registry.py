@@ -27,6 +27,18 @@ def _build_influxdb() -> "BaseExporter | None":
     )
 
 
+def _build_loki() -> "BaseExporter | None":
+    if not config.LOKI_URL:
+        _LOG.warning("Loki exporter requested but LOKI_URL not set.")
+        return None
+    from src.exporters.loki_exporter import LokiExporter
+    return LokiExporter(
+        url=config.LOKI_URL,
+        job_label=config.LOKI_JOB_LABEL,
+        timeout_seconds=config.LOKI_TIMEOUT_SECONDS,
+    )
+
+
 EXPORTER_REGISTRY: dict[str, Callable[[], "BaseExporter | None"]] = {
     "sqlite": lambda: SQLiteExporter(
         db_path=config.SQLITE_PATH,
@@ -35,4 +47,5 @@ EXPORTER_REGISTRY: dict[str, Callable[[], "BaseExporter | None"]] = {
     ),
     "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
     "influxdb": _build_influxdb,
+    "loki": _build_loki,
 }

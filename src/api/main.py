@@ -62,6 +62,7 @@ async def _lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 def create_app() -> FastAPI:
+    """Create and configure the Argus FastAPI application."""
     application = FastAPI(
         title="Argus API",
         version="0.1.0",
@@ -107,8 +108,9 @@ def create_app() -> FastAPI:
         application.mount("/assets", StaticFiles(directory=f"{_STATIC_DIR}/assets"), name="assets")
 
         @application.get("/{full_path:path}", include_in_schema=False)
-        def spa_fallback(full_path: str) -> FileResponse:  # pylint: disable=unused-argument
+        def spa_fallback(full_path: str) -> FileResponse:
             """Serve the SPA for all unmatched routes."""
+            _LOG.debug("SPA fallback serving index.html for path: /%s", full_path)
             return FileResponse(f"{_STATIC_DIR}/index.html")
 
     return application

@@ -198,9 +198,15 @@ def _validate_interval_minutes(value: int) -> None:
         raise ValueError("poll_interval_minutes must be an integer between 1 and 10080.")
 
 
+_VALID_EXPORTERS: frozenset[str] = frozenset({"sqlite", "prometheus", "influxdb", "loki"})
+
+
 def _validate_enabled_exporters(value: list[str]) -> None:
     if not isinstance(value, list) or not all(isinstance(e, str) for e in value):
         raise ValueError("enabled_exporters must be a list of strings.")
+    unknown = [e for e in value if e not in _VALID_EXPORTERS]
+    if unknown:
+        raise ValueError(f"Unknown exporter(s): {unknown}. Valid: {sorted(_VALID_EXPORTERS)}")
 
 
 def _validate_alert_config(value: dict[str, Any]) -> None:

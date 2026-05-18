@@ -13,8 +13,10 @@ from __future__ import annotations
 
 import logging
 import signal
+import socket
 import sys
 import time
+import urllib.parse
 from datetime import datetime, timezone
 from typing import Any
 
@@ -45,6 +47,7 @@ _scheduler_status: dict[str, Any] = {"status": "starting"}
 # ---------------------------------------------------------------------------
 
 def build_dispatcher() -> SnapshotDispatcher:
+    """Build a SnapshotDispatcher populated with all currently enabled exporters."""
     dispatcher = SnapshotDispatcher()
     for name in runtime_config.get_enabled_exporters():
         factory = EXPORTER_REGISTRY.get(name)
@@ -59,12 +62,14 @@ def build_dispatcher() -> SnapshotDispatcher:
 
 
 def build_alert_manager() -> AlertManager:
+    """Build an AlertManager with all configured alert providers registered."""
     manager = AlertManager(failure_threshold=config.ALERT_FAILURE_THRESHOLD)
     register_all_providers(manager)
     return manager
 
 
 def build_scheduler(interval_minutes: int) -> BackgroundScheduler:
+    """Build a BackgroundScheduler that fires poll_once on the given interval."""
     scheduler = BackgroundScheduler()
     scheduler.add_job(
         poll_once,
@@ -125,8 +130,6 @@ def poll_once() -> None:
 
 def _poll_once_for_changes() -> None:
     """Called every 30 s by the control loop to react to UI-driven changes."""
-    global _dispatcher, _scheduler  # pylint: disable=global-variable-not-assigned
-
     if runtime_config.consume_poll_trigger():
         _LOG.info("Manual poll trigger detected.")
         poll_once()
@@ -147,6 +150,7 @@ def _poll_once_for_changes() -> None:
 # ---------------------------------------------------------------------------
 
 def _build_health_status() -> dict[str, Any]:
+    """Return the current scheduler health status dict for the health endpoint."""
     return {
         **_scheduler_status,
         "scheduler_running": _scheduler.running if _scheduler else False,
@@ -157,10 +161,51 @@ def _build_health_status() -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Environment validation
+# ---------------------------------------------------------------------------
+
+def _validate_environment() -> None:
+    """Warn at startup if configured alert provider URLs appear unreachable.
+
+    Uses a TCP socket connection so no HTTP library or security-audit
+    exceptions are required.  Non-fatal — a warning is logged but the
+    scheduler continues regardless.
+    """
+    checks = [
+        ("WEBHOOK_URL", config.WEBHOOK_URL),
+        ("GOTIFY_URL", config.GOTIFY_URL),
+        ("NTFY_URL", config.NTFY_URL),
+        ("APPRISE_URL", config.APPRISE_URL),
+    ]
+    for name, url in checks:
+        if not url:
+            continue
+        parsed = urllib.parse.urlparse(url)
+        host = parsed.hostname
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        if not host:
+            _LOG.warning("Alert provider %s has an invalid URL: %s", name, url)
+            continue
+        try:
+            with socket.create_connection((host, port), timeout=3):
+                _LOG.debug("Alert provider %s (%s:%s) is reachable.", name, host, port)
+        except OSError as exc:
+            _LOG.warning(
+                "Alert provider %s (%s:%s) appears unreachable at startup: %s"
+                " — alerts may not be delivered.",
+                name,
+                host,
+                port,
+                exc,
+            )
+
+
+# ---------------------------------------------------------------------------
 # Main entry point
 # ---------------------------------------------------------------------------
 
 def main() -> None:
+    """Start the Argus scheduler process: configure, start, and run the control loop."""
     global _dispatcher, _alert_manager, _scheduler, _health_server  # pylint: disable=global-statement
 
     logging.basicConfig(level=getattr(logging, config.LOG_LEVEL, logging.INFO))
@@ -171,6 +216,8 @@ def main() -> None:
     except ValueError as exc:
         _LOG.critical("Configuration error: %s", exc)
         sys.exit(1)
+
+    _validate_environment()
 
     _dispatcher = build_dispatcher()
     _alert_manager = build_alert_manager()
@@ -184,7 +231,7 @@ def main() -> None:
     _health_server = HealthServer(port=config.HEALTH_PORT, status_fn=_build_health_status)
     _health_server.start()
 
-    def _shutdown(_signum: int, _frame: Any) -> None:  # pylint: disable=unused-argument
+    def _shutdown(_signum: int, _frame: Any) -> None:
         """Signal handler for graceful shutdown."""
         _LOG.info("Shutting down Argus scheduler.")
         if _scheduler and _scheduler.running:

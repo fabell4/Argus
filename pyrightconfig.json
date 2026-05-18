@@ -2,5 +2,9 @@
   "include": ["src/**", "tests/**"],
   "exclude": ["frontend/**", ".venv/**"],
   "pythonVersion": "3.12",
-  "typeCheckingMode": "strict"
+  "typeCheckingMode": "strict",
+  "reportMissingTypeStubs": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none"
 }

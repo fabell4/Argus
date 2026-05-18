@@ -57,4 +57,4 @@ class PrometheusExporter(BaseExporter):
         for metric, gauge in self._gauges.items():
             value = getattr(snapshot, metric, None)
             if value is not None:
-                gauge.labels(*labels).set(value)  # type: ignore[attr-defined]
+                gauge.labels(*labels).set(value)

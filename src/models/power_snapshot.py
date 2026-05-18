@@ -33,8 +33,6 @@ class PowerSnapshot:
     outlet_count: int | None = None
 
     def __post_init__(self) -> None:
-        if not isinstance(self.timestamp, datetime):
-            raise TypeError("timestamp must be a datetime instance.")
         if self.timestamp.tzinfo is None:
             raise ValueError("timestamp must be timezone-aware.")
         if not self.device_id or not self.device_id.strip():
