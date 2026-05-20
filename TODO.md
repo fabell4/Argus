@@ -91,42 +91,42 @@ _Goal: make the deployed instance reliable before adding features. Required befo
 
 _Goal: make historical data more useful and integrate with the wider observability stack._
 
-- [ ] SQLite WAL checkpoint management — run `PRAGMA wal_checkpoint(TRUNCATE)` after each
+- [x] SQLite WAL checkpoint management — run `PRAGMA wal_checkpoint(TRUNCATE)` after each
   retention prune to keep WAL file bounded; mirrors Hermes v1.1 pattern
-- [ ] SQLite VACUUM automation — check `PRAGMA freelist_count` post-prune; issue `VACUUM` when
+- [x] SQLite VACUUM automation — check `PRAGMA freelist_count` post-prune; issue `VACUUM` when
   fragmentation exceeds 20% of total page count
-- [ ] SQLite timestamp index — `CREATE INDEX IF NOT EXISTS idx_snapshots_timestamp ON
+- [x] SQLite timestamp index — `CREATE INDEX IF NOT EXISTS idx_snapshots_timestamp ON
   power_snapshots(timestamp)` and equivalent on `power_events`; gives 10–100× faster
   date-range queries as history grows
 - [ ] Data retention enforcement audit — verify `SQLITE_RETENTION_DAYS` and `SQLITE_MAX_ROWS`
   prune runs correctly on schedule; add integration test
 - [ ] Grafana dashboard JSON — pre-built power monitoring dashboard for one-click import
   (UPS status timeline, battery %, load %, input/output voltage, runtime remaining, event log)
-- [ ] Multi-device polling — poll multiple NUT and SNMP devices per cycle; aggregate into a
+- [x] Multi-device polling — poll multiple NUT and SNMP devices per cycle; aggregate into a
   single dispatch pass; `DEVICES` env var as JSON or the runtime_config device list
-- [ ] NUT `LIST UPS` auto-discovery — on startup, issue `LIST UPS` to enumerate all UPS
+- [x] NUT `LIST UPS` auto-discovery — on startup, issue `LIST UPS` to enumerate all UPS
   devices served by the NUT daemon; auto-register discovered devices rather than requiring
   explicit `NUT_UPS_NAME` config; manual override still supported
-- [ ] Device registry in runtime config — add/remove monitored devices via
+- [x] Device registry in runtime config — add/remove monitored devices via
   `PUT /api/devices` without restarting; persisted in `data/runtime_config.json`
-- [ ] UPS model/firmware metadata — capture `ups.model`, `ups.firmware`, `ups.serial`,
+- [x] UPS model/firmware metadata — capture `ups.model`, `ups.firmware`, `ups.serial`,
   and `ups.mfr` from NUT `LIST VAR`; store in the device registry and expose via
   `GET /api/devices`; useful for inventory and dashboard display
-- [ ] Additional event detection — implement remaining `EventType` variants:
+- [x] Additional event detection — implement remaining `EventType` variants:
   `DEVICE_OFFLINE` / `DEVICE_ONLINE` (missed poll threshold), `SHUTDOWN_INITIATED`
   (battery below critical floor), `THRESHOLD_CROSSED` (configurable metric thresholds)
-- [ ] Prometheus label cardinality management — `PROMETHEUS_DISABLE_LABELS=true` env var makes
+- [x] Prometheus label cardinality management — `PROMETHEUS_DISABLE_LABELS=true` env var makes
   `device_id`/`device_type` labels optional to prevent unbounded time series growth in large
   multi-device deployments
-- [ ] `CSVExporter` — optional file-based exporter; appends one row per snapshot to a rotating
+- [x] `CSVExporter` — optional file-based exporter; appends one row per snapshot to a rotating
   CSV file (`CSV_PATH`, `CSV_MAX_SIZE_MB`, `CSV_RETENTION_DAYS`); useful for simple log
   ingestion into external tools without a database dependency; mirrors Hermes's `CSVExporter`
   pattern adapted for `PowerSnapshot` fields
-- [ ] Energy accumulation (kWh tracking) — accumulate watt-hours between poll cycles using
+- [x] Energy accumulation (kWh tracking) — accumulate watt-hours between poll cycles using
   trapezoidal integration (`power_watts × Δt`); store cumulative `energy_wh` in SQLite;
   expose `argus_energy_kwh_total` Prometheus counter; optional cost estimation via
   `ENERGY_RATE_PER_KWH` env var and `GET /api/energy` endpoint
-- [ ] SNMPv3 authentication and encryption — extend `SNMPPoller` to support SNMPv3 `authPriv`
+- [x] SNMPv3 authentication and encryption — extend `SNMPPoller` to support SNMPv3 `authPriv`
   mode (`SNMP_V3_USERNAME`, `SNMP_V3_AUTH_PROTOCOL`, `SNMP_V3_AUTH_KEY`,
   `SNMP_V3_PRIV_PROTOCOL`, `SNMP_V3_PRIV_KEY`); required for security-conscious production
   deployments; v1/v2c community strings remain default

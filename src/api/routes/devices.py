@@ -1,18 +1,17 @@
-"""GET/PUT /api/devices — device registry."""
+"""GET/PUT/POST/DELETE /api/devices — device registry."""
 from __future__ import annotations
 
-import json
-import os
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 
 from src.api.auth import require_api_key
+from src.services import device_registry
 
 router = APIRouter(tags=["devices"])
 
-_DEVICES_FILE = os.path.join("data", "devices.json")
+_DEVICE_NOT_FOUND = "Device not found."
 
 
 class DeviceSchema(BaseModel):
@@ -24,36 +23,58 @@ class DeviceSchema(BaseModel):
     port: int
     enabled: bool = True
     connection_config: dict[str, Any] = {}
-
-
-def _load_devices() -> list[dict[str, Any]]:
-    if not os.path.exists(_DEVICES_FILE):
-        return []
-    with open(_DEVICES_FILE, encoding="utf-8") as fh:
-        devices: list[dict[str, Any]] = json.load(fh)
-        return devices
-
-
-def _save_devices(devices: list[dict[str, Any]]) -> None:
-    os.makedirs(os.path.dirname(_DEVICES_FILE), exist_ok=True)
-    with open(_DEVICES_FILE, "w", encoding="utf-8") as fh:
-        json.dump(devices, fh, indent=2)
+    model: str | None = None
+    firmware: str | None = None
+    serial: str | None = None
+    manufacturer: str | None = None
+    last_seen: str | None = None
 
 
 @router.get("/devices")
 def list_devices() -> list[DeviceSchema]:
-    return [DeviceSchema(**d) for d in _load_devices()]
+    return [DeviceSchema(**d) for d in device_registry.load_devices()]
 
 
 @router.get("/devices/{device_id}")
 def get_device(device_id: str) -> DeviceSchema:
-    for d in _load_devices():
-        if d["id"] == device_id:
-            return DeviceSchema(**d)
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Device not found.")
+    d = device_registry.get_device(device_id)
+    if d is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND)
+    return DeviceSchema(**d)
+
+
+@router.post("/devices", dependencies=[Depends(require_api_key)], status_code=status.HTTP_201_CREATED)
+def add_device(device: DeviceSchema) -> DeviceSchema:
+    if device_registry.get_device(device.id) is not None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Device '{device.id}' already exists. Use PUT to update.",
+        )
+    device_registry.upsert_device(device.model_dump())
+    return device
 
 
 @router.put("/devices", dependencies=[Depends(require_api_key)])
 def replace_devices(devices: list[DeviceSchema]) -> list[DeviceSchema]:
-    _save_devices([d.model_dump() for d in devices])
+    """Replace the entire device list."""
+    device_registry.save_devices([d.model_dump() for d in devices])
     return devices
+
+
+@router.put("/devices/{device_id}", dependencies=[Depends(require_api_key)])
+def update_device(device_id: str, device: DeviceSchema) -> DeviceSchema:
+    if device_registry.get_device(device_id) is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND)
+    if device.id != device_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Device ID in body must match path parameter.",
+        )
+    device_registry.upsert_device(device.model_dump())
+    return device
+
+
+@router.delete("/devices/{device_id}", dependencies=[Depends(require_api_key)], status_code=status.HTTP_204_NO_CONTENT)
+def delete_device(device_id: str) -> None:
+    if not device_registry.remove_device(device_id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND)

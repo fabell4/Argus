@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS power_events (
 )
 """
 
+_CREATE_INDEXES = [
+    "CREATE INDEX IF NOT EXISTS idx_snapshots_timestamp ON power_snapshots(timestamp)",
+    "CREATE INDEX IF NOT EXISTS idx_events_timestamp ON power_events(timestamp)",
+]
+
 _INSERT_SNAPSHOT = """
 INSERT INTO power_snapshots (
     timestamp, device_id, device_type,
@@ -73,6 +78,8 @@ class SQLiteExporter(BaseExporter):
             conn.execute(_CREATE_SNAPSHOTS)
             conn.execute(_CREATE_EVENTS)
             conn.execute("PRAGMA journal_mode=WAL")
+            for stmt in _CREATE_INDEXES:
+                conn.execute(stmt)
             conn.commit()
 
     def _connect(self) -> sqlite3.Connection:
@@ -120,7 +127,26 @@ class SQLiteExporter(BaseExporter):
                     (excess,),
                 )
             conn.commit()
-            conn.execute("PRAGMA wal_checkpoint(PASSIVE)")
+            conn.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+            self._vacuum_if_fragmented(conn)
+
+    def _vacuum_if_fragmented(self, conn: sqlite3.Connection) -> None:
+        """Run VACUUM when free-page ratio exceeds 20% of total page count."""
+        row = conn.execute("PRAGMA freelist_count").fetchone()
+        free = row[0] if row else 0
+        row = conn.execute("PRAGMA page_count").fetchone()
+        total = row[0] if row else 1
+        if total > 0 and (free / total) > 0.20:
+            _LOG.info(
+                "SQLite fragmentation %.1f%% (free=%d / total=%d); running VACUUM.",
+                100.0 * free / total,
+                free,
+                total,
+            )
+            # VACUUM cannot run inside a transaction; use autocommit isolation.
+            conn.isolation_level = None
+            conn.execute("VACUUM")
+            conn.isolation_level = ""
 
     def get_db_path(self) -> str:
         return self._db_path

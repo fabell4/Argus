@@ -1,6 +1,7 @@
 """NUT poller — collects UPS telemetry via the NUT (Network UPS Tools) protocol."""
 from __future__ import annotations
 
+import io
 import logging
 import socket
 from datetime import datetime, timezone
@@ -23,6 +24,14 @@ _NUT_FIELD_MAP: dict[str, str] = {
     "ups.temperature": "temperature_c",
     "ups.status": "ups_status",
 }
+
+# NUT variables captured as device metadata (not stored in PowerSnapshot)
+_NUT_METADATA_KEYS: tuple[str, ...] = (
+    "ups.model",
+    "ups.firmware",
+    "ups.serial",
+    "ups.mfr",
+)
 
 
 class NUTPoller:
@@ -72,24 +81,30 @@ class NUTPoller:
                     )
         raise last_exc
 
+    # ------------------------------------------------------------------
+    # NUT protocol helpers
+    # ------------------------------------------------------------------
+
+    def _authenticate(self, fh: io.TextIOWrapper) -> None:
+        """Send USERNAME / PASSWORD to an open NUT file handle if credentials are set."""
+        if self._username:
+            fh.write(f"USERNAME {self._username}\n")
+            fh.flush()
+            resp = fh.readline().strip()
+            if not resp.startswith("OK"):
+                raise RuntimeError(f"NUT authentication (username) rejected: {resp}")
+        if self._password:
+            fh.write(f"PASSWORD {self._password}\n")
+            fh.flush()
+            resp = fh.readline().strip()
+            if not resp.startswith("OK"):
+                raise RuntimeError(f"NUT authentication (password) rejected: {resp}")
+
     def _fetch_vars(self) -> dict[str, str]:
         """Open a socket to NUT and retrieve all UPS variables."""
         with socket.create_connection((self._host, self._port), timeout=self._timeout) as sock:
             fh = sock.makefile("rw", buffering=1, encoding="utf-8")
-
-            if self._username:
-                fh.write(f"USERNAME {self._username}\n")
-                fh.flush()
-                resp = fh.readline().strip()
-                if not resp.startswith("OK"):
-                    raise RuntimeError(f"NUT authentication (username) rejected: {resp}")
-
-            if self._password:
-                fh.write(f"PASSWORD {self._password}\n")
-                fh.flush()
-                resp = fh.readline().strip()
-                if not resp.startswith("OK"):
-                    raise RuntimeError(f"NUT authentication (password) rejected: {resp}")
+            self._authenticate(fh)
 
             fh.write(f"LIST VAR {self._ups_name}\n")
             fh.flush()
@@ -110,6 +125,83 @@ class NUTPoller:
             fh.write("LOGOUT\n")
             fh.flush()
             return variables
+
+    def _fetch_ups_list(self) -> list[str]:
+        """Query LIST UPS and return all UPS names served by the NUT daemon."""
+        with socket.create_connection((self._host, self._port), timeout=self._timeout) as sock:
+            fh = sock.makefile("rw", buffering=1, encoding="utf-8")
+            self._authenticate(fh)
+
+            fh.write("LIST UPS\n")
+            fh.flush()
+
+            names: list[str] = []
+            for line in fh:
+                line = line.strip()
+                if line == "END LIST UPS":
+                    break
+                if line.startswith("UPS "):
+                    # Format: UPS <name> "<description>"
+                    parts = line.split(" ", 2)
+                    if len(parts) >= 2:
+                        names.append(parts[1])
+
+            fh.write("LOGOUT\n")
+            fh.flush()
+            return names
+
+    # ------------------------------------------------------------------
+    # Public poll API
+    # ------------------------------------------------------------------
+
+    def list_ups(self) -> list[str]:
+        """Return all UPS names served by this NUT daemon.
+
+        Retries up to ``max_retries`` times on transient socket errors.
+        """
+        last_exc: OSError = OSError(
+            f"LIST UPS query failed for {self._host}:{self._port}."
+        )
+        for attempt in range(self._max_retries + 1):
+            try:
+                return self._fetch_ups_list()
+            except OSError as exc:
+                last_exc = exc
+                if attempt < self._max_retries:
+                    _LOG.warning(
+                        "LIST UPS attempt %d/%d failed (%s); retrying.",
+                        attempt + 1,
+                        self._max_retries + 1,
+                        exc,
+                    )
+        raise last_exc
+
+    def poll_with_metadata(
+        self,
+    ) -> tuple["PowerSnapshot", dict[str, str]]:
+        """Like :meth:`poll` but also returns UPS metadata (model, firmware, serial, mfr)."""
+        last_exc: OSError = OSError(
+            f"All {self._max_retries + 1} poll attempt(s) for "
+            f"{self._ups_name}@{self._host}:{self._port} failed."
+        )
+        for attempt in range(self._max_retries + 1):
+            try:
+                raw = self._fetch_vars()
+                snapshot = self._build_snapshot(raw)
+                metadata = {
+                    k: raw[k] for k in _NUT_METADATA_KEYS if k in raw
+                }
+                return snapshot, metadata
+            except OSError as exc:
+                last_exc = exc
+                if attempt < self._max_retries:
+                    _LOG.warning(
+                        "NUT poll attempt %d/%d failed (%s); retrying.",
+                        attempt + 1,
+                        self._max_retries + 1,
+                        exc,
+                    )
+        raise last_exc
 
     @staticmethod
     def _apply_field(

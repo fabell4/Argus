@@ -5,8 +5,10 @@ import logging
 from typing import TYPE_CHECKING, Callable
 
 from src import config
-from src.exporters.sqlite_exporter import SQLiteExporter
+from src.exporters.csv_exporter import CSVExporter
+from src.exporters.energy_accumulator import EnergyAccumulatorExporter
 from src.exporters.prometheus_exporter import PrometheusExporter
+from src.exporters.sqlite_exporter import SQLiteExporter
 
 if TYPE_CHECKING:
     from src.exporters.base_exporter import BaseExporter
@@ -45,7 +47,19 @@ EXPORTER_REGISTRY: dict[str, Callable[[], "BaseExporter | None"]] = {
         retention_days=config.SQLITE_RETENTION_DAYS,
         max_rows=config.SQLITE_MAX_ROWS,
     ),
-    "prometheus": lambda: PrometheusExporter(port=config.PROMETHEUS_PORT),
+    "prometheus": lambda: PrometheusExporter(
+        port=config.PROMETHEUS_PORT,
+        disable_labels=config.PROMETHEUS_DISABLE_LABELS,
+    ),
     "influxdb": _build_influxdb,
     "loki": _build_loki,
+    "csv": lambda: CSVExporter(
+        path=config.CSV_PATH,
+        max_size_mb=config.CSV_MAX_SIZE_MB,
+        retention_days=config.CSV_RETENTION_DAYS,
+    ),
+    "energy": lambda: EnergyAccumulatorExporter(
+        db_path=config.SQLITE_PATH,
+        rate_per_kwh=config.ENERGY_RATE_PER_KWH,
+    ),
 }

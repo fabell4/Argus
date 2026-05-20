@@ -20,7 +20,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from src import config
 from src.api.routes import config as config_router
-from src.api.routes import diagnostics, events, snapshots, trigger, devices
+from src.api.routes import diagnostics, energy, events, snapshots, trigger, devices
 
 _LOG = logging.getLogger(__name__)
 _STATIC_DIR = "frontend/dist"
@@ -78,7 +78,7 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=config.ALLOWED_ORIGINS,
         allow_credentials=False,
-        allow_methods=["GET", "POST", "PUT"],
+        allow_methods=["GET", "POST", "PUT", "DELETE"],
         allow_headers=["*"],
     )
 
@@ -89,6 +89,7 @@ def create_app() -> FastAPI:
     application.include_router(trigger.router, prefix="/api")
     application.include_router(config_router.router, prefix="/api")
     application.include_router(diagnostics.router, prefix="/api")
+    application.include_router(energy.router, prefix="/api")
 
     # Health endpoint
     @application.get("/api/health", tags=["health"])

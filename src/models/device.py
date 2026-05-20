@@ -17,6 +17,12 @@ class Device:
     port: int
     enabled: bool = True
     connection_config: dict[str, Any] = field(default_factory=dict)
+    # UPS model/firmware metadata populated from NUT LIST VAR
+    model: str | None = None
+    firmware: str | None = None
+    serial: str | None = None
+    manufacturer: str | None = None
+    last_seen: str | None = None   # ISO-8601 UTC timestamp
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -28,4 +34,9 @@ class Device:
             "port": self.port,
             "enabled": self.enabled,
             "connection_config": self.connection_config,
+            "model": self.model,
+            "firmware": self.firmware,
+            "serial": self.serial,
+            "manufacturer": self.manufacturer,
+            "last_seen": self.last_seen,
         }

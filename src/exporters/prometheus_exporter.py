@@ -12,8 +12,9 @@ _LOG = logging.getLogger(__name__)
 class PrometheusExporter(BaseExporter):
     """Exposes PowerSnapshot metrics as Prometheus gauges."""
 
-    def __init__(self, port: int = 9090) -> None:
+    def __init__(self, port: int = 9090, disable_labels: bool = False) -> None:
         self._port = port
+        self._disable_labels = disable_labels
         self._started = False
         self._gauges: dict[str, object] = {}
         self._init_metrics()
@@ -22,7 +23,7 @@ class PrometheusExporter(BaseExporter):
         try:
             from prometheus_client import Gauge, start_http_server
 
-            labels = ["device_id", "device_type"]
+            labels = [] if self._disable_labels else ["device_id", "device_type"]
             self._gauges = {
                 "power_watts": Gauge(
                     "argus_power_watts", "Device power consumption in watts", labels
@@ -53,8 +54,10 @@ class PrometheusExporter(BaseExporter):
     def export(self, snapshot: PowerSnapshot) -> None:
         if not self._gauges:
             return
-        labels = [snapshot.device_id, snapshot.device_type]
         for metric, gauge in self._gauges.items():
             value = getattr(snapshot, metric, None)
             if value is not None:
-                gauge.labels(*labels).set(value)
+                if self._disable_labels:
+                    gauge.set(value)  # type: ignore[attr-defined]
+                else:
+                    gauge.labels(snapshot.device_id, snapshot.device_type).set(value)  # type: ignore[attr-defined]

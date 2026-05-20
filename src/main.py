@@ -24,9 +24,12 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from src import config, runtime_config, shared_state
+from src.models.event import PowerEvent
+from src.models.power_snapshot import PowerSnapshot
 from src.exporter_registry import EXPORTER_REGISTRY
 from src.services.alert_manager import AlertManager
 from src.services.alert_provider_factory import register_all_providers
+from src.services.device_registry import upsert_device
 from src.services.event_processor import EventProcessor
 from src.services.health_server import HealthServer
 from src.services.nut_poller import NUTPoller
@@ -84,44 +87,114 @@ def build_scheduler(interval_minutes: int) -> BackgroundScheduler:
 # Core poll cycle
 # ---------------------------------------------------------------------------
 
-def poll_once() -> None:
-    """Execute one full poll cycle: collect → dispatch → detect events."""
-    global _scheduler_status  # pylint: disable=global-statement
-    runtime_config.mark_running()
-    _LOG.info("Starting poll cycle.")
+def _get_ups_names(discovery_poller: NUTPoller) -> list[str]:
+    """Return the list of UPS names to poll, using auto-discovery when enabled."""
+    if not config.NUT_AUTO_DISCOVER:
+        return [config.NUT_UPS_NAME]
     try:
-        poller = NUTPoller(
-            host=config.NUT_HOST,
-            port=config.NUT_PORT,
-            username=config.NUT_USERNAME,
-            password=config.NUT_PASSWORD,
-            ups_name=config.NUT_UPS_NAME,
-        )
-        snapshot = poller.poll()
-        events = _event_processor.process(snapshot)
+        ups_names = discovery_poller.list_ups()
+        if not ups_names:
+            _LOG.warning("NUT auto-discover returned no devices; falling back to NUT_UPS_NAME.")
+            return [config.NUT_UPS_NAME]
+        return ups_names
+    except Exception as exc:  # noqa: BLE001
+        _LOG.warning("NUT auto-discover failed (%s); falling back to NUT_UPS_NAME.", exc)
+        return [config.NUT_UPS_NAME]
 
+
+def _poll_single_device(
+    ups_name: str,
+) -> tuple[PowerSnapshot, list[PowerEvent]] | tuple[None, list[PowerEvent]]:
+    """Poll one UPS device and return (snapshot, events), or (None, offline_events) on failure."""
+    device_id = f"nut:{ups_name}@{config.NUT_HOST}"
+    poller = NUTPoller(
+        host=config.NUT_HOST,
+        port=config.NUT_PORT,
+        username=config.NUT_USERNAME,
+        password=config.NUT_PASSWORD,
+        ups_name=ups_name,
+    )
+    try:
+        snapshot, metadata = poller.poll_with_metadata()
+        upsert_device({
+            "id": device_id,
+            "name": metadata.get("ups.model") or ups_name,
+            "type": "ups",
+            "poller": "nut",
+            "host": config.NUT_HOST,
+            "port": config.NUT_PORT,
+            "enabled": True,
+            "model": metadata.get("ups.model"),
+            "firmware": metadata.get("ups.firmware"),
+            "serial": metadata.get("ups.serial"),
+            "manufacturer": metadata.get("ups.mfr"),
+            "last_seen": snapshot.timestamp.isoformat(),
+        })
+        events = _event_processor.process(snapshot)
         try:
             _dispatcher.dispatch(snapshot)
         except DispatchError as exc:
-            _LOG.exception("One or more exporters failed: %s", exc.failures)
+            _LOG.exception("One or more exporters failed for %s: %s", ups_name, exc.failures)
+        return snapshot, events
+    except Exception as exc:  # noqa: BLE001
+        _LOG.exception("Poll failed for %s: %s", ups_name, exc)
+        offline_events = _event_processor.record_missed_poll(
+            device_id, datetime.now(timezone.utc)
+        )
+        return None, offline_events
 
-        now = datetime.now(timezone.utc)
+
+def poll_once() -> None:
+    """Execute one full poll cycle: collect → dispatch → detect events.
+
+    Supports multi-device via NUT auto-discovery (LIST UPS) when
+    ``NUT_AUTO_DISCOVER=true``; falls back to the single ``NUT_UPS_NAME``
+    when auto-discovery is disabled or the daemon is unreachable.
+    """
+    global _scheduler_status  # pylint: disable=global-statement
+    runtime_config.mark_running()
+    _LOG.info("Starting poll cycle.")
+
+    discovery_poller = NUTPoller(
+        host=config.NUT_HOST,
+        port=config.NUT_PORT,
+        username=config.NUT_USERNAME,
+        password=config.NUT_PASSWORD,
+    )
+    ups_names = _get_ups_names(discovery_poller)
+    _LOG.debug("Polling %d UPS device(s): %s", len(ups_names), ups_names)
+
+    all_events: list[PowerEvent] = []
+    any_success = False
+    last_snapshot: PowerSnapshot | None = None
+
+    for ups_name in ups_names:
+        snapshot, events = _poll_single_device(ups_name)
+        all_events.extend(events)
+        if snapshot is not None:
+            any_success = True
+            last_snapshot = snapshot
+
+    now = datetime.now(timezone.utc)
+    if any_success:
         runtime_config.set_last_poll_at(now)
         if _alert_manager:
             _alert_manager.record_success()
-
         _scheduler_status = {"status": "ok", "last_poll_at": now.isoformat()}
-        shared_state.set_last_diagnostics(
-            {"last_snapshot": snapshot.to_dict(), "events": [e.to_dict() for e in events]}
-        )
-        _LOG.info("Poll cycle complete. Events detected: %d", len(events))
-    except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-exception-caught
-        _LOG.exception("Poll cycle failed: %s", exc)
+        if last_snapshot:
+            shared_state.set_last_diagnostics(
+                {
+                    "last_snapshot": last_snapshot.to_dict(),
+                    "events": [e.to_dict() for e in all_events],
+                }
+            )
+        _LOG.info("Poll cycle complete. Devices=%d events=%d", len(ups_names), len(all_events))
+    else:
         if _alert_manager:
-            _alert_manager.record_failure(str(exc), datetime.now(timezone.utc))
-        _scheduler_status = {"status": "error", "last_error": str(exc)}
-    finally:
-        runtime_config.mark_done()
+            _alert_manager.record_failure("All device polls failed.", now)
+        _scheduler_status = {"status": "error", "last_error": "All device polls failed."}
+        _LOG.error("Poll cycle failed for all %d device(s).", len(ups_names))
+    runtime_config.mark_done()
 
 
 # ---------------------------------------------------------------------------

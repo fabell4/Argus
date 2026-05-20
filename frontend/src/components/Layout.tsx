@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Activity, Settings, Zap, Menu, X } from 'lucide-react'
+import { Activity, Settings, Menu, X } from 'lucide-react'
+import argusLogo from '../assets/argus_logo.png'
 
 const NAV = [
   { to: '/', label: 'Dashboard', icon: Activity, end: true },
@@ -47,7 +48,7 @@ export function Layout() {
           {mobileOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
         <div className="flex items-center gap-2">
-          <Zap size={20} className="text-violet-400" />
+          <img src={argusLogo} alt="Argus" className="h-7 w-7 object-contain" />
           <span className="font-bold text-slate-100 text-lg tracking-tight">Argus</span>
           <span className="hidden sm:inline text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700">
             Power Monitor

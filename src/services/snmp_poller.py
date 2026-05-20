@@ -36,6 +36,12 @@ class SNMPPoller:
         timeout: int | None = None,
         retries: int | None = None,
         max_retries: int = 1,
+        # SNMPv3 authPriv parameters (all optional; v1/v2c community used when empty)
+        v3_username: str = "",
+        v3_auth_protocol: str = "MD5",
+        v3_auth_key: str = "",
+        v3_priv_protocol: str = "DES",
+        v3_priv_key: str = "",
     ) -> None:
         self._host = host
         self._port = port
@@ -47,6 +53,11 @@ class SNMPPoller:
         self._timeout = timeout if timeout is not None else config.SNMP_TIMEOUT
         self._retries = retries if retries is not None else config.SNMP_RETRIES
         self._max_retries = max_retries
+        self._v3_username = v3_username
+        self._v3_auth_protocol = v3_auth_protocol.upper()
+        self._v3_auth_key = v3_auth_key
+        self._v3_priv_protocol = v3_priv_protocol.upper()
+        self._v3_priv_key = v3_priv_key
 
     def poll(self) -> PowerSnapshot:
         """Perform SNMP GET for all OIDs and return a PowerSnapshot.
@@ -75,31 +86,41 @@ class SNMPPoller:
     def _snmp_get(self, oids: list[str]) -> dict[str, Any]:
         """Perform SNMP GET for each OID; returns {oid: value} dict."""
         try:
-            from pysnmp.hlapi import (
+            from pysnmp.hlapi import (  # type: ignore[import-untyped]
                 CommunityData,
                 ContextData,
                 ObjectIdentity,
                 ObjectType,
                 SnmpEngine,
                 UdpTransportTarget,
+                UsmUserData,
                 getCmd,
             )
+            from pysnmp.proto.rfc1905 import noSuchObject  # type: ignore[import-untyped]
         except ImportError:
             _LOG.warning("pysnmp not installed; SNMP polling unavailable.")
             return {}
 
+        # Build auth data — SNMPv3 when username is set, else community string
+        if self._v3_username:
+            auth_data = self._build_v3_auth(UsmUserData)
+        else:
+            mp_model = 0 if self._version == "1" else 1
+            auth_data = CommunityData(self._community, mpModel=mp_model)
+
         results: dict[str, Any] = {}
         engine = SnmpEngine()
+        transport = UdpTransportTarget(
+            (self._host, self._port),
+            timeout=self._timeout,
+            retries=self._retries,
+        )
         for oid in oids:
             error_indication, error_status, _, var_binds = next(
                 getCmd(
                     engine,
-                    CommunityData(self._community, mpModel=0 if self._version == "1" else 1),
-                    UdpTransportTarget(
-                        (self._host, self._port),
-                        timeout=self._timeout,
-                        retries=self._retries,
-                    ),
+                    auth_data,
+                    transport,
                     ContextData(),
                     ObjectType(ObjectIdentity(oid)),
                 )
@@ -111,9 +132,53 @@ class SNMPPoller:
                 _LOG.warning("SNMP error status for OID %s: %s", oid, error_status)
                 continue
             for var_bind in var_binds:
-                results[str(var_bind[0])] = var_bind[1].prettyPrint()
+                value = var_bind[1]
+                if isinstance(value, noSuchObject.__class__):
+                    continue
+                results[str(var_bind[0])] = value.prettyPrint()
 
         return results
+
+    def _build_v3_auth(self, UsmUserData: type) -> object:  # type: ignore[type-arg]
+        """Construct a UsmUserData instance for authPriv mode."""
+        try:
+            from pysnmp.hlapi import (  # type: ignore[import-untyped]
+                usmAesCfb128Protocol,
+                usmDESPrivProtocol,
+                usmHMAC128SHA224AuthProtocol,
+                usmHMAC192SHA256AuthProtocol,
+                usmHMACMD5AuthProtocol,
+                usmHMACSHAAuthProtocol,
+                usmNoAuthProtocol,
+                usmNoPrivProtocol,
+            )
+        except ImportError:
+            _LOG.warning("pysnmp SNMPv3 protocol constants unavailable; falling back.")
+            return UsmUserData(self._v3_username)
+
+        _AUTH_MAP = {
+            "MD5": usmHMACMD5AuthProtocol,
+            "SHA": usmHMACSHAAuthProtocol,
+            "SHA224": usmHMAC128SHA224AuthProtocol,
+            "SHA256": usmHMAC192SHA256AuthProtocol,
+            "NONE": usmNoAuthProtocol,
+        }
+        _PRIV_MAP = {
+            "DES": usmDESPrivProtocol,
+            "AES": usmAesCfb128Protocol,
+            "NONE": usmNoPrivProtocol,
+        }
+
+        auth_proto = _AUTH_MAP.get(self._v3_auth_protocol, usmHMACMD5AuthProtocol)
+        priv_proto = _PRIV_MAP.get(self._v3_priv_protocol, usmDESPrivProtocol)
+
+        return UsmUserData(
+            self._v3_username,
+            authKey=self._v3_auth_key or None,
+            privKey=self._v3_priv_key or None,
+            authProtocol=auth_proto,
+            privProtocol=priv_proto,
+        )
 
     def _build_snapshot(self, raw: dict[str, Any]) -> PowerSnapshot:
         kwargs: dict[str, Any] = {
