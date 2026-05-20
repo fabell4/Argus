@@ -113,9 +113,21 @@ class SQLiteExporter(BaseExporter):
     def _prune(self) -> None:
         with self._lock, self._connect() as conn:
             if self._retention_days > 0:
+                cutoff = (f"-{self._retention_days} days",)
+                # datetime(timestamp) normalises the stored ISO-8601 value
+                # (which contains a 'T' separator and '+00:00' offset) to
+                # SQLite's 'YYYY-MM-DD HH:MM:SS' format before comparison.
+                # A plain text compare would incorrectly treat 'T' > ' ',
+                # causing same-day-as-boundary rows to survive deletion.
                 conn.execute(
-                    "DELETE FROM power_snapshots WHERE timestamp < datetime('now', ?)",
-                    (f"-{self._retention_days} days",),
+                    "DELETE FROM power_snapshots"
+                    " WHERE datetime(timestamp) < datetime('now', ?)",
+                    cutoff,
+                )
+                conn.execute(
+                    "DELETE FROM power_events"
+                    " WHERE datetime(timestamp) < datetime('now', ?)",
+                    cutoff,
                 )
             row = conn.execute("SELECT COUNT(*) FROM power_snapshots").fetchone()
             count = row[0] if row else 0

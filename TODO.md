@@ -98,9 +98,9 @@ _Goal: make historical data more useful and integrate with the wider observabili
 - [x] SQLite timestamp index — `CREATE INDEX IF NOT EXISTS idx_snapshots_timestamp ON
   power_snapshots(timestamp)` and equivalent on `power_events`; gives 10–100× faster
   date-range queries as history grows
-- [ ] Data retention enforcement audit — verify `SQLITE_RETENTION_DAYS` and `SQLITE_MAX_ROWS`
+- [x] Data retention enforcement audit — verify `SQLITE_RETENTION_DAYS` and `SQLITE_MAX_ROWS`
   prune runs correctly on schedule; add integration test
-- [ ] Grafana dashboard JSON — pre-built power monitoring dashboard for one-click import
+- [x] Grafana dashboard JSON — pre-built power monitoring dashboard for one-click import
   (UPS status timeline, battery %, load %, input/output voltage, runtime remaining, event log)
 - [x] Multi-device polling — poll multiple NUT and SNMP devices per cycle; aggregate into a
   single dispatch pass; `DEVICES` env var as JSON or the runtime_config device list
@@ -139,22 +139,22 @@ _Goal: make historical data more useful and integrate with the wider observabili
 
 _Goal: complete the React frontend with full Argus-specific pages and interactions._
 
-- [ ] Devices page — list all monitored devices with current status indicator (online/on battery
+- [x] Devices page — list all monitored devices with current status indicator (online/on battery
   /offline), live metrics summary cards, and last-seen timestamp
-- [ ] Events page — full paginated power event history; filter by device, event type, and date
+- [x] Events page — full paginated power event history; filter by device, event type, and date
   range; colour-coded severity (on-battery = amber, battery-low = red, restored = green)
-- [ ] Alert configuration page — UI for configuring alert providers (webhook URL, Gotify token,
+- [x] Alert configuration page — UI for configuring alert providers (webhook URL, Gotify token,
   ntfy topic, Apprise URL) backed by `GET/PUT /api/alerts`; send-test button
-- [ ] Alert API endpoints — `GET /api/alerts` and `PUT /api/alerts` with authentication;
+- [x] Alert API endpoints — `GET /api/alerts` and `PUT /api/alerts` with authentication;
   mirrors Hermes alert API pattern
-- [ ] Historical chart per device — multi-device power history chart (Recharts); device selector
+- [x] Historical chart per device — multi-device power history chart (Recharts); device selector
   dropdown; metrics selector (battery %, load %, power W, voltage, runtime remaining)
-- [ ] Countdown timer and manual trigger — next-poll countdown and "Poll Now" button on
+- [x] Countdown timer and manual trigger — next-poll countdown and "Poll Now" button on
   Dashboard; mirrors Hermes UI pattern
-- [ ] Version banner — display running version; poll GitHub API for latest release and show
+- [x] Version banner — display running version; poll GitHub API for latest release and show
   update notification when behind
-- [ ] Light theme toggle — light / dark mode switch persisted in localStorage
-- [ ] Mobile-responsive layout improvements — ensure all pages render correctly on narrow screens
+- [x] Light theme toggle — light / dark mode switch persisted in localStorage
+- [x] Mobile-responsive layout improvements — ensure all pages render correctly on narrow screens
 
 > 🏁 **Beta → Full release gate** — all Phase 1–3 items must be complete before tagging v1.0.
 

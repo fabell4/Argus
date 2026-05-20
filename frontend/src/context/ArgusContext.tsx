@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { Device, HealthStatus, PowerSnapshot, RuntimeConfig } from '@/types'
 import {
   getConfig,
@@ -12,7 +12,21 @@ import {
 } from '@/lib/api'
 import { ArgusContext, type ArgusContextType } from './argusContextDef'
 
-export function ArgusProvider({ children }: { children: React.ReactNode }) {
+function getInitialTheme(): 'dark' | 'light' {
+  const stored = localStorage.getItem('argus_theme')
+  if (stored === 'light' || stored === 'dark') return stored
+  return 'dark'
+}
+
+function applyTheme(theme: 'dark' | 'light') {
+  if (theme === 'dark') {
+    document.documentElement.classList.add('dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+  }
+}
+
+export function ArgusProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const [snapshots, setSnapshots] = useState<PowerSnapshot[]>([])
   const [latest, setLatest] = useState<PowerSnapshot | null>(null)
   const [health, setHealth] = useState<HealthStatus | null>(null)
@@ -21,7 +35,18 @@ export function ArgusProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [isPolling, setIsPolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [theme, setTheme] = useState<'dark' | 'light'>(getInitialTheme)
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  // Apply theme on mount and changes
+  useEffect(() => {
+    applyTheme(theme)
+    localStorage.setItem('argus_theme', theme)
+  }, [theme])
+
+  const toggleTheme = useCallback(() => {
+    setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
+  }, [])
 
   const fetchAll = useCallback(async () => {
     try {
@@ -55,8 +80,8 @@ export function ArgusProvider({ children }: { children: React.ReactNode }) {
           await fetchAll()
         }
       }, 2000)
-    } else {
-      if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
+    } else if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current)
     }
     return () => {
       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current)
@@ -86,19 +111,24 @@ export function ArgusProvider({ children }: { children: React.ReactNode }) {
     [config]
   )
 
-  const value: ArgusContextType = {
-    snapshots,
-    latest,
-    health,
-    config,
-    devices,
-    loading,
-    isPolling,
-    error,
-    runPoll,
-    updateConfig,
-    refresh: fetchAll,
-  }
+  const value: ArgusContextType = useMemo(
+    () => ({
+      snapshots,
+      latest,
+      health,
+      config,
+      devices,
+      loading,
+      isPolling,
+      error,
+      theme,
+      toggleTheme,
+      runPoll,
+      updateConfig,
+      refresh: fetchAll,
+    }),
+    [snapshots, latest, health, config, devices, loading, isPolling, error, theme, toggleTheme, runPoll, updateConfig, fetchAll]
+  )
 
   return <ArgusContext.Provider value={value}>{children}</ArgusContext.Provider>
 }

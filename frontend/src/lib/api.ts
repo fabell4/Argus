@@ -1,6 +1,7 @@
 // Typed API client for Argus
 
 import type {
+  AlertConfig,
   Device,
   EventsPage,
   HealthStatus,
@@ -43,6 +44,18 @@ export const getLatestSnapshot = (deviceId?: string): Promise<PowerSnapshot | nu
 export const getEvents = (page = 1, pageSize = 50): Promise<EventsPage> =>
   request(`/api/events?page=${page}&page_size=${pageSize}`)
 
+export const getEventsFiltered = (
+  page = 1,
+  pageSize = 50,
+  deviceId?: string,
+  eventType?: string,
+): Promise<EventsPage> => {
+  const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) })
+  if (deviceId) params.set('device_id', deviceId)
+  if (eventType) params.set('event_type', eventType)
+  return request(`/api/events?${params}`)
+}
+
 // --- Devices ---
 export const getDevices = (): Promise<Device[]> => request('/api/devices')
 export const updateDevices = (devices: Device[]): Promise<Device[]> =>
@@ -60,3 +73,10 @@ export const updateConfig = (cfg: RuntimeConfig): Promise<RuntimeConfig> =>
 
 // --- Health ---
 export const getHealth = (): Promise<HealthStatus> => request('/api/health')
+
+// --- Alerts ---
+export const getAlerts = (): Promise<AlertConfig> => request('/api/alerts')
+export const updateAlerts = (cfg: AlertConfig): Promise<AlertConfig> =>
+  request('/api/alerts', { method: 'PUT', body: JSON.stringify(cfg) })
+export const testAlert = (): Promise<{ status: string; message: string }> =>
+  request('/api/alerts/test', { method: 'POST' })

@@ -31,14 +31,21 @@ export interface Device {
   port: number
   enabled: boolean
   connection_config: Record<string, unknown>
+  model?: string | null
+  firmware?: string | null
+  serial?: string | null
+  manufacturer?: string | null
+  last_seen?: string | null
 }
 
 export interface HealthStatus {
   status: string
   service: string
+  version?: string
   last_poll_at: string | null
   next_poll_at: string | null
   is_polling: boolean
+  github_repo?: string
 }
 
 export interface RuntimeConfig {
@@ -65,4 +72,38 @@ export interface EventsPage {
 export interface TriggerResponse {
   status: string
   message: string
+}
+
+export interface WebhookProvider {
+  type: 'webhook'
+  enabled: boolean
+  url: string
+}
+
+export interface GotifyProvider {
+  type: 'gotify'
+  enabled: boolean
+  url: string
+  token: string
+}
+
+export interface NtfyProvider {
+  type: 'ntfy'
+  enabled: boolean
+  url: string
+  topic: string
+}
+
+export interface AppriseProvider {
+  type: 'apprise'
+  enabled: boolean
+  url: string
+}
+
+export type AlertProvider = WebhookProvider | GotifyProvider | NtfyProvider | AppriseProvider
+
+export interface AlertConfig {
+  providers: AlertProvider[]
+  failure_threshold: number
+  cooldown_seconds: number
 }

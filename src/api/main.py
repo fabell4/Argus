@@ -19,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from src import config
+from src.api.routes import alerts as alerts_router
 from src.api.routes import config as config_router
 from src.api.routes import diagnostics, energy, events, snapshots, trigger, devices
 
@@ -65,7 +66,7 @@ def create_app() -> FastAPI:
     """Create and configure the Argus FastAPI application."""
     application = FastAPI(
         title="Argus API",
-        version="0.1.0",
+        version="0.1.0-beta",
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
@@ -90,6 +91,7 @@ def create_app() -> FastAPI:
     application.include_router(config_router.router, prefix="/api")
     application.include_router(diagnostics.router, prefix="/api")
     application.include_router(energy.router, prefix="/api")
+    application.include_router(alerts_router.router, prefix="/api")
 
     # Health endpoint
     @application.get("/api/health", tags=["health"])
@@ -98,9 +100,11 @@ def create_app() -> FastAPI:
         return {
             "status": "ok",
             "service": "argus-api",
+            "version": application.version,
             "last_poll_at": runtime_config.get_last_poll_at(),
             "next_poll_at": runtime_config.get_next_poll_at(),
             "is_polling": runtime_config.is_running(),
+            "github_repo": config.GITHUB_REPO,
         }
 
     # Serve React SPA

@@ -94,6 +94,7 @@ ALLOWED_ORIGINS: list[str] = _get_csv_list(
     "ALLOWED_ORIGINS", ["http://localhost:3000", "http://localhost:5173"]
 )
 RATE_LIMIT_PER_MINUTE: int = _get_int("RATE_LIMIT_PER_MINUTE", 60)
+GITHUB_REPO: str = _get_str("GITHUB_REPO", "")  # e.g. "owner/argus" for update checks
 
 # --- Alerting ---
 ALERT_FAILURE_THRESHOLD: int = _get_int("ALERT_FAILURE_THRESHOLD", 3)
