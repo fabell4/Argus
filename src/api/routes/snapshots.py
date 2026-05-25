@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sqlite3
 from contextlib import closing
-from typing import Annotated, Any
+from typing import Annotated
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
@@ -52,21 +52,18 @@ def list_snapshots(
         with closing(get_conn()) as conn:
             offset = (page - 1) * page_size
 
-            where = "WHERE device_id = ?" if device_id else ""
-            params_count: list[Any] = [device_id] if device_id else []
-            params_rows: list[Any] = (
-                [device_id, page_size, offset] if device_id else [page_size, offset]
-            )
-
             total_row = conn.execute(
-                f"SELECT COUNT(*) FROM power_snapshots {where}", params_count
+                "SELECT COUNT(*) FROM power_snapshots"
+                " WHERE (? IS NULL OR device_id = ?)",
+                [device_id, device_id],
             ).fetchone()
             total = total_row[0] if total_row else 0
 
             rows = conn.execute(
-                f"SELECT * FROM power_snapshots {where} "
-                "ORDER BY timestamp DESC LIMIT ? OFFSET ?",
-                params_rows,
+                "SELECT * FROM power_snapshots"
+                " WHERE (? IS NULL OR device_id = ?)"
+                " ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+                [device_id, device_id, page_size, offset],
             ).fetchall()
 
             items = [SnapshotSchema(**dict(row)) for row in rows]
@@ -87,11 +84,11 @@ def latest_snapshot(
     """Return the most recent snapshot, optionally filtered by device_id."""
     try:
         with closing(get_conn()) as conn:
-            where = "WHERE device_id = ?" if device_id else ""
-            params: list[Any] = [device_id] if device_id else []
             row = conn.execute(
-                f"SELECT * FROM power_snapshots {where} ORDER BY timestamp DESC LIMIT 1",
-                params,
+                "SELECT * FROM power_snapshots"
+                " WHERE (? IS NULL OR device_id = ?)"
+                " ORDER BY timestamp DESC LIMIT 1",
+                [device_id, device_id],
             ).fetchone()
             return SnapshotSchema(**dict(row)) if row else None
     except sqlite3.OperationalError as exc:

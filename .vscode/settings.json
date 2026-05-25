@@ -2,5 +2,9 @@
   "files.exclude": {
     "**/AppData/Local/Programs/Python/**": true,
     "**/AppData/Roaming/Python/**": true
+  },
+  "sonarlint.connectedMode.project": {
+    "connectionId": "https-sonarqube-greenflametech-net",
+    "projectKey": "Argus"
   }
 }

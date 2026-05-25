@@ -48,25 +48,22 @@ def list_events(
         with closing(get_conn()) as conn:
             offset = (page - 1) * page_size
 
-            conditions: list[str] = []
-            params: list[Any] = []
-            if device_id:
-                conditions.append("device_id = ?")
-                params.append(device_id)
-            if event_type:
-                conditions.append("event_type = ?")
-                params.append(event_type)
-
-            where = ("WHERE " + " AND ".join(conditions)) if conditions else ""
+            filter_params: list[Any] = [device_id, device_id, event_type, event_type]
 
             total_row = conn.execute(
-                f"SELECT COUNT(*) FROM power_events {where}", params
+                "SELECT COUNT(*) FROM power_events"
+                " WHERE (? IS NULL OR device_id = ?)"
+                " AND (? IS NULL OR event_type = ?)",
+                filter_params,
             ).fetchone()
             total = total_row[0] if total_row else 0
 
             rows = conn.execute(
-                f"SELECT * FROM power_events {where} ORDER BY timestamp DESC LIMIT ? OFFSET ?",
-                params + [page_size, offset],
+                "SELECT * FROM power_events"
+                " WHERE (? IS NULL OR device_id = ?)"
+                " AND (? IS NULL OR event_type = ?)"
+                " ORDER BY timestamp DESC LIMIT ? OFFSET ?",
+                filter_params + [page_size, offset],
             ).fetchall()
 
             items = [

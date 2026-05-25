@@ -16,6 +16,8 @@ _DEVICE_NOT_FOUND = "Device not found."
 
 
 class DeviceSchema(BaseModel):
+    """Serialised device registry record."""
+
     id: str
     name: str
     type: str
@@ -33,11 +35,13 @@ class DeviceSchema(BaseModel):
 
 @router.get("/devices")
 def list_devices() -> list[DeviceSchema]:
+    """Return all registered devices."""
     return [DeviceSchema(**d) for d in device_registry.load_devices()]
 
 
 @router.get("/devices/{device_id}")
 def get_device(device_id: str) -> DeviceSchema:
+    """Return a single device by ID."""
     d = device_registry.get_device(device_id)
     if d is None:
         raise HTTPException(
@@ -52,6 +56,7 @@ def get_device(device_id: str) -> DeviceSchema:
     status_code=status.HTTP_201_CREATED,
 )
 def add_device(device: DeviceSchema) -> DeviceSchema:
+    """Register a new device; returns 409 if the ID already exists."""
     if device_registry.get_device(device.id) is not None:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -70,6 +75,7 @@ def replace_devices(devices: list[DeviceSchema]) -> list[DeviceSchema]:
 
 @router.put("/devices/{device_id}", dependencies=[Depends(require_api_key)])
 def update_device(device_id: str, device: DeviceSchema) -> DeviceSchema:
+    """Update an existing device by ID."""
     if device_registry.get_device(device_id) is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND
@@ -87,9 +93,9 @@ def update_device(device_id: str, device: DeviceSchema) -> DeviceSchema:
     "/devices/{device_id}",
     dependencies=[Depends(require_api_key)],
     status_code=status.HTTP_204_NO_CONTENT,
-    response_model=None,
 )
 def delete_device(device_id: str) -> None:
+    """Delete a device by ID; returns 404 if not found."""
     if not device_registry.remove_device(device_id):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND

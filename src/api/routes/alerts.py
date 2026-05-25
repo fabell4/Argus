@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field, field_validator
+from pydantic import AfterValidator, BaseModel, Field
 
 from src import runtime_config, shared_state
 from src.api.auth import require_api_key
@@ -20,18 +20,16 @@ def _require_https(v: str) -> str:
     return v
 
 
+_HttpsUrl = Annotated[str, AfterValidator(_require_https)]
+
+
 class WebhookProviderConfig(BaseModel):
     """Alert provider config for generic webhook targets."""
 
     type: Literal["webhook"] = "webhook"
     enabled: bool = True
-    url: str
+    url: _HttpsUrl
     min_severity: AlertSeverity = AlertSeverity.LOW
-
-    @field_validator("url")
-    @classmethod
-    def _validate_url(cls, v: str) -> str:
-        return _require_https(v)
 
 
 class GotifyProviderConfig(BaseModel):
@@ -39,14 +37,9 @@ class GotifyProviderConfig(BaseModel):
 
     type: Literal["gotify"] = "gotify"
     enabled: bool = True
-    url: str
+    url: _HttpsUrl
     token: str
     min_severity: AlertSeverity = AlertSeverity.LOW
-
-    @field_validator("url")
-    @classmethod
-    def _validate_url(cls, v: str) -> str:
-        return _require_https(v)
 
 
 class NtfyProviderConfig(BaseModel):
@@ -54,14 +47,9 @@ class NtfyProviderConfig(BaseModel):
 
     type: Literal["ntfy"] = "ntfy"
     enabled: bool = True
-    url: str
+    url: _HttpsUrl
     topic: str
     min_severity: AlertSeverity = AlertSeverity.LOW
-
-    @field_validator("url")
-    @classmethod
-    def _validate_url(cls, v: str) -> str:
-        return _require_https(v)
 
 
 class AppriseProviderConfig(BaseModel):
@@ -69,13 +57,8 @@ class AppriseProviderConfig(BaseModel):
 
     type: Literal["apprise"] = "apprise"
     enabled: bool = True
-    url: str
+    url: _HttpsUrl
     min_severity: AlertSeverity = AlertSeverity.LOW
-
-    @field_validator("url")
-    @classmethod
-    def _validate_url(cls, v: str) -> str:
-        return _require_https(v)
 
 
 AlertProviderConfig = Annotated[

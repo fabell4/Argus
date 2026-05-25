@@ -148,7 +148,7 @@ class SNMPPoller:
 
         return results
 
-    def _build_v3_auth(self, usm_cls: type) -> object:  # type: ignore[type-arg]
+    def _build_v3_auth(self, usm_cls: type) -> object:
         """Construct a UsmUserData instance for authPriv mode."""
         try:
             from pysnmp.hlapi import (  # type: ignore[import-untyped]
