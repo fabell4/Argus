@@ -1,4 +1,5 @@
 """Thread-safe shared state for cross-layer access between the scheduler and API."""
+
 from __future__ import annotations
 
 import threading
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 @dataclass
 class _SharedState:
     """Container for module-level shared state."""
+
     alert_manager: Any = None
     last_diagnostics: dict[str, Any] = field(default_factory=dict)
 

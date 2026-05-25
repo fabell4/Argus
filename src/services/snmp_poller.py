@@ -1,4 +1,5 @@
 """SNMP poller — collects telemetry from PDUs, UPS, and sensors via SNMP."""
+
 from __future__ import annotations
 
 import logging
@@ -13,12 +14,12 @@ _LOG = logging.getLogger(__name__)
 
 # Standard UPS MIB (RFC 1628) OIDs
 _UPS_MIB: dict[str, str] = {
-    "1.3.6.1.2.1.33.1.3.3.1.3.1": "input_voltage",     # upsInputVoltage
-    "1.3.6.1.2.1.33.1.4.4.1.2.1": "output_voltage",    # upsOutputVoltage
-    "1.3.6.1.2.1.33.1.4.4.1.5.1": "load_percent",      # upsOutputPercentLoad
-    "1.3.6.1.2.1.33.1.2.4.0": "battery_percent",       # upsBatteryCapacity
-    "1.3.6.1.2.1.33.1.2.3.0": "runtime_seconds",       # upsEstimatedMinutesRemaining → converted
-    "1.3.6.1.2.1.33.1.4.4.1.4.1": "power_watts",       # upsOutputPower
+    "1.3.6.1.2.1.33.1.3.3.1.3.1": "input_voltage",  # upsInputVoltage
+    "1.3.6.1.2.1.33.1.4.4.1.2.1": "output_voltage",  # upsOutputVoltage
+    "1.3.6.1.2.1.33.1.4.4.1.5.1": "load_percent",  # upsOutputPercentLoad
+    "1.3.6.1.2.1.33.1.2.4.0": "battery_percent",  # upsBatteryCapacity
+    "1.3.6.1.2.1.33.1.2.3.0": "runtime_seconds",  # upsEstimatedMinutesRemaining → converted
+    "1.3.6.1.2.1.33.1.4.4.1.4.1": "power_watts",  # upsOutputPower
 }
 
 

@@ -4,6 +4,7 @@ Changes made through the UI/API are written here so they survive process restart
 Both the scheduler process and the API process read/write this file.
 Atomic writes (write-to-temp then rename) prevent partial reads.
 """
+
 from __future__ import annotations
 
 import json
@@ -36,6 +37,7 @@ _DEFAULTS: dict[str, Any] = {
 # Internal helpers
 # ---------------------------------------------------------------------------
 
+
 def _load_raw() -> dict[str, Any]:
     try:
         with open(_CONFIG_PATH, encoding="utf-8") as fh:
@@ -51,7 +53,11 @@ def _load_raw() -> dict[str, Any]:
 def _save_raw(data: dict[str, Any]) -> None:
     os.makedirs(os.path.dirname(_CONFIG_PATH), exist_ok=True)
     with tempfile.NamedTemporaryFile(
-        "w", dir=os.path.dirname(_CONFIG_PATH), delete=False, suffix=".tmp", encoding="utf-8"
+        "w",
+        dir=os.path.dirname(_CONFIG_PATH),
+        delete=False,
+        suffix=".tmp",
+        encoding="utf-8",
     ) as tmp:
         json.dump(data, tmp, indent=2)
         tmp_path = tmp.name
@@ -106,6 +112,7 @@ def save(data: dict[str, Any]) -> None:
 # Poll interval
 # ---------------------------------------------------------------------------
 
+
 def get_interval_minutes() -> int:
     """Return the configured poll interval in minutes."""
     return int(load().get("poll_interval_minutes", _DEFAULTS["poll_interval_minutes"]))
@@ -122,6 +129,7 @@ def set_interval_minutes(minutes: int) -> None:
 # ---------------------------------------------------------------------------
 # Enabled exporters
 # ---------------------------------------------------------------------------
+
 
 def get_enabled_exporters() -> list[str]:
     """Return the list of enabled exporter names."""
@@ -140,6 +148,7 @@ def set_enabled_exporters(exporters: list[str]) -> None:
 # Scheduler paused
 # ---------------------------------------------------------------------------
 
+
 def get_scheduler_paused() -> bool:
     """Return True if the scheduler is currently paused."""
     return bool(load().get("scheduler_paused", False))
@@ -155,6 +164,7 @@ def set_scheduler_paused(paused: bool) -> None:
 # ---------------------------------------------------------------------------
 # Timestamps
 # ---------------------------------------------------------------------------
+
 
 def get_next_poll_at() -> str | None:
     """Return the ISO-format next-poll timestamp, or None if unset."""
@@ -183,6 +193,7 @@ def set_last_poll_at(dt: datetime) -> None:
 # ---------------------------------------------------------------------------
 # Manual trigger sentinels
 # ---------------------------------------------------------------------------
+
 
 def trigger_poll() -> None:
     """Signal the scheduler to run an immediate poll."""
@@ -226,6 +237,7 @@ def is_running() -> bool:
 # Alert config
 # ---------------------------------------------------------------------------
 
+
 def get_alert_config() -> dict[str, Any]:
     """Return a copy of the persisted alert provider configuration."""
     return dict(load().get("alert_config", {}))
@@ -243,9 +255,12 @@ def set_alert_config(cfg: dict[str, Any]) -> None:
 # Validation helpers
 # ---------------------------------------------------------------------------
 
+
 def _validate_interval_minutes(value: int) -> None:
     if not isinstance(value, int) or value < 1 or value > 10080:
-        raise ValueError("poll_interval_minutes must be an integer between 1 and 10080.")
+        raise ValueError(
+            "poll_interval_minutes must be an integer between 1 and 10080."
+        )
 
 
 _VALID_EXPORTERS: frozenset[str] = frozenset(ExporterType)
@@ -256,7 +271,9 @@ def _validate_enabled_exporters(value: list[str]) -> None:
         raise ValueError("enabled_exporters must be a list of strings.")
     unknown = [e for e in value if e not in _VALID_EXPORTERS]
     if unknown:
-        raise ValueError(f"Unknown exporter(s): {unknown}. Valid: {sorted(_VALID_EXPORTERS)}")
+        raise ValueError(
+            f"Unknown exporter(s): {unknown}. Valid: {sorted(_VALID_EXPORTERS)}"
+        )
 
 
 def _validate_alert_config(value: dict[str, Any]) -> None:

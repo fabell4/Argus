@@ -1,4 +1,5 @@
 """GET/PUT/POST/DELETE /api/devices — device registry."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -39,11 +40,17 @@ def list_devices() -> list[DeviceSchema]:
 def get_device(device_id: str) -> DeviceSchema:
     d = device_registry.get_device(device_id)
     if d is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND
+        )
     return DeviceSchema(**d)
 
 
-@router.post("/devices", dependencies=[Depends(require_api_key)], status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/devices",
+    dependencies=[Depends(require_api_key)],
+    status_code=status.HTTP_201_CREATED,
+)
 def add_device(device: DeviceSchema) -> DeviceSchema:
     if device_registry.get_device(device.id) is not None:
         raise HTTPException(
@@ -64,7 +71,9 @@ def replace_devices(devices: list[DeviceSchema]) -> list[DeviceSchema]:
 @router.put("/devices/{device_id}", dependencies=[Depends(require_api_key)])
 def update_device(device_id: str, device: DeviceSchema) -> DeviceSchema:
     if device_registry.get_device(device_id) is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND
+        )
     if device.id != device_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -74,7 +83,14 @@ def update_device(device_id: str, device: DeviceSchema) -> DeviceSchema:
     return device
 
 
-@router.delete("/devices/{device_id}", dependencies=[Depends(require_api_key)], status_code=status.HTTP_204_NO_CONTENT, response_model=None)
+@router.delete(
+    "/devices/{device_id}",
+    dependencies=[Depends(require_api_key)],
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+)
 def delete_device(device_id: str) -> None:
     if not device_registry.remove_device(device_id):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND)
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=_DEVICE_NOT_FOUND
+        )

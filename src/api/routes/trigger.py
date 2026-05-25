@@ -1,4 +1,5 @@
 """POST /api/trigger — manually trigger an immediate poll cycle."""
+
 from __future__ import annotations
 
 import threading

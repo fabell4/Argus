@@ -1,4 +1,5 @@
 """GET /api/snapshots — paginated power snapshot history."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -69,7 +70,9 @@ def list_snapshots(
             ).fetchall()
 
             items = [SnapshotSchema(**dict(row)) for row in rows]
-            return SnapshotsPage(page=page, page_size=page_size, total=total, items=items)
+            return SnapshotsPage(
+                page=page, page_size=page_size, total=total, items=items
+            )
     except sqlite3.OperationalError as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,

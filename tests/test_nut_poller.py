@@ -1,4 +1,5 @@
 """Tests for NUTPoller — mock socket: happy path, auth, retry, parse errors."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -11,6 +12,7 @@ from src.services.nut_poller import NUTPoller
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 class _MockNUTFileHandle:
     """Simulates a NUT socket file handle with separate read/write buffers."""
@@ -56,6 +58,7 @@ def _make_mock_socket(lines: list[str]) -> MagicMock:
 # ---------------------------------------------------------------------------
 # Happy path
 # ---------------------------------------------------------------------------
+
 
 def test_poll_returns_power_snapshot() -> None:
     """NUTPoller.poll() returns a populated PowerSnapshot on a successful response."""
@@ -133,6 +136,7 @@ def test_list_ups_returns_device_names() -> None:
 # Authentication
 # ---------------------------------------------------------------------------
 
+
 def test_authentication_sends_username_and_password() -> None:
     """Credentials are forwarded as USERNAME / PASSWORD commands before polling."""
     var_lines = ['VAR ups ups.status "OL"', "END LIST VAR ups"]
@@ -145,7 +149,9 @@ def test_authentication_sends_username_and_password() -> None:
     mock_sock.makefile.return_value = fh
 
     with patch("socket.create_connection", return_value=mock_sock):
-        poller = NUTPoller(username="admin", password="secret", ups_name="ups")  # NOSONAR
+        poller = NUTPoller(
+            username="admin", password="secret", ups_name="ups"
+        )  # NOSONAR
         poller.poll()
 
     assert any("USERNAME admin" in w for w in fh.written)
@@ -169,6 +175,7 @@ def test_authentication_failure_raises_runtime_error() -> None:
 # ---------------------------------------------------------------------------
 # Retry logic
 # ---------------------------------------------------------------------------
+
 
 def test_poll_retries_on_os_error() -> None:
     """poll() retries on a transient OSError and succeeds on the second attempt."""
@@ -203,6 +210,7 @@ def test_poll_raises_after_all_retries_exhausted() -> None:
 # ---------------------------------------------------------------------------
 # Parse edge cases
 # ---------------------------------------------------------------------------
+
 
 def test_poll_handles_quoted_value_with_spaces() -> None:
     """Quoted NUT values containing spaces are parsed correctly."""
@@ -256,7 +264,9 @@ def test_password_rejection_raises_runtime_error() -> None:
     mock_sock.makefile.return_value = fh
 
     with patch("socket.create_connection", return_value=mock_sock):
-        poller = NUTPoller(username="admin", password="wrongpass", ups_name="ups")  # NOSONAR
+        poller = NUTPoller(
+            username="admin", password="wrongpass", ups_name="ups"
+        )  # NOSONAR
         with pytest.raises(RuntimeError, match="password"):
             poller.poll()
 

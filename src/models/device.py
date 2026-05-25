@@ -1,4 +1,5 @@
 """Device — entry in the Argus device registry."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -11,8 +12,8 @@ class Device:
 
     id: str
     name: str
-    type: str      # DeviceType value
-    poller: str    # PollerType value
+    type: str  # DeviceType value
+    poller: str  # PollerType value
     host: str
     port: int
     enabled: bool = True
@@ -22,7 +23,7 @@ class Device:
     firmware: str | None = None
     serial: str | None = None
     manufacturer: str | None = None
-    last_seen: str | None = None   # ISO-8601 UTC timestamp
+    last_seen: str | None = None  # ISO-8601 UTC timestamp
 
     def to_dict(self) -> dict[str, Any]:
         return {

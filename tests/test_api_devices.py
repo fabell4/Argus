@@ -1,4 +1,5 @@
 """Tests for /api/devices CRUD endpoints."""
+
 from __future__ import annotations
 
 from unittest.mock import patch
@@ -32,7 +33,9 @@ _DEVICE: dict = {
 
 def test_get_device_returns_200_when_found() -> None:
     """Fetching an existing device returns 200 with the device payload."""
-    with patch("src.api.routes.devices.device_registry.get_device", return_value=_DEVICE):
+    with patch(
+        "src.api.routes.devices.device_registry.get_device", return_value=_DEVICE
+    ):
         resp = client.get("/api/devices/nut:ups@localhost")
     assert resp.status_code == 200
     assert resp.json()["id"] == "nut:ups@localhost"
@@ -62,7 +65,9 @@ def test_add_device_returns_201_when_new() -> None:
 
 def test_add_device_returns_409_when_already_exists() -> None:
     """Adding a device that already exists returns 409."""
-    with patch("src.api.routes.devices.device_registry.get_device", return_value=_DEVICE):
+    with patch(
+        "src.api.routes.devices.device_registry.get_device", return_value=_DEVICE
+    ):
         resp = client.post("/api/devices", json=_DEVICE)
     assert resp.status_code == 409
 
@@ -95,7 +100,9 @@ def test_replace_devices_with_empty_list() -> None:
 def test_update_device_returns_200() -> None:
     """Updating an existing device returns 200 with the updated payload."""
     with (
-        patch("src.api.routes.devices.device_registry.get_device", return_value=_DEVICE),
+        patch(
+            "src.api.routes.devices.device_registry.get_device", return_value=_DEVICE
+        ),
         patch("src.api.routes.devices.device_registry.upsert_device"),
     ):
         resp = client.put("/api/devices/nut:ups@localhost", json=_DEVICE)
@@ -114,7 +121,9 @@ def test_update_device_returns_404_when_missing() -> None:
 def test_update_device_returns_400_on_id_mismatch() -> None:
     """Updating with a body ID that doesn't match the path parameter returns 400."""
     mismatched = {**_DEVICE, "id": "different-id"}
-    with patch("src.api.routes.devices.device_registry.get_device", return_value=_DEVICE):
+    with patch(
+        "src.api.routes.devices.device_registry.get_device", return_value=_DEVICE
+    ):
         resp = client.put("/api/devices/nut:ups@localhost", json=mismatched)
     assert resp.status_code == 400
 
@@ -126,13 +135,17 @@ def test_update_device_returns_400_on_id_mismatch() -> None:
 
 def test_delete_device_returns_204_when_found() -> None:
     """Deleting an existing device returns 204."""
-    with patch("src.api.routes.devices.device_registry.remove_device", return_value=True):
+    with patch(
+        "src.api.routes.devices.device_registry.remove_device", return_value=True
+    ):
         resp = client.delete("/api/devices/nut:ups@localhost")
     assert resp.status_code == 204
 
 
 def test_delete_device_returns_404_when_missing() -> None:
     """Deleting a non-existent device returns 404."""
-    with patch("src.api.routes.devices.device_registry.remove_device", return_value=False):
+    with patch(
+        "src.api.routes.devices.device_registry.remove_device", return_value=False
+    ):
         resp = client.delete("/api/devices/no-such-device")
     assert resp.status_code == 404

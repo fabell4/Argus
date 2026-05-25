@@ -1,4 +1,5 @@
 """PowerSnapshot — the canonical telemetry unit for Argus."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -39,7 +40,9 @@ class PowerSnapshot:
             raise ValueError("device_id must not be empty.")
         if self.load_percent is not None and not (0.0 <= self.load_percent <= 100.0):
             raise ValueError("load_percent must be between 0 and 100.")
-        if self.battery_percent is not None and not (0.0 <= self.battery_percent <= 100.0):
+        if self.battery_percent is not None and not (
+            0.0 <= self.battery_percent <= 100.0
+        ):
             raise ValueError("battery_percent must be between 0 and 100.")
         if self.power_watts is not None and self.power_watts < 0:
             raise ValueError("power_watts must be non-negative.")

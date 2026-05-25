@@ -1,4 +1,5 @@
 """EventProcessor — detects device state transitions between consecutive snapshots."""
+
 from __future__ import annotations
 
 import logging
@@ -111,7 +112,10 @@ class EventProcessor:
                     timestamp=now,
                     device_id=curr.device_id,
                     event_type=EventType.ON_BATTERY,
-                    metadata={"previous_status": prev_status, "current_status": curr_status},
+                    metadata={
+                        "previous_status": prev_status,
+                        "current_status": curr_status,
+                    },
                 )
             )
             _LOG.warning("Device %s switched to battery power.", curr.device_id)
@@ -124,7 +128,10 @@ class EventProcessor:
                     timestamp=now,
                     device_id=curr.device_id,
                     event_type=EventType.POWER_RESTORED,
-                    metadata={"previous_status": prev_status, "current_status": curr_status},
+                    metadata={
+                        "previous_status": prev_status,
+                        "current_status": curr_status,
+                    },
                 )
             )
             _LOG.info("Device %s restored to mains power.", curr.device_id)
@@ -156,9 +163,7 @@ class EventProcessor:
                     },
                 )
             )
-            _LOG.warning(
-                "Device %s battery low: %.1f%%.", curr.device_id, curr_pct
-            )
+            _LOG.warning("Device %s battery low: %.1f%%.", curr.device_id, curr_pct)
 
         return events
 

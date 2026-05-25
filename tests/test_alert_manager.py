@@ -1,4 +1,5 @@
 """Tests for AlertManager — event alerting, recovery, cooldown, and failure tracking."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -31,6 +32,7 @@ def _manager_with_provider(**kwargs: object) -> tuple[AlertManager, MagicMock]:
 # ---------------------------------------------------------------------------
 # Poll-failure tracking
 # ---------------------------------------------------------------------------
+
 
 def test_record_failure_increments_counter() -> None:
     """Consecutive failures counter increments with each recorded failure."""
@@ -102,6 +104,7 @@ def test_no_providers_no_error() -> None:
 # ---------------------------------------------------------------------------
 # Power event alerting
 # ---------------------------------------------------------------------------
+
 
 def test_record_event_on_battery_fires_alert() -> None:
     """ON_BATTERY event triggers an event alert when alerting is enabled."""
@@ -208,6 +211,7 @@ def test_event_alert_different_types_same_device_both_fire() -> None:
 # Recovery notifications
 # ---------------------------------------------------------------------------
 
+
 def test_record_recovery_event_power_restored() -> None:
     """POWER_RESTORED recovery event triggers an alert when notifications are enabled."""
     mgr, _provider = _manager_with_provider()
@@ -287,6 +291,7 @@ def test_get_recovery_cooldown_seconds_falls_back_to_env_default() -> None:
 # Test alert cooldown
 # ---------------------------------------------------------------------------
 
+
 def test_send_test_alert_succeeds_first_time() -> None:
     """Test alert is sent successfully the first time with no prior cooldown."""
     mgr, provider = _manager_with_provider(test_cooldown_seconds=10)
@@ -319,9 +324,11 @@ def test_send_test_alert_provider_exception_does_not_propagate() -> None:
 # Per-provider severity filter
 # ---------------------------------------------------------------------------
 
+
 def test_event_alert_skipped_when_provider_min_severity_too_high() -> None:
     """Provider with min_severity=critical should NOT receive a HIGH event."""
     from src.services.alert_providers import WebhookProvider
+
     mgr = AlertManager(cooldown_seconds=0)
     provider = WebhookProvider(url="https://example.com/hook", min_severity="critical")
     mgr.add_provider(provider)
@@ -336,6 +343,7 @@ def test_event_alert_skipped_when_provider_min_severity_too_high() -> None:
 def test_event_alert_sent_when_severity_meets_min() -> None:
     """Provider with min_severity=high SHOULD receive a CRITICAL event."""
     from src.services.alert_providers import WebhookProvider
+
     mgr = AlertManager(cooldown_seconds=0)
     provider = WebhookProvider(url="https://example.com/hook", min_severity="high")
     mgr.add_provider(provider)
@@ -353,9 +361,12 @@ def test_event_alert_sent_when_severity_meets_min() -> None:
 def test_event_alert_selective_dispatch_by_min_severity() -> None:
     """Two providers with different min_severity thresholds; only the lower one fires."""
     from src.services.alert_providers import WebhookProvider
+
     mgr = AlertManager(cooldown_seconds=0)
     low_provider = WebhookProvider(url="https://example.com/low", min_severity="low")
-    high_provider = WebhookProvider(url="https://example.com/high", min_severity="critical")
+    high_provider = WebhookProvider(
+        url="https://example.com/high", min_severity="critical"
+    )
     mgr.add_provider(low_provider)
     mgr.add_provider(high_provider)
     with (
@@ -371,6 +382,7 @@ def test_event_alert_selective_dispatch_by_min_severity() -> None:
 # ---------------------------------------------------------------------------
 # _is_event_type_enabled reads runtime config
 # ---------------------------------------------------------------------------
+
 
 def test_is_event_type_enabled_defaults_true_for_on_battery() -> None:
     """_is_event_type_enabled returns True for ON_BATTERY when no runtime override exists."""

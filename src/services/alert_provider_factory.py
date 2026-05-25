@@ -1,4 +1,5 @@
 """Factory functions for registering alert providers with the AlertManager."""
+
 from __future__ import annotations
 
 import logging

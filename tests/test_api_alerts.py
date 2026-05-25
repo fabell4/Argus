@@ -1,4 +1,5 @@
 """Tests for alert API endpoints, security headers, and input validation."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -13,6 +14,7 @@ client = TestClient(app, raise_server_exceptions=False)
 # ---------------------------------------------------------------------------
 # GET /api/alerts
 # ---------------------------------------------------------------------------
+
 
 def test_get_alerts_returns_default_schema() -> None:
     """GET /api/alerts returns all expected top-level keys."""
@@ -38,6 +40,7 @@ def test_get_alerts_providers_is_list() -> None:
 # ---------------------------------------------------------------------------
 # PUT /api/alerts
 # ---------------------------------------------------------------------------
+
 
 def test_put_alerts_persists_config() -> None:
     """PUT /api/alerts with valid body returns the saved config including recovery_cooldown_seconds.
@@ -113,7 +116,11 @@ def test_put_alerts_with_webhook_provider() -> None:
     """PUT /api/alerts with a valid webhook provider config is accepted."""
     body = {
         "providers": [
-            {"type": "webhook", "enabled": True, "url": "https://hooks.example.com/argus"}
+            {
+                "type": "webhook",
+                "enabled": True,
+                "url": "https://hooks.example.com/argus",
+            }
         ],
         "failure_threshold": 3,
         "cooldown_seconds": 3600,
@@ -138,6 +145,7 @@ def test_put_alerts_rejects_http_url_missing_scheme() -> None:
 # ---------------------------------------------------------------------------
 # POST /api/alerts/test
 # ---------------------------------------------------------------------------
+
 
 def test_post_alerts_test_returns_503_when_no_alert_manager() -> None:
     """POST /api/alerts/test returns 503 when the alert manager is unavailable."""
@@ -172,6 +180,7 @@ def test_post_alerts_test_returns_429_on_cooldown_error() -> None:
 # Security headers
 # ---------------------------------------------------------------------------
 
+
 def test_security_headers_present_on_health() -> None:
     """Security headers (nosniff, deny, referrer-policy) are present on health responses."""
     resp = client.get("/api/health")
@@ -191,6 +200,7 @@ def test_security_headers_present_on_alerts() -> None:
 # Request size limit
 # ---------------------------------------------------------------------------
 
+
 def test_oversized_request_rejected() -> None:
     """PUT requests with a body exceeding the size limit are rejected with 413."""
     # Send a PUT with 2 MB body — should be rejected with 413
@@ -198,7 +208,10 @@ def test_oversized_request_rejected() -> None:
     resp = client.put(
         "/api/config",
         content=large_body,
-        headers={"Content-Length": str(len(large_body)), "Content-Type": "application/json"},
+        headers={
+            "Content-Length": str(len(large_body)),
+            "Content-Type": "application/json",
+        },
     )
     assert resp.status_code == 413
 
@@ -206,6 +219,7 @@ def test_oversized_request_rejected() -> None:
 # ---------------------------------------------------------------------------
 # Input validation on config routes
 # ---------------------------------------------------------------------------
+
 
 def test_put_config_rejects_negative_poll_interval() -> None:
     """PUT /api/config rejects a negative poll_interval_minutes value."""
@@ -237,6 +251,7 @@ def test_put_config_rejects_string_poll_interval() -> None:
 # Diagnostics
 # ---------------------------------------------------------------------------
 
+
 def test_get_diagnostics_returns_structure() -> None:
     """GET /api/diagnostics returns a JSON object."""
     resp = client.get("/api/diagnostics")
@@ -248,6 +263,7 @@ def test_get_diagnostics_returns_structure() -> None:
 # ---------------------------------------------------------------------------
 # CORS
 # ---------------------------------------------------------------------------
+
 
 def test_cors_headers_present_for_allowed_origin() -> None:
     """CORS preflight does not 500 for a configured allowed origin."""

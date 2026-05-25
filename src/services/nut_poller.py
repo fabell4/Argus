@@ -1,4 +1,5 @@
 """NUT poller — collects UPS telemetry via the NUT (Network UPS Tools) protocol."""
+
 from __future__ import annotations
 
 import io
@@ -82,11 +83,14 @@ class NUTPoller:
         Authentication failures and protocol errors (``RuntimeError``) propagate
         immediately and are not retried.
         """
+
         def _do() -> PowerSnapshot:
             raw = self._fetch_vars()
             return self._build_snapshot(raw)
 
-        return self._with_retry(_do, f"NUT poll for {self._ups_name}@{self._host}:{self._port}")
+        return self._with_retry(
+            _do, f"NUT poll for {self._ups_name}@{self._host}:{self._port}"
+        )
 
     # ------------------------------------------------------------------
     # NUT protocol helpers
@@ -109,7 +113,9 @@ class NUTPoller:
 
     def _fetch_vars(self) -> dict[str, str]:
         """Open a socket to NUT and retrieve all UPS variables."""
-        with socket.create_connection((self._host, self._port), timeout=self._timeout) as sock:
+        with socket.create_connection(
+            (self._host, self._port), timeout=self._timeout
+        ) as sock:
             fh = sock.makefile("rw", buffering=1, encoding="utf-8")
             self._authenticate(fh)
 
@@ -135,7 +141,9 @@ class NUTPoller:
 
     def _fetch_ups_list(self) -> list[str]:
         """Query LIST UPS and return all UPS names served by the NUT daemon."""
-        with socket.create_connection((self._host, self._port), timeout=self._timeout) as sock:
+        with socket.create_connection(
+            (self._host, self._port), timeout=self._timeout
+        ) as sock:
             fh = sock.makefile("rw", buffering=1, encoding="utf-8")
             self._authenticate(fh)
 
@@ -175,13 +183,16 @@ class NUTPoller:
         self,
     ) -> tuple[PowerSnapshot, dict[str, str]]:
         """Like :meth:`poll` but also returns UPS metadata (model, firmware, serial, mfr)."""
+
         def _do() -> tuple[PowerSnapshot, dict[str, str]]:
             raw = self._fetch_vars()
             snapshot = self._build_snapshot(raw)
             metadata = {k: raw[k] for k in _NUT_METADATA_KEYS if k in raw}
             return snapshot, metadata
 
-        return self._with_retry(_do, f"NUT poll for {self._ups_name}@{self._host}:{self._port}")
+        return self._with_retry(
+            _do, f"NUT poll for {self._ups_name}@{self._host}:{self._port}"
+        )
 
     @staticmethod
     def _apply_field(
@@ -197,9 +208,7 @@ class NUTPoller:
             _LOG.warning("Could not parse NUT var %s=%r as float.", nut_key, value)
 
     @staticmethod
-    def _derive_power_watts(
-        raw: dict[str, str], kwargs: dict[str, Any]
-    ) -> None:
+    def _derive_power_watts(raw: dict[str, str], kwargs: dict[str, Any]) -> None:
         """Derive power_watts from nominal capacity and load_percent when not directly available."""
         if kwargs.get("power_watts") is not None:
             return
@@ -212,7 +221,9 @@ class NUTPoller:
         try:
             kwargs["power_watts"] = float(nominal_raw) * (float(load) / 100.0)
         except (ValueError, TypeError) as exc:
-            _LOG.debug("Could not derive power_watts from NUT vars (%s); skipping.", exc)
+            _LOG.debug(
+                "Could not derive power_watts from NUT vars (%s); skipping.", exc
+            )
 
     def _build_snapshot(self, raw: dict[str, str]) -> PowerSnapshot:
         kwargs: dict[str, Any] = {

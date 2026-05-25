@@ -1,4 +1,5 @@
 """GET/PUT /api/config — runtime scheduler configuration."""
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -59,5 +60,7 @@ def update_config(body: RuntimeConfigSchema) -> RuntimeConfigSchema:
         data["scheduler_paused"] = body.scheduler_paused
         runtime_config.save(data)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        ) from exc
     return body

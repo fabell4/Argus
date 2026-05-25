@@ -5,6 +5,7 @@ Persists per-device cumulative energy in a separate SQLite table so totals
 survive process restarts.  Optionally exposes a Prometheus counter and
 cost estimation when ENERGY_RATE_PER_KWH is set.
 """
+
 from __future__ import annotations
 
 import logging
@@ -90,9 +91,7 @@ class EnergyAccumulatorExporter(BaseExporter):
             if prev is not None and prev.power_watts is not None:
                 # Trapezoidal integration: average power × elapsed hours
                 avg_watts = (prev.power_watts + snapshot.power_watts) / 2.0
-                delta_s = (
-                    snapshot.timestamp - prev.timestamp
-                ).total_seconds()
+                delta_s = (snapshot.timestamp - prev.timestamp).total_seconds()
                 if delta_s > 0:
                     increment_wh = avg_watts * (delta_s / 3600.0)
 

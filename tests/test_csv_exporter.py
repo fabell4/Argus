@@ -1,9 +1,9 @@
 """Tests for CSVExporter — file creation, append, rotation, pruning."""
+
 from __future__ import annotations
 
 import csv
 import os
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -13,7 +13,9 @@ from src.exporters.csv_exporter import CSVExporter
 from src.models.power_snapshot import PowerSnapshot
 
 
-def _snap(device_id: str = "nut:ups@localhost", power_watts: float = 100.0) -> PowerSnapshot:
+def _snap(
+    device_id: str = "nut:ups@localhost", power_watts: float = 100.0
+) -> PowerSnapshot:
     return PowerSnapshot(
         timestamp=datetime.now(timezone.utc),
         device_id=device_id,
@@ -25,6 +27,7 @@ def _snap(device_id: str = "nut:ups@localhost", power_watts: float = 100.0) -> P
 # ---------------------------------------------------------------------------
 # File creation and header
 # ---------------------------------------------------------------------------
+
 
 def test_export_creates_csv_file(tmp_path: Path) -> None:
     path = str(tmp_path / "argus.csv")
@@ -52,7 +55,9 @@ def test_export_does_not_duplicate_header(tmp_path: Path) -> None:
     exporter.export(_snap())
     with open(path, encoding="utf-8") as fh:
         lines = fh.readlines()
-    header_count = sum(1 for line in lines if "timestamp" in line and "device_id" in line)
+    header_count = sum(
+        1 for line in lines if "timestamp" in line and "device_id" in line
+    )
     assert header_count == 1
 
 
@@ -92,6 +97,7 @@ def test_export_writes_power_watts(tmp_path: Path) -> None:
 # Missing directory
 # ---------------------------------------------------------------------------
 
+
 def test_export_creates_missing_directory(tmp_path: Path) -> None:
     nested = tmp_path / "deep" / "nested"
     path = str(nested / "argus.csv")
@@ -103,6 +109,7 @@ def test_export_creates_missing_directory(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # Size-based rotation
 # ---------------------------------------------------------------------------
+
 
 def test_export_rotates_when_file_exceeds_max_size(tmp_path: Path) -> None:
     path = str(tmp_path / "argus.csv")
@@ -127,6 +134,7 @@ def test_export_no_rotation_when_disabled(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # Age-based pruning
 # ---------------------------------------------------------------------------
+
 
 def test_prune_skips_active_file(tmp_path: Path) -> None:
     path = str(tmp_path / "argus.csv")

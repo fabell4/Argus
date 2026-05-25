@@ -1,4 +1,5 @@
 """SQLite exporter — primary authoritative store for Argus telemetry."""
+
 from __future__ import annotations
 
 import logging

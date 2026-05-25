@@ -1,4 +1,5 @@
 """Tests for the API health, snapshots, trigger, and config endpoints."""
+
 from __future__ import annotations
 
 from fastapi.testclient import TestClient
@@ -12,6 +13,7 @@ client = TestClient(app)
 # Health
 # ---------------------------------------------------------------------------
 
+
 def test_health_returns_ok() -> None:
     """GET /api/health returns 200 with status ok."""
     resp = client.get("/api/health")
@@ -22,6 +24,7 @@ def test_health_returns_ok() -> None:
 # ---------------------------------------------------------------------------
 # Snapshots (empty DB expected in test environment)
 # ---------------------------------------------------------------------------
+
 
 def test_list_snapshots_returns_page() -> None:
     """GET /api/snapshots returns a valid response (200 or 503 when SQLite absent)."""
@@ -39,6 +42,7 @@ def test_latest_snapshot_returns_none_or_snapshot() -> None:
 # Trigger (no auth required when API_KEY is empty)
 # ---------------------------------------------------------------------------
 
+
 def test_trigger_status_idle() -> None:
     """GET /api/trigger/status returns idle or running."""
     resp = client.get("/api/trigger/status")
@@ -49,6 +53,7 @@ def test_trigger_status_idle() -> None:
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
+
 
 def test_get_config() -> None:
     """GET /api/config returns poll_interval_minutes and enabled_exporters."""
@@ -78,6 +83,7 @@ def test_update_config_without_auth_when_key_empty() -> None:
 # Events
 # ---------------------------------------------------------------------------
 
+
 def test_list_events_returns_page() -> None:
     """GET /api/events returns a valid response."""
     resp = client.get("/api/events")
@@ -106,6 +112,7 @@ def test_list_events_with_pagination_params() -> None:
 # Snapshots — filter variants
 # ---------------------------------------------------------------------------
 
+
 def test_list_snapshots_with_device_id_filter() -> None:
     """GET /api/snapshots?device_id=... passes the filter without error."""
     resp = client.get("/api/snapshots?device_id=nut:ups@localhost")
@@ -121,6 +128,7 @@ def test_latest_snapshot_with_device_id_filter() -> None:
 # ---------------------------------------------------------------------------
 # Devices
 # ---------------------------------------------------------------------------
+
 
 def test_list_devices_returns_list() -> None:
     """GET /api/devices returns a JSON list."""

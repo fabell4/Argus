@@ -1,4 +1,5 @@
 """API key authentication and per-key sliding-window rate limiting."""
+
 from __future__ import annotations
 
 import hmac

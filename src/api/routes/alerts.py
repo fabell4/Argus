@@ -1,4 +1,5 @@
 """GET/PUT /api/alerts — alert provider configuration and test dispatch."""
+
 from __future__ import annotations
 
 from typing import Annotated, Any, Literal
@@ -78,7 +79,10 @@ class AppriseProviderConfig(BaseModel):
 
 
 AlertProviderConfig = Annotated[
-    WebhookProviderConfig | GotifyProviderConfig | NtfyProviderConfig | AppriseProviderConfig,
+    WebhookProviderConfig
+    | GotifyProviderConfig
+    | NtfyProviderConfig
+    | AppriseProviderConfig,
     Field(discriminator="type"),
 ]
 

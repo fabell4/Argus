@@ -1,4 +1,5 @@
 """Prometheus exporter — exposes Argus device metrics for scraping."""
+
 from __future__ import annotations
 
 import logging
@@ -49,7 +50,9 @@ class PrometheusExporter(BaseExporter):
                 self._started = True
                 _LOG.info("Prometheus metrics server started on port %d.", self._port)
         except ImportError:
-            _LOG.warning("prometheus_client not installed; Prometheus exporter disabled.")
+            _LOG.warning(
+                "prometheus_client not installed; Prometheus exporter disabled."
+            )
 
     def export(self, snapshot: PowerSnapshot) -> None:
         if not self._gauges:

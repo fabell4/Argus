@@ -1,4 +1,5 @@
 """AlertManager — tracks consecutive poll failures and fires notifications."""
+
 from __future__ import annotations
 
 import concurrent.futures
@@ -41,13 +42,15 @@ _EVENT_MESSAGES: dict[str, str] = {
 }
 
 _RECOVERY_EVENT_TYPES = frozenset({EventType.POWER_RESTORED, EventType.DEVICE_ONLINE})
-_ALERTABLE_EVENT_TYPES = frozenset({
-    EventType.ON_BATTERY,
-    EventType.BATTERY_LOW,
-    EventType.DEVICE_OFFLINE,
-    EventType.SHUTDOWN_INITIATED,
-    EventType.THRESHOLD_CROSSED,
-})
+_ALERTABLE_EVENT_TYPES = frozenset(
+    {
+        EventType.ON_BATTERY,
+        EventType.BATTERY_LOW,
+        EventType.DEVICE_OFFLINE,
+        EventType.SHUTDOWN_INITIATED,
+        EventType.THRESHOLD_CROSSED,
+    }
+)
 
 
 def _format_event_message(event: "PowerEvent") -> str:
@@ -112,7 +115,11 @@ class AlertManager:
             self._last_failure_time = timestamp
             count = self._consecutive_failures
 
-        _LOG.warning("Consecutive poll failures: %d (threshold=%d)", count, self._failure_threshold)
+        _LOG.warning(
+            "Consecutive poll failures: %d (threshold=%d)",
+            count,
+            self._failure_threshold,
+        )
         if count >= self._failure_threshold:
             self._maybe_send_alert(error, count, timestamp)
 
@@ -153,7 +160,9 @@ class AlertManager:
         alert_cfg: dict[str, Any] = rc.load().get("alert_config", {})
         on_batt = alert_cfg.get("alert_on_battery", config.ALERT_ON_BATTERY)
         batt_low = alert_cfg.get("alert_on_battery_low", config.ALERT_ON_BATTERY_LOW)
-        offline = alert_cfg.get("alert_on_device_offline", config.ALERT_ON_DEVICE_OFFLINE)
+        offline = alert_cfg.get(
+            "alert_on_device_offline", config.ALERT_ON_DEVICE_OFFLINE
+        )
         flags: dict[str, bool] = {
             EventType.ON_BATTERY: on_batt,
             EventType.BATTERY_LOW: batt_low,
@@ -213,7 +222,8 @@ class AlertManager:
         eligible = [p for p in self._providers if p.meets_min_severity(str(severity))]
         if not eligible:
             _LOG.debug(
-                "No providers eligible for severity %s (all below their min_severity).", severity
+                "No providers eligible for severity %s (all below their min_severity).",
+                severity,
             )
             return
 
@@ -254,7 +264,9 @@ class AlertManager:
                 elapsed = (now - self._last_alert_time).total_seconds()
                 if elapsed < self._cooldown_seconds:
                     remaining = self._cooldown_seconds - elapsed
-                    _LOG.debug("Alert suppressed (cooldown %.0f s remaining).", remaining)
+                    _LOG.debug(
+                        "Alert suppressed (cooldown %.0f s remaining).", remaining
+                    )
                     return
             self._last_alert_time = now
 
@@ -262,7 +274,9 @@ class AlertManager:
             _LOG.debug("No alert providers configured.")
             return
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=len(self._providers)) as pool:
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=len(self._providers)
+        ) as pool:
             futures = {
                 pool.submit(p.send_alert, count, error, timestamp): type(p).__name__
                 for p in self._providers
@@ -283,7 +297,8 @@ class AlertManager:
                 if elapsed < self._test_cooldown_seconds:
                     remaining = self._test_cooldown_seconds - elapsed
                     _LOG.warning(
-                        "Test alert suppressed; cooldown active (%.0f s remaining).", remaining
+                        "Test alert suppressed; cooldown active (%.0f s remaining).",
+                        remaining,
                     )
                     raise RuntimeError(
                         f"Test alert cooldown active. Try again in {remaining:.0f} seconds."
@@ -295,7 +310,9 @@ class AlertManager:
                 provider.send_alert(0, "Test alert from Argus", now)
                 _LOG.info("Test alert sent via %s.", type(provider).__name__)
             except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-exception-caught
-                _LOG.exception("Test alert via %s failed: %s", type(provider).__name__, exc)
+                _LOG.exception(
+                    "Test alert via %s failed: %s", type(provider).__name__, exc
+                )
 
     # ------------------------------------------------------------------
     # Properties

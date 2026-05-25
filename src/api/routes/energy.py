@@ -1,4 +1,5 @@
 """GET /api/energy — cumulative energy consumption per device."""
+
 from __future__ import annotations
 
 from typing import Any

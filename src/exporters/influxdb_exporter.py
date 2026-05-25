@@ -1,4 +1,5 @@
 """InfluxDB exporter — forwards snapshots to an InfluxDB v2 bucket."""
+
 from __future__ import annotations
 
 import logging
@@ -28,7 +29,9 @@ class InfluxDBExporter(BaseExporter):
             _LOG.warning("influxdb-client not installed; InfluxDB exporter disabled.")
             return None
         client: Any = InfluxDBClient(url=self._url, token=self._token, org=self._org)
-        _LOG.info("InfluxDB client initialised (url=%s, bucket=%s).", self._url, self._bucket)
+        _LOG.info(
+            "InfluxDB client initialised (url=%s, bucket=%s).", self._url, self._bucket
+        )
         return client
 
     def export(self, snapshot: PowerSnapshot) -> None:

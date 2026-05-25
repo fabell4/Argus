@@ -1,4 +1,5 @@
 """Tests for LokiExporter — URL validation, payload shape, optional retry."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -27,6 +28,7 @@ def _snap(**kwargs: object) -> PowerSnapshot:
 # ---------------------------------------------------------------------------
 # URL validation
 # ---------------------------------------------------------------------------
+
 
 def test_empty_url_raises() -> None:
     with pytest.raises(ValueError, match="required"):
@@ -77,6 +79,7 @@ def test_valid_https_url_accepted() -> None:
 # Push URL construction
 # ---------------------------------------------------------------------------
 
+
 def test_push_url_appends_path_when_missing() -> None:
     exporter = LokiExporter(url="http://loki.example.com")
     assert exporter._push_url.endswith("/loki/api/v1/push")
@@ -97,6 +100,7 @@ def test_push_url_handles_trailing_slash() -> None:
 # Payload shape
 # ---------------------------------------------------------------------------
 
+
 def _ok_response() -> MagicMock:
     mock_resp = MagicMock()
     mock_resp.status_code = 204
@@ -113,7 +117,9 @@ def _error_response(status: int = 500) -> MagicMock:
 
 def test_export_posts_to_push_url() -> None:
     exporter = LokiExporter(url="https://loki.example.com")
-    with patch("src.exporters.loki_exporter.requests.post", return_value=_ok_response()) as mock_post:
+    with patch(
+        "src.exporters.loki_exporter.requests.post", return_value=_ok_response()
+    ) as mock_post:
         exporter.export(_snap())
         mock_post.assert_called_once()
         url_called = mock_post.call_args.args[0]
@@ -122,13 +128,20 @@ def test_export_posts_to_push_url() -> None:
 
 def test_export_payload_contains_streams() -> None:
     exporter = LokiExporter(url="https://loki.example.com")
-    with patch("src.exporters.loki_exporter.requests.post", return_value=_ok_response()) as mock_post:
+    with patch(
+        "src.exporters.loki_exporter.requests.post", return_value=_ok_response()
+    ) as mock_post:
         exporter.export(_snap())
-        payload = mock_post.call_args.kwargs.get("json") or mock_post.call_args[1].get("json")
+        payload = mock_post.call_args.kwargs.get("json") or mock_post.call_args[1].get(
+            "json"
+        )
         if payload is None:
             # data= kwarg: the body was JSON-encoded bytes
-            body_bytes = mock_post.call_args.kwargs.get("data") or mock_post.call_args[1].get("data")
+            body_bytes = mock_post.call_args.kwargs.get("data") or mock_post.call_args[
+                1
+            ].get("data")
             import json as _json
+
             payload = _json.loads(body_bytes)
         assert "streams" in payload
         assert len(payload["streams"]) == 1
@@ -136,10 +149,15 @@ def test_export_payload_contains_streams() -> None:
 
 def test_export_payload_labels_include_job_and_device() -> None:
     exporter = LokiExporter(url="https://loki.example.com", job_label="argus_test")
-    with patch("src.exporters.loki_exporter.requests.post", return_value=_ok_response()) as mock_post:
+    with patch(
+        "src.exporters.loki_exporter.requests.post", return_value=_ok_response()
+    ) as mock_post:
         exporter.export(_snap(device_id="dev-1"))
         import json as _json
-        body_bytes = mock_post.call_args.kwargs.get("data") or mock_post.call_args[1].get("data")
+
+        body_bytes = mock_post.call_args.kwargs.get("data") or mock_post.call_args[
+            1
+        ].get("data")
         payload = _json.loads(body_bytes)
         labels = payload["streams"][0]["stream"]
         assert labels["job"] == "argus_test"
@@ -148,10 +166,15 @@ def test_export_payload_labels_include_job_and_device() -> None:
 
 def test_export_payload_values_are_non_empty() -> None:
     exporter = LokiExporter(url="https://loki.example.com")
-    with patch("src.exporters.loki_exporter.requests.post", return_value=_ok_response()) as mock_post:
+    with patch(
+        "src.exporters.loki_exporter.requests.post", return_value=_ok_response()
+    ) as mock_post:
         exporter.export(_snap())
         import json as _json
-        body_bytes = mock_post.call_args.kwargs.get("data") or mock_post.call_args[1].get("data")
+
+        body_bytes = mock_post.call_args.kwargs.get("data") or mock_post.call_args[
+            1
+        ].get("data")
         payload = _json.loads(body_bytes)
         values = payload["streams"][0]["values"]
         assert len(values) >= 1
@@ -162,6 +185,8 @@ def test_export_payload_values_are_non_empty() -> None:
 
 def test_export_raises_on_http_error() -> None:
     exporter = LokiExporter(url="https://loki.example.com")
-    with patch("src.exporters.loki_exporter.requests.post", return_value=_error_response(500)):
+    with patch(
+        "src.exporters.loki_exporter.requests.post", return_value=_error_response(500)
+    ):
         with pytest.raises((requests.HTTPError, RuntimeError)):
             exporter.export(_snap())

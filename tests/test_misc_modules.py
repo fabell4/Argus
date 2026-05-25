@@ -1,4 +1,5 @@
 """Tests for InfluxDB exporter, Prometheus exporter, health_server, snmp_poller, Device model."""
+
 from __future__ import annotations
 
 import json
@@ -14,7 +15,7 @@ from src.models.power_snapshot import PowerSnapshot
 from src.services.snmp_poller import SNMPv3Config
 
 # RFC 5737 TEST-NET addresses — safe for use in test code
-_TEST_HOST = "192.0.2.1"     # TEST-NET-1, never routable
+_TEST_HOST = "192.0.2.1"  # TEST-NET-1, never routable
 _TEST_HOST_2 = "192.0.2.100"  # TEST-NET-1 alternate
 
 
@@ -35,13 +36,20 @@ def _snap(**kwargs: Any) -> PowerSnapshot:
 # Device model
 # ===========================================================================
 
+
 class TestDeviceModel:
     """Tests for the Device model."""
 
     def test_to_dict_contains_all_fields(self) -> None:
         """to_dict returns all expected fields with correct values."""
-        dev = Device(id="d1", name="Test UPS", type="ups", poller="nut",
-                     host="localhost", port=3493)
+        dev = Device(
+            id="d1",
+            name="Test UPS",
+            type="ups",
+            poller="nut",
+            host="localhost",
+            port=3493,
+        )
         d = dev.to_dict()
         assert d["id"] == "d1"
         assert d["name"] == "Test UPS"
@@ -67,9 +75,18 @@ class TestDeviceModel:
 
     def test_to_dict_includes_metadata_when_set(self) -> None:
         """to_dict includes model, firmware, serial, and manufacturer when set."""
-        dev = Device(id="d1", name="n", type="ups", poller="nut", host="h", port=3493,
-                     model="SmartUPS", firmware="v1.0", serial="SN-001",
-                     manufacturer="APC")
+        dev = Device(
+            id="d1",
+            name="n",
+            type="ups",
+            poller="nut",
+            host="h",
+            port=3493,
+            model="SmartUPS",
+            firmware="v1.0",
+            serial="SN-001",
+            manufacturer="APC",
+        )
         d = dev.to_dict()
         assert d["model"] == "SmartUPS"
         assert d["serial"] == "SN-001"
@@ -84,12 +101,14 @@ class TestDeviceModel:
 # InfluxDB exporter
 # ===========================================================================
 
+
 class TestInfluxDBExporter:
     """Tests for the InfluxDB exporter."""
 
     def test_import_error_silently_disables(self) -> None:
         """InfluxDBExporter sets _client to None when influxdb_client is unavailable."""
         from src.exporters.influxdb_exporter import InfluxDBExporter
+
         with patch.dict("sys.modules", {"influxdb_client": None}):
             exp = InfluxDBExporter(
                 url="http://influxdb:8086", token="tok", org="org", bucket="bkt"
@@ -100,6 +119,7 @@ class TestInfluxDBExporter:
     def test_export_is_no_op_when_client_none(self) -> None:
         """export does not raise when _client is None (import disabled)."""
         from src.exporters.influxdb_exporter import InfluxDBExporter
+
         with patch.dict("sys.modules", {"influxdb_client": None}):
             exp = InfluxDBExporter(
                 url="http://influxdb:8086", token="tok", org="org", bucket="bkt"
@@ -110,6 +130,7 @@ class TestInfluxDBExporter:
     def test_export_calls_write_api(self) -> None:
         """export calls write_api.write with the InfluxDB Point."""
         from src.exporters.influxdb_exporter import InfluxDBExporter
+
         mock_point = MagicMock()
         mock_point.tag.return_value = mock_point
         mock_point.field.return_value = mock_point
@@ -124,11 +145,14 @@ class TestInfluxDBExporter:
         mock_write_api_module = MagicMock()
         mock_write_api_module.SYNCHRONOUS = "SYNCHRONOUS"
 
-        with patch.dict("sys.modules", {
-            "influxdb_client": mock_influxdb,
-            "influxdb_client.client": MagicMock(),
-            "influxdb_client.client.write_api": mock_write_api_module,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "influxdb_client": mock_influxdb,
+                "influxdb_client.client": MagicMock(),
+                "influxdb_client.client.write_api": mock_write_api_module,
+            },
+        ):
             exp = InfluxDBExporter(
                 url="http://influxdb:8086", token="tok", org="org", bucket="bkt"
             )
@@ -141,12 +165,14 @@ class TestInfluxDBExporter:
 # Prometheus exporter
 # ===========================================================================
 
+
 class TestPrometheusExporter:
     """Tests for the Prometheus exporter."""
 
     def test_export_is_no_op_when_prometheus_unavailable(self) -> None:
         """export does not raise when prometheus_client is unavailable."""
         from src.exporters.prometheus_exporter import PrometheusExporter
+
         with patch.dict("sys.modules", {"prometheus_client": None}):
             exp = PrometheusExporter(port=9200)
         # _gauges should be None/empty when module missing
@@ -155,6 +181,7 @@ class TestPrometheusExporter:
     def test_export_calls_set_on_gauges(self) -> None:
         """export calls Gauge.set for each metric in the snapshot."""
         from src.exporters.prometheus_exporter import PrometheusExporter
+
         mock_gauge = MagicMock()
         mock_gauge.labels.return_value = mock_gauge
         mock_pc = MagicMock()
@@ -171,6 +198,7 @@ class TestPrometheusExporter:
 # ===========================================================================
 # Health server
 # ===========================================================================
+
 
 class TestHealthServer:
     """Tests for the HealthServer and its HTTP handler."""
@@ -218,7 +246,9 @@ class TestHealthServer:
 
     def test_health_degraded_returns_503(self) -> None:
         """A degraded status function causes /health to return HTTP 503."""
-        code, _ = self._make_request("/health", status_fn=lambda: {"status": "degraded"})
+        code, _ = self._make_request(
+            "/health", status_fn=lambda: {"status": "degraded"}
+        )
         assert code == 503
 
     def test_unknown_path_returns_404(self) -> None:
@@ -229,6 +259,7 @@ class TestHealthServer:
     def test_start_spawns_daemon_thread(self) -> None:
         """HealthServer.start spawns a daemon thread for the HTTP server."""
         from src.services.health_server import HealthServer
+
         with patch("src.services.health_server.HTTPServer") as mock_server_cls:
             mock_server = MagicMock()
             mock_server_cls.return_value = mock_server
@@ -242,15 +273,24 @@ class TestHealthServer:
 # SNMP poller
 # ===========================================================================
 
+
 class TestSNMPPoller:
     """Tests for the SNMP poller."""
 
     def test_poll_returns_empty_snapshot_when_pysnmp_missing(self) -> None:
         """_build_snapshot returns a skeleton snapshot when pysnmp is not installed."""
         from src.services.snmp_poller import SNMPPoller
+
         poller = SNMPPoller(host=_TEST_HOST)
-        with patch.dict("sys.modules", {"pysnmp": None, "pysnmp.hlapi": None,
-                                         "pysnmp.proto": None, "pysnmp.proto.rfc1905": None}):
+        with patch.dict(
+            "sys.modules",
+            {
+                "pysnmp": None,
+                "pysnmp.hlapi": None,
+                "pysnmp.proto": None,
+                "pysnmp.proto.rfc1905": None,
+            },
+        ):
             snapshot = poller._build_snapshot({})  # noqa: SLF001
         assert snapshot.device_id == f"snmp:{_TEST_HOST}:161"
         assert snapshot.power_watts is None
@@ -258,11 +298,12 @@ class TestSNMPPoller:
     def test_build_snapshot_maps_known_oids(self) -> None:
         """_build_snapshot correctly maps UPS-MIB OIDs to snapshot fields."""
         from src.services.snmp_poller import SNMPPoller, _UPS_MIB
+
         poller = SNMPPoller(host=_TEST_HOST, oids=_UPS_MIB)
         raw = {
-            "1.3.6.1.2.1.33.1.4.4.1.5.1": "50",   # load_percent
+            "1.3.6.1.2.1.33.1.4.4.1.5.1": "50",  # load_percent
             "1.3.6.1.2.1.33.1.4.4.1.4.1": "200",  # power_watts
-            "1.3.6.1.2.1.33.1.2.3.0": "10",       # runtime_seconds (minutes→×60)
+            "1.3.6.1.2.1.33.1.2.3.0": "10",  # runtime_seconds (minutes→×60)
         }
         snapshot = poller._build_snapshot(raw)  # noqa: SLF001
         assert snapshot.load_percent == pytest.approx(50.0)
@@ -272,6 +313,7 @@ class TestSNMPPoller:
     def test_build_snapshot_ignores_non_numeric_values(self) -> None:
         """_build_snapshot leaves fields None when an OID value is non-numeric."""
         from src.services.snmp_poller import SNMPPoller
+
         poller = SNMPPoller(host=_TEST_HOST)
         raw = {"1.3.6.1.2.1.33.1.4.4.1.5.1": "N/A"}
         snapshot = poller._build_snapshot(raw)  # noqa: SLF001
@@ -280,18 +322,21 @@ class TestSNMPPoller:
     def test_default_device_id_from_host(self) -> None:
         """The default device_id includes the host address."""
         from src.services.snmp_poller import SNMPPoller
+
         poller = SNMPPoller(host=_TEST_HOST_2)
         assert _TEST_HOST_2 in poller._device_id  # noqa: SLF001
 
     def test_custom_device_id_used(self) -> None:
         """A custom device_id is stored verbatim in the poller."""
         from src.services.snmp_poller import SNMPPoller
+
         poller = SNMPPoller(host=_TEST_HOST, device_id="pdu:rack1")
         assert poller._device_id == "pdu:rack1"  # noqa: SLF001
 
     def test_poll_retries_on_os_error(self) -> None:
         """poll retries once on OSError and re-raises after exhausting retries."""
         from src.services.snmp_poller import SNMPPoller
+
         poller = SNMPPoller(host=_TEST_HOST, max_retries=1)
         call_count = 0
 
@@ -308,19 +353,23 @@ class TestSNMPPoller:
     def test_snmp_get_returns_empty_dict_when_pysnmp_unavailable(self) -> None:
         """_snmp_get returns {} when pysnmp is not installed."""
         from src.services.snmp_poller import SNMPPoller
+
         poller = SNMPPoller(host=_TEST_HOST)
-        with patch.dict("sys.modules", {
-            "pysnmp": None,
-            "pysnmp.hlapi": None,
-            "pysnmp.proto": None,
-            "pysnmp.proto.rfc1905": None,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "pysnmp": None,
+                "pysnmp.hlapi": None,
+                "pysnmp.proto": None,
+                "pysnmp.proto.rfc1905": None,
+            },
+        ):
             result = poller._snmp_get(["1.3.6.1.2.1.1.1.0"])  # noqa: SLF001
         assert result == {}
 
     def test_snmp_get_with_mocked_pysnmp(self) -> None:
         """Test the main code path of _snmp_get when pysnmp is available (mocked)."""
-        from src.services.snmp_poller import SNMPPoller, _UPS_MIB
+        from src.services.snmp_poller import SNMPPoller
 
         oid = "1.3.6.1.2.1.33.1.4.4.1.4.1"
 
@@ -335,7 +384,9 @@ class TestSNMPPoller:
 
         # getCmd returns (error_indication=None, error_status=None, error_index, var_binds)
         # iter(next(...)) yields one item
-        mock_get_cmd = MagicMock(return_value=iter([(None, None, None, [mock_var_bind])]))
+        mock_get_cmd = MagicMock(
+            return_value=iter([(None, None, None, [mock_var_bind])])
+        )
 
         mock_no_such_obj = type("noSuchObject", (), {})  # distinct type
 
@@ -352,12 +403,15 @@ class TestSNMPPoller:
         mock_rfc1905 = MagicMock()
         mock_rfc1905.noSuchObject = mock_no_such_obj()
 
-        with patch.dict("sys.modules", {
-            "pysnmp": MagicMock(),
-            "pysnmp.hlapi": mock_hlapi,
-            "pysnmp.proto": MagicMock(),
-            "pysnmp.proto.rfc1905": mock_rfc1905,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "pysnmp": MagicMock(),
+                "pysnmp.hlapi": mock_hlapi,
+                "pysnmp.proto": MagicMock(),
+                "pysnmp.proto.rfc1905": mock_rfc1905,
+            },
+        ):
             poller = SNMPPoller(host=_TEST_HOST, community="public")
             snmp_result = poller._snmp_get([oid])  # noqa: SLF001
 
@@ -380,12 +434,15 @@ class TestSNMPPoller:
         mock_hlapi.usmNoPrivProtocol = "NONE_PRIV"
         mock_hlapi.UsmUserData = mock_usm
 
-        with patch.dict("sys.modules", {
-            "pysnmp": MagicMock(),
-            "pysnmp.hlapi": mock_hlapi,
-            "pysnmp.proto": MagicMock(),
-            "pysnmp.proto.rfc1905": MagicMock(),
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "pysnmp": MagicMock(),
+                "pysnmp.hlapi": mock_hlapi,
+                "pysnmp.proto": MagicMock(),
+                "pysnmp.proto.rfc1905": MagicMock(),
+            },
+        ):
             poller = SNMPPoller(
                 host=_TEST_HOST,
                 v3_config=SNMPv3Config(
@@ -416,12 +473,15 @@ class TestSNMPPoller:
         )
         mock_rfc1905 = MagicMock()
 
-        with patch.dict("sys.modules", {
-            "pysnmp": MagicMock(),
-            "pysnmp.hlapi": mock_hlapi,
-            "pysnmp.proto": MagicMock(),
-            "pysnmp.proto.rfc1905": mock_rfc1905,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "pysnmp": MagicMock(),
+                "pysnmp.hlapi": mock_hlapi,
+                "pysnmp.proto": MagicMock(),
+                "pysnmp.proto.rfc1905": mock_rfc1905,
+            },
+        ):
             poller = SNMPPoller(host=_TEST_HOST, community="public")
             result = poller._snmp_get(["1.3.6.1.2.1.1.1.0"])  # noqa: SLF001
 
@@ -462,12 +522,15 @@ class TestSNMPPoller:
         mock_rfc1905 = MagicMock()
         mock_rfc1905.noSuchObject = type("noSuchObject", (), {})()
 
-        with patch.dict("sys.modules", {
-            "pysnmp": MagicMock(),
-            "pysnmp.hlapi": mock_hlapi,
-            "pysnmp.proto": MagicMock(),
-            "pysnmp.proto.rfc1905": mock_rfc1905,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "pysnmp": MagicMock(),
+                "pysnmp.hlapi": mock_hlapi,
+                "pysnmp.proto": MagicMock(),
+                "pysnmp.proto.rfc1905": mock_rfc1905,
+            },
+        ):
             poller = SNMPPoller(
                 host=_TEST_HOST,
                 v3_config=SNMPv3Config(
@@ -496,12 +559,15 @@ class TestSNMPPoller:
         mock_hlapi.getCmd = MagicMock(return_value=iter([(None, None, None, [])]))
         mock_rfc1905 = MagicMock()
 
-        with patch.dict("sys.modules", {
-            "pysnmp": MagicMock(),
-            "pysnmp.hlapi": mock_hlapi,
-            "pysnmp.proto": MagicMock(),
-            "pysnmp.proto.rfc1905": mock_rfc1905,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "pysnmp": MagicMock(),
+                "pysnmp.hlapi": mock_hlapi,
+                "pysnmp.proto": MagicMock(),
+                "pysnmp.proto.rfc1905": mock_rfc1905,
+            },
+        ):
             poller = SNMPPoller(host=_TEST_HOST, version="1", community="public")
             poller._snmp_get(["1.3.6.1.2.1.1.1.0"])  # noqa: SLF001
 
@@ -514,13 +580,18 @@ class TestSNMPPoller:
 
         mock_usm = MagicMock(return_value=MagicMock())
         # Simulate ImportError inside _build_v3_auth by hiding the pysnmp.hlapi attrs
-        with patch.dict("sys.modules", {
-            "pysnmp": MagicMock(),
-            "pysnmp.hlapi": None,  # type: ignore[assignment]
-            "pysnmp.proto": MagicMock(),
-            "pysnmp.proto.rfc1905": MagicMock(),
-        }):
-            poller = SNMPPoller(host=_TEST_HOST, v3_config=SNMPv3Config(username="admin"))
+        with patch.dict(
+            "sys.modules",
+            {
+                "pysnmp": MagicMock(),
+                "pysnmp.hlapi": None,  # type: ignore[assignment]
+                "pysnmp.proto": MagicMock(),
+                "pysnmp.proto.rfc1905": MagicMock(),
+            },
+        ):
+            poller = SNMPPoller(
+                host=_TEST_HOST, v3_config=SNMPv3Config(username="admin")
+            )
             result = poller._build_v3_auth(mock_usm)  # noqa: SLF001
 
         # Fallback path: UsmUserData called with just the username
@@ -536,6 +607,7 @@ class TestSNMPPoller:
 def test_build_influxdb_returns_none_when_url_missing() -> None:
     """_build_influxdb returns None and logs a warning when INFLUXDB_URL is unset."""
     from src.exporter_registry import _build_influxdb
+
     with patch("src.exporter_registry.config") as mock_cfg:
         mock_cfg.INFLUXDB_URL = ""
         mock_cfg.INFLUXDB_TOKEN = "some-token"
@@ -546,6 +618,7 @@ def test_build_influxdb_returns_none_when_url_missing() -> None:
 def test_build_influxdb_returns_none_when_token_missing() -> None:
     """_build_influxdb returns None and logs a warning when INFLUXDB_TOKEN is unset."""
     from src.exporter_registry import _build_influxdb
+
     with patch("src.exporter_registry.config") as mock_cfg:
         mock_cfg.INFLUXDB_URL = "http://influxdb:8086"
         mock_cfg.INFLUXDB_TOKEN = ""
@@ -556,6 +629,7 @@ def test_build_influxdb_returns_none_when_token_missing() -> None:
 def test_build_loki_returns_none_when_url_missing() -> None:
     """_build_loki returns None and logs a warning when LOKI_URL is unset."""
     from src.exporter_registry import _build_loki
+
     with patch("src.exporter_registry.config") as mock_cfg:
         mock_cfg.LOKI_URL = ""
         result = _build_loki()
@@ -590,17 +664,18 @@ def test_snmp_get_error_indication_path() -> None:
     mock_hlapi.UdpTransportTarget = MagicMock(return_value=MagicMock())
     mock_hlapi.UsmUserData = MagicMock(return_value=MagicMock())
     # Truthy error_indication, falsy error_status
-    mock_hlapi.getCmd = MagicMock(
-        return_value=iter([("Timeout", None, None, [])])
-    )
+    mock_hlapi.getCmd = MagicMock(return_value=iter([("Timeout", None, None, [])]))
     mock_rfc1905 = MagicMock()
 
-    with patch.dict("sys.modules", {
-        "pysnmp": MagicMock(),
-        "pysnmp.hlapi": mock_hlapi,
-        "pysnmp.proto": MagicMock(),
-        "pysnmp.proto.rfc1905": mock_rfc1905,
-    }):
+    with patch.dict(
+        "sys.modules",
+        {
+            "pysnmp": MagicMock(),
+            "pysnmp.hlapi": mock_hlapi,
+            "pysnmp.proto": MagicMock(),
+            "pysnmp.proto.rfc1905": mock_rfc1905,
+        },
+    ):
         poller = SNMPPoller(host=_TEST_HOST, community="public")
         result = poller._snmp_get(["1.3.6.1.2.1.1.1.0"])  # noqa: SLF001
 
@@ -634,12 +709,15 @@ def test_snmp_get_no_such_object_skipped() -> None:
     mock_rfc1905 = MagicMock()
     mock_rfc1905.noSuchObject = no_such_instance
 
-    with patch.dict("sys.modules", {
-        "pysnmp": MagicMock(),
-        "pysnmp.hlapi": mock_hlapi,
-        "pysnmp.proto": MagicMock(),
-        "pysnmp.proto.rfc1905": mock_rfc1905,
-    }):
+    with patch.dict(
+        "sys.modules",
+        {
+            "pysnmp": MagicMock(),
+            "pysnmp.hlapi": mock_hlapi,
+            "pysnmp.proto": MagicMock(),
+            "pysnmp.proto.rfc1905": mock_rfc1905,
+        },
+    ):
         poller = SNMPPoller(host=_TEST_HOST, community="public")
         result = poller._snmp_get(["1.3.6.1.2.1.1.1.0"])  # noqa: SLF001
 

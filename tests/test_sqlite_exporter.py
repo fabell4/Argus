@@ -1,4 +1,5 @@
 """Integration tests for SQLiteExporter — schema, write, and retention pruning."""
+
 from __future__ import annotations
 
 import sqlite3
@@ -13,6 +14,7 @@ from src.models.power_snapshot import PowerSnapshot
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_snapshot(
     device_id: str = "nut:ups@localhost",
@@ -62,6 +64,7 @@ def _insert_event_at(db_path: str, ts: datetime) -> None:
 # Schema
 # ---------------------------------------------------------------------------
 
+
 class TestSchema:
     def test_tables_created(self, tmp_path: pytest.TempPathFactory) -> None:
         db_path = str(tmp_path / "argus.db")
@@ -100,6 +103,7 @@ class TestSchema:
 # ---------------------------------------------------------------------------
 # Export writes
 # ---------------------------------------------------------------------------
+
 
 class TestExport:
     def test_export_writes_row(self, tmp_path: pytest.TempPathFactory) -> None:
@@ -150,6 +154,7 @@ class TestExport:
 # Prune by age — snapshots
 # ---------------------------------------------------------------------------
 
+
 class TestPruneByAge:
     def test_old_snapshots_pruned(self, tmp_path: pytest.TempPathFactory) -> None:
         """Snapshot older than retention_days is deleted on the next export call."""
@@ -164,8 +169,7 @@ class TestPruneByAge:
 
         with sqlite3.connect(db_path) as conn:
             remaining_ids = {
-                row[0]
-                for row in conn.execute("SELECT device_id FROM power_snapshots")
+                row[0] for row in conn.execute("SELECT device_id FROM power_snapshots")
             }
         assert "old-ups" not in remaining_ids
         assert "new-ups" in remaining_ids
@@ -222,8 +226,7 @@ class TestPruneByAge:
 
         with sqlite3.connect(db_path) as conn:
             remaining_ids = {
-                row[0]
-                for row in conn.execute("SELECT device_id FROM power_snapshots")
+                row[0] for row in conn.execute("SELECT device_id FROM power_snapshots")
             }
         # The boundary row (before the cutoff) must have been pruned
         assert "boundary-ups" not in remaining_ids
@@ -262,6 +265,7 @@ class TestPruneByAge:
 # ---------------------------------------------------------------------------
 # Prune by age — events
 # ---------------------------------------------------------------------------
+
 
 class TestPruneEventsByAge:
     def test_old_events_pruned(self, tmp_path: pytest.TempPathFactory) -> None:
@@ -305,6 +309,7 @@ class TestPruneEventsByAge:
 # Prune by max_rows — snapshots
 # ---------------------------------------------------------------------------
 
+
 class TestPruneByMaxRows:
     def test_excess_rows_removed_to_max(self, tmp_path: pytest.TempPathFactory) -> None:
         """After export, row count must not exceed max_rows."""
@@ -336,8 +341,7 @@ class TestPruneByMaxRows:
         assert _row_count(db_path) == max_rows
         with sqlite3.connect(db_path) as conn:
             remaining = {
-                row[0]
-                for row in conn.execute("SELECT device_id FROM power_snapshots")
+                row[0] for row in conn.execute("SELECT device_id FROM power_snapshots")
             }
         assert "ups0" not in remaining
         assert "ups1" not in remaining
@@ -373,7 +377,9 @@ class TestPruneByMaxRows:
         # 3 old rows (will be age-pruned) + 4 recent rows (will remain)
         old_ts = datetime.now(timezone.utc) - timedelta(days=60)
         for i in range(3):
-            _insert_snapshot_at(db_path, old_ts + timedelta(hours=i), device_id=f"old{i}")
+            _insert_snapshot_at(
+                db_path, old_ts + timedelta(hours=i), device_id=f"old{i}"
+            )
 
         recent_base = datetime.now(timezone.utc) - timedelta(hours=4)
         for i in range(4):
@@ -389,8 +395,7 @@ class TestPruneByMaxRows:
 
         with sqlite3.connect(db_path) as conn:
             remaining = {
-                row[0]
-                for row in conn.execute("SELECT device_id FROM power_snapshots")
+                row[0] for row in conn.execute("SELECT device_id FROM power_snapshots")
             }
         # All old rows must be gone (age-pruned)
         for i in range(3):

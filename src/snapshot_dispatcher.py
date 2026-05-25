@@ -1,4 +1,5 @@
 """Fans out a PowerSnapshot to all registered exporters."""
+
 from __future__ import annotations
 
 import logging

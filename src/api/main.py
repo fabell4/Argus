@@ -6,6 +6,7 @@ Serves:
 - REST API under /api/
 - React SPA static files from frontend/dist
 """
+
 from __future__ import annotations
 
 import logging
@@ -32,6 +33,7 @@ _MAX_REQUEST_BYTES = 1 * 1024 * 1024  # 1 MB
 # Middleware
 # ---------------------------------------------------------------------------
 
+
 class _RequestSizeLimitMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next: Any) -> Response:
         content_length = request.headers.get("content-length")
@@ -47,7 +49,9 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["Permissions-Policy"] = (
+            "geolocation=(), microphone=(), camera=()"
+        )
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; "
             "script-src 'self'; "
@@ -65,6 +69,7 @@ class _SecurityHeadersMiddleware(BaseHTTPMiddleware):
 # ---------------------------------------------------------------------------
 # App factory
 # ---------------------------------------------------------------------------
+
 
 @asynccontextmanager
 async def _lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
@@ -108,6 +113,7 @@ def create_app() -> FastAPI:
     @application.get("/api/health", tags=["health"])
     def health() -> dict[str, Any]:
         from src import runtime_config
+
         return {
             "status": "ok",
             "service": "argus-api",
@@ -120,8 +126,11 @@ def create_app() -> FastAPI:
 
     # Serve React SPA
     import os
+
     if os.path.isdir(_STATIC_DIR):
-        application.mount("/assets", StaticFiles(directory=f"{_STATIC_DIR}/assets"), name="assets")
+        application.mount(
+            "/assets", StaticFiles(directory=f"{_STATIC_DIR}/assets"), name="assets"
+        )
 
         @application.get("/{full_path:path}", include_in_schema=False)
         def spa_fallback(full_path: str) -> FileResponse:

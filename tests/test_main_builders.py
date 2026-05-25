@@ -1,4 +1,5 @@
 """Tests for src.main builder functions, _build_health_status, _get_ups_names, etc."""
+
 from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
@@ -8,9 +9,11 @@ from unittest.mock import MagicMock, patch
 # types module — trivial import coverage
 # ===========================================================================
 
+
 def test_types_module_importable() -> None:
     """Verify that JsonDict is importable and usable from src.types."""
     from src.types import JsonDict
+
     d: JsonDict = {"key": "value"}
     assert d["key"] == "value"
 
@@ -19,13 +22,17 @@ def test_types_module_importable() -> None:
 # build_dispatcher
 # ===========================================================================
 
+
 def test_build_dispatcher_adds_enabled_exporters() -> None:
     """Enabled exporters from runtime config are added to the dispatcher."""
     from src import main as main_mod
+
     mock_exporter = MagicMock()
     mock_factory = MagicMock(return_value=mock_exporter)
 
-    with patch("src.main.runtime_config.get_enabled_exporters", return_value=["sqlite"]):
+    with patch(
+        "src.main.runtime_config.get_enabled_exporters", return_value=["sqlite"]
+    ):
         with patch("src.main.EXPORTER_REGISTRY", {"sqlite": mock_factory}):
             dispatcher = main_mod.build_dispatcher()
 
@@ -35,7 +42,10 @@ def test_build_dispatcher_adds_enabled_exporters() -> None:
 def test_build_dispatcher_skips_unknown_exporter() -> None:
     """Unknown exporter names are silently skipped by build_dispatcher."""
     from src import main as main_mod
-    with patch("src.main.runtime_config.get_enabled_exporters", return_value=["nonexistent"]):
+
+    with patch(
+        "src.main.runtime_config.get_enabled_exporters", return_value=["nonexistent"]
+    ):
         with patch("src.main.EXPORTER_REGISTRY", {}):
             dispatcher = main_mod.build_dispatcher()
 
@@ -45,6 +55,7 @@ def test_build_dispatcher_skips_unknown_exporter() -> None:
 def test_build_dispatcher_skips_none_factory_result() -> None:
     """A factory returning None does not add an exporter to the dispatcher."""
     from src import main as main_mod
+
     mock_factory = MagicMock(return_value=None)
     with patch("src.main.runtime_config.get_enabled_exporters", return_value=["csv"]):
         with patch("src.main.EXPORTER_REGISTRY", {"csv": mock_factory}):
@@ -56,6 +67,7 @@ def test_build_dispatcher_skips_none_factory_result() -> None:
 # ===========================================================================
 # build_alert_manager
 # ===========================================================================
+
 
 def test_build_alert_manager_returns_alert_manager() -> None:
     """build_alert_manager returns an AlertManager instance."""
@@ -82,6 +94,7 @@ def test_build_alert_manager_calls_register_all_providers() -> None:
 # build_scheduler
 # ===========================================================================
 
+
 def test_build_scheduler_creates_background_scheduler() -> None:
     """build_scheduler returns a BackgroundScheduler instance."""
     from src import main as main_mod
@@ -104,9 +117,11 @@ def test_build_scheduler_adds_argus_poll_job() -> None:
 # _get_ups_names
 # ===========================================================================
 
+
 def test_get_ups_names_returns_config_name_when_auto_discover_false() -> None:
     """_get_ups_names returns the configured name when auto-discover is disabled."""
     from src import main as main_mod
+
     mock_poller = MagicMock()
 
     with patch("src.main.config.NUT_AUTO_DISCOVER", False):
@@ -119,6 +134,7 @@ def test_get_ups_names_returns_config_name_when_auto_discover_false() -> None:
 def test_get_ups_names_uses_list_ups_when_auto_discover_true() -> None:
     """_get_ups_names calls list_ups when auto-discover is enabled."""
     from src import main as main_mod
+
     mock_poller = MagicMock()
     mock_poller.list_ups.return_value = ["ups1", "ups2"]
 
@@ -131,6 +147,7 @@ def test_get_ups_names_uses_list_ups_when_auto_discover_true() -> None:
 def test_get_ups_names_falls_back_on_empty_list() -> None:
     """_get_ups_names falls back to the configured name when list_ups returns empty."""
     from src import main as main_mod
+
     mock_poller = MagicMock()
     mock_poller.list_ups.return_value = []
 
@@ -144,6 +161,7 @@ def test_get_ups_names_falls_back_on_empty_list() -> None:
 def test_get_ups_names_falls_back_on_exception() -> None:
     """_get_ups_names falls back to the configured name when list_ups raises."""
     from src import main as main_mod
+
     mock_poller = MagicMock()
     mock_poller.list_ups.side_effect = OSError("Connection refused")
 
@@ -158,9 +176,11 @@ def test_get_ups_names_falls_back_on_exception() -> None:
 # _build_health_status
 # ===========================================================================
 
+
 def test_build_health_status_contains_expected_keys() -> None:
     """_build_health_status response contains status, scheduler_running, and scheduler_paused."""
     import src.main as main_mod
+
     main_mod._scheduler_status = {"status": "ok"}
     main_mod._scheduler = None  # no scheduler
 
@@ -177,6 +197,7 @@ def test_build_health_status_contains_expected_keys() -> None:
 def test_build_health_status_reflects_scheduler_running() -> None:
     """scheduler_running is True when the scheduler reports running=True."""
     import src.main as main_mod
+
     mock_scheduler = MagicMock()
     mock_scheduler.running = True
     main_mod._scheduler = mock_scheduler
@@ -195,9 +216,11 @@ def test_build_health_status_reflects_scheduler_running() -> None:
 # _validate_environment
 # ===========================================================================
 
+
 def test_validate_environment_skips_empty_urls() -> None:
     """_validate_environment skips socket checks when all provider URLs are empty."""
     import src.main as main_mod
+
     # Should not call socket.create_connection when all URLs are empty
     with patch("src.main.config.WEBHOOK_URL", ""):
         with patch("src.main.config.GOTIFY_URL", ""):
@@ -211,11 +234,14 @@ def test_validate_environment_skips_empty_urls() -> None:
 def test_validate_environment_warns_on_unreachable_url() -> None:
     """_validate_environment logs a warning but does not raise on unreachable URL."""
     import src.main as main_mod
+
     with patch("src.main.config.WEBHOOK_URL", "http://unreachable.example.com"):
         with patch("src.main.config.GOTIFY_URL", ""):
             with patch("src.main.config.NTFY_URL", ""):
                 with patch("src.main.config.APPRISE_URL", ""):
-                    with patch("socket.create_connection", side_effect=OSError("refused")):
+                    with patch(
+                        "socket.create_connection", side_effect=OSError("refused")
+                    ):
                         # Should not raise — just warn
                         main_mod._validate_environment()
 
@@ -224,9 +250,11 @@ def test_validate_environment_warns_on_unreachable_url() -> None:
 # exporter_registry factory functions
 # ===========================================================================
 
+
 def test_exporter_registry_csv_factory() -> None:
     """The csv factory in EXPORTER_REGISTRY returns a non-None exporter."""
     from src.exporter_registry import EXPORTER_REGISTRY
+
     factory = EXPORTER_REGISTRY.get("csv")
     assert factory is not None
     result = factory()
@@ -236,7 +264,10 @@ def test_exporter_registry_csv_factory() -> None:
 def test_exporter_registry_energy_factory() -> None:
     """The energy factory in EXPORTER_REGISTRY returns a non-None exporter."""
     from src.exporter_registry import EXPORTER_REGISTRY
-    with patch("src.exporters.energy_accumulator.EnergyAccumulatorExporter._init_prometheus"):
+
+    with patch(
+        "src.exporters.energy_accumulator.EnergyAccumulatorExporter._init_prometheus"
+    ):
         factory = EXPORTER_REGISTRY.get("energy")
         assert factory is not None
         result = factory()
@@ -246,6 +277,7 @@ def test_exporter_registry_energy_factory() -> None:
 def test_exporter_registry_loki_factory_when_url_set() -> None:
     """The loki factory is present in EXPORTER_REGISTRY when a URL is configured."""
     from src.exporter_registry import EXPORTER_REGISTRY
+
     with patch("src.config.LOKI_URL", "http://loki.example.com"):
         factory = EXPORTER_REGISTRY.get("loki")
         assert factory is not None
@@ -254,6 +286,7 @@ def test_exporter_registry_loki_factory_when_url_set() -> None:
 def test_exporter_registry_influxdb_factory_when_url_set() -> None:
     """The influxdb factory is present in EXPORTER_REGISTRY when credentials are configured."""
     from src.exporter_registry import EXPORTER_REGISTRY
+
     with patch("src.config.INFLUXDB_URL", "http://influxdb:8086"):
         with patch("src.config.INFLUXDB_TOKEN", "tok"):
             with patch("src.config.INFLUXDB_ORG", "org"):
@@ -265,6 +298,7 @@ def test_exporter_registry_influxdb_factory_when_url_set() -> None:
 # ===========================================================================
 # _poll_once_for_changes
 # ===========================================================================
+
 
 def test_poll_once_for_changes_calls_poll_once_on_trigger() -> None:
     """_poll_once_for_changes calls poll_once when a trigger is pending."""
@@ -279,6 +313,7 @@ def test_poll_once_for_changes_calls_poll_once_on_trigger() -> None:
 def test_poll_once_for_changes_pauses_scheduler() -> None:
     """_poll_once_for_changes pauses a running scheduler when the paused flag is set."""
     import src.main as main_mod
+
     mock_scheduler = MagicMock()
     mock_scheduler.running = True
     mock_scheduler.state = 1  # STATE_RUNNING
@@ -295,6 +330,7 @@ def test_poll_once_for_changes_pauses_scheduler() -> None:
 def test_poll_once_for_changes_resumes_scheduler() -> None:
     """_poll_once_for_changes resumes a paused scheduler when the paused flag is cleared."""
     import src.main as main_mod
+
     mock_scheduler = MagicMock()
     mock_scheduler.running = True
     mock_scheduler.state = 2  # STATE_PAUSED
@@ -311,6 +347,7 @@ def test_poll_once_for_changes_resumes_scheduler() -> None:
 # ===========================================================================
 # poll_once (simplified integration)
 # ===========================================================================
+
 
 def test_poll_once_records_success_on_good_snapshot() -> None:
     """poll_once calls record_success on the alert manager after a successful poll."""
@@ -341,6 +378,7 @@ def test_poll_once_records_success_on_good_snapshot() -> None:
 def test_poll_once_records_failure_when_no_snapshots() -> None:
     """poll_once calls record_failure on the alert manager when no snapshot is returned."""
     import src.main as main_mod
+
     mock_manager = MagicMock()
 
     with patch("src.main._get_ups_names", return_value=["ups"]):
@@ -401,6 +439,7 @@ def test_poll_single_device_failure_path_returns_none() -> None:
         from datetime import datetime, timezone
         from src.models.event import PowerEvent
         from src.constants import EventType
+
         offline_event = PowerEvent(
             timestamp=datetime.now(timezone.utc),
             device_id="nut:ups@localhost",
@@ -450,6 +489,7 @@ def test_poll_single_device_dispatch_error_logged() -> None:
 def test_record_events_with_alert_manager_no_manager_returns_early() -> None:
     """When _alert_manager is None, _record_events_with_alert_manager is a no-op."""
     import src.main as main_mod
+
     main_mod._alert_manager = None  # noqa: SLF001
     # Should not raise
     main_mod._record_events_with_alert_manager([])  # noqa: SLF001

@@ -34,9 +34,7 @@ class LokiExporter(BaseExporter):
         parsed = urlparse(stripped)
 
         if parsed.scheme not in ("http", "https"):
-            raise ValueError(
-                f"Loki URL must use http or https, got: '{parsed.scheme}'"
-            )
+            raise ValueError(f"Loki URL must use http or https, got: '{parsed.scheme}'")
 
         if not parsed.hostname:
             raise ValueError("Loki URL must include a hostname")
@@ -80,9 +78,7 @@ class LokiExporter(BaseExporter):
         }
 
     def _build_payload(self, snapshot: PowerSnapshot) -> dict[str, Any]:
-        line = json.dumps(
-            snapshot.to_dict(), ensure_ascii=False, separators=(",", ":")
-        )
+        line = json.dumps(snapshot.to_dict(), ensure_ascii=False, separators=(",", ":"))
         return {
             "streams": [
                 {

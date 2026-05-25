@@ -9,6 +9,7 @@ Responsibilities:
 - Track poll failures and fire alerts when threshold is exceeded
 - React to runtime config changes (interval, exporters, manual trigger, pause)
 """
+
 from __future__ import annotations
 
 import logging
@@ -49,6 +50,7 @@ _scheduler_status: dict[str, Any] = {"status": "starting"}
 # ---------------------------------------------------------------------------
 # Builder helpers
 # ---------------------------------------------------------------------------
+
 
 def build_dispatcher() -> SnapshotDispatcher:
     """Build a SnapshotDispatcher populated with all currently enabled exporters."""
@@ -91,6 +93,7 @@ def build_scheduler(interval_minutes: int) -> BackgroundScheduler:
 # Core poll cycle
 # ---------------------------------------------------------------------------
 
+
 def _get_ups_names(discovery_poller: NUTPoller) -> list[str]:
     """Return the list of UPS names to poll, using auto-discovery when enabled."""
     if not config.NUT_AUTO_DISCOVER:
@@ -98,11 +101,15 @@ def _get_ups_names(discovery_poller: NUTPoller) -> list[str]:
     try:
         ups_names = discovery_poller.list_ups()
         if not ups_names:
-            _LOG.warning("NUT auto-discover returned no devices; falling back to NUT_UPS_NAME.")
+            _LOG.warning(
+                "NUT auto-discover returned no devices; falling back to NUT_UPS_NAME."
+            )
             return [config.NUT_UPS_NAME]
         return ups_names
     except (OSError, RuntimeError) as exc:
-        _LOG.warning("NUT auto-discover failed (%s); falling back to NUT_UPS_NAME.", exc)
+        _LOG.warning(
+            "NUT auto-discover failed (%s); falling back to NUT_UPS_NAME.", exc
+        )
         return [config.NUT_UPS_NAME]
 
 
@@ -120,25 +127,29 @@ def _poll_single_device(
     )
     try:
         snapshot, metadata = poller.poll_with_metadata()
-        upsert_device({
-            "id": device_id,
-            "name": metadata.get("ups.model") or ups_name,
-            "type": DeviceType.UPS,
-            "poller": PollerType.NUT,
-            "host": config.NUT_HOST,
-            "port": config.NUT_PORT,
-            "enabled": True,
-            "model": metadata.get("ups.model"),
-            "firmware": metadata.get("ups.firmware"),
-            "serial": metadata.get("ups.serial"),
-            "manufacturer": metadata.get("ups.mfr"),
-            "last_seen": snapshot.timestamp.isoformat(),
-        })
+        upsert_device(
+            {
+                "id": device_id,
+                "name": metadata.get("ups.model") or ups_name,
+                "type": DeviceType.UPS,
+                "poller": PollerType.NUT,
+                "host": config.NUT_HOST,
+                "port": config.NUT_PORT,
+                "enabled": True,
+                "model": metadata.get("ups.model"),
+                "firmware": metadata.get("ups.firmware"),
+                "serial": metadata.get("ups.serial"),
+                "manufacturer": metadata.get("ups.mfr"),
+                "last_seen": snapshot.timestamp.isoformat(),
+            }
+        )
         events = _event_processor.process(snapshot)
         try:
             _dispatcher.dispatch(snapshot)
         except DispatchError as exc:
-            _LOG.exception("One or more exporters failed for %s: %s", ups_name, exc.failures)
+            _LOG.exception(
+                "One or more exporters failed for %s: %s", ups_name, exc.failures
+            )
         return snapshot, events
     except (OSError, RuntimeError) as exc:
         _LOG.exception("Poll failed for %s: %s", ups_name, exc)
@@ -180,11 +191,16 @@ def _process_poll_results(
                     "events": [e.to_dict() for e in all_events],
                 }
             )
-        _LOG.info("Poll cycle complete. Devices=%d events=%d", ups_count, len(all_events))
+        _LOG.info(
+            "Poll cycle complete. Devices=%d events=%d", ups_count, len(all_events)
+        )
     else:
         if _alert_manager:
             _alert_manager.record_failure("All device polls failed.", now)
-        _scheduler_status = {"status": "error", "last_error": "All device polls failed."}
+        _scheduler_status = {
+            "status": "error",
+            "last_error": "All device polls failed.",
+        }
         _LOG.error("Poll cycle failed for all %d device(s).", ups_count)
 
 
@@ -219,7 +235,11 @@ def poll_once() -> None:
             last_snapshot = snapshot
 
     _process_poll_results(
-        all_events, any_success, last_snapshot, len(ups_names), datetime.now(timezone.utc)
+        all_events,
+        any_success,
+        last_snapshot,
+        len(ups_names),
+        datetime.now(timezone.utc),
     )
     runtime_config.mark_done()
 
@@ -227,6 +247,7 @@ def poll_once() -> None:
 # ---------------------------------------------------------------------------
 # Runtime config change handlers
 # ---------------------------------------------------------------------------
+
 
 def _poll_once_for_changes() -> None:
     """Called every 30 s by the control loop to react to UI-driven changes."""
@@ -249,6 +270,7 @@ def _poll_once_for_changes() -> None:
 # Health status
 # ---------------------------------------------------------------------------
 
+
 def _build_health_status() -> dict[str, Any]:
     """Return the current scheduler health status dict for the health endpoint."""
     return {
@@ -263,6 +285,7 @@ def _build_health_status() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # Environment validation
 # ---------------------------------------------------------------------------
+
 
 def _validate_environment() -> None:
     """Warn at startup if configured alert provider URLs appear unreachable.
@@ -304,6 +327,7 @@ def _validate_environment() -> None:
 # Main entry point
 # ---------------------------------------------------------------------------
 
+
 def main() -> None:
     """Start the Argus scheduler process: configure, start, and run the control loop."""
     global _dispatcher, _alert_manager, _scheduler, _health_server  # pylint: disable=global-statement
@@ -328,7 +352,9 @@ def main() -> None:
     _scheduler.start()
     _LOG.info("Scheduler started with interval=%d minutes.", interval)
 
-    _health_server = HealthServer(port=config.HEALTH_PORT, status_fn=_build_health_status)
+    _health_server = HealthServer(
+        port=config.HEALTH_PORT, status_fn=_build_health_status
+    )
     _health_server.start()
 
     def _shutdown(_signum: int, _frame: Any) -> None:

@@ -1,9 +1,10 @@
 """Tests for EnergyAccumulatorExporter — watt-hour calculation, cumulative storage, cost."""
+
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -35,6 +36,7 @@ def _exporter(db_path: str, **kwargs: object) -> EnergyAccumulatorExporter:
 # ---------------------------------------------------------------------------
 # Watt-hour calculation
 # ---------------------------------------------------------------------------
+
 
 def test_first_snapshot_records_no_energy(tmp_path: Path) -> None:
     db = str(tmp_path / "argus.db")
@@ -97,6 +99,7 @@ def test_zero_delta_time_produces_no_energy(tmp_path: Path) -> None:
 # Cumulative storage survives re-instantiation
 # ---------------------------------------------------------------------------
 
+
 def test_energy_persists_across_exporter_instances(tmp_path: Path) -> None:
     db = str(tmp_path / "argus.db")
     exp1 = _exporter(db)
@@ -115,6 +118,7 @@ def test_energy_persists_across_exporter_instances(tmp_path: Path) -> None:
 # Multi-device
 # ---------------------------------------------------------------------------
 
+
 def test_multiple_devices_tracked_independently(tmp_path: Path) -> None:
     db = str(tmp_path / "argus.db")
     exporter = _exporter(db)
@@ -130,6 +134,7 @@ def test_multiple_devices_tracked_independently(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # Cost estimation
 # ---------------------------------------------------------------------------
+
 
 def test_cost_estimation_when_rate_set(tmp_path: Path) -> None:
     db = str(tmp_path / "argus.db")
@@ -154,6 +159,7 @@ def test_no_cost_field_when_rate_is_zero(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # kwh conversion in get_totals
 # ---------------------------------------------------------------------------
+
 
 def test_get_totals_includes_energy_kwh(tmp_path: Path) -> None:
     db = str(tmp_path / "argus.db")

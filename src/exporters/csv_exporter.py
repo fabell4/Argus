@@ -1,4 +1,5 @@
 """CSV exporter — appends one row per PowerSnapshot to a rotating CSV file."""
+
 from __future__ import annotations
 
 import csv
@@ -68,7 +69,9 @@ class CSVExporter(BaseExporter):
 
     def _write_row(self, snapshot: PowerSnapshot) -> None:
         """Append one CSV row, writing the header first if the file is new."""
-        needs_header = not os.path.exists(self._path) or os.path.getsize(self._path) == 0
+        needs_header = (
+            not os.path.exists(self._path) or os.path.getsize(self._path) == 0
+        )
         with open(self._path, "a", newline="", encoding="utf-8") as fh:
             writer = csv.DictWriter(fh, fieldnames=_FIELDNAMES)
             if needs_header:

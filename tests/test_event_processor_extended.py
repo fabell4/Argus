@@ -1,4 +1,5 @@
 """Extended tests for EventProcessor — all event types, multi-device, and edge cases."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -24,6 +25,7 @@ def _snap(**kwargs: object) -> PowerSnapshot:
 # ---------------------------------------------------------------------------
 # SHUTDOWN_INITIATED
 # ---------------------------------------------------------------------------
+
 
 def test_shutdown_initiated_when_on_battery_and_below_floor() -> None:
     """SHUTDOWN_INITIATED is emitted when on battery and battery is below the floor threshold."""
@@ -84,6 +86,7 @@ def test_shutdown_flag_cleared_on_power_restored() -> None:
 # THRESHOLD_CROSSED
 # ---------------------------------------------------------------------------
 
+
 def test_threshold_crossed_on_load_spike() -> None:
     """THRESHOLD_CROSSED is emitted when load_percent crosses the configured threshold."""
     proc = EventProcessor()
@@ -113,6 +116,7 @@ def test_threshold_crossed_not_re_emitted_when_already_high() -> None:
 # ---------------------------------------------------------------------------
 # DEVICE_OFFLINE / DEVICE_ONLINE
 # ---------------------------------------------------------------------------
+
 
 def test_device_offline_after_missed_polls() -> None:
     """DEVICE_OFFLINE is emitted after the configured number of consecutive missed polls."""
@@ -186,6 +190,7 @@ def test_missed_poll_counter_resets_after_recovery() -> None:
 # Multi-device isolation
 # ---------------------------------------------------------------------------
 
+
 def test_two_devices_tracked_independently() -> None:
     """Events for one device do not affect the state of another device.
 
@@ -200,7 +205,9 @@ def test_two_devices_tracked_independently() -> None:
         proc.process(_snap(device_id="dev-b", ups_status="OL"))
         # Only dev-a goes on battery
         events = proc.process(_snap(device_id="dev-a", ups_status="OB"))
-    assert all(e.device_id == "dev-a" for e in events if e.event_type == EventType.ON_BATTERY)
+    assert all(
+        e.device_id == "dev-a" for e in events if e.event_type == EventType.ON_BATTERY
+    )
 
 
 def test_battery_low_isolated_per_device() -> None:
@@ -222,6 +229,7 @@ def test_battery_low_isolated_per_device() -> None:
 # Edge cases
 # ---------------------------------------------------------------------------
 
+
 def test_no_events_when_no_previous_snapshot() -> None:
     """First snapshot for a device should never produce transition events."""
     proc = EventProcessor()
@@ -232,7 +240,8 @@ def test_no_events_when_no_previous_snapshot() -> None:
         events = proc.process(_snap(ups_status="OB", battery_percent=5.0))
     # DEVICE_ONLINE is acceptable on first recovery, but no transition events
     assert not any(
-        e.event_type in (EventType.ON_BATTERY, EventType.BATTERY_LOW, EventType.POWER_RESTORED)
+        e.event_type
+        in (EventType.ON_BATTERY, EventType.BATTERY_LOW, EventType.POWER_RESTORED)
         for e in events
     )
 
@@ -264,7 +273,8 @@ def test_threshold_crossed_on_temperature_spike() -> None:
         proc.process(_snap(temperature_c=40.0))
         events = proc.process(_snap(temperature_c=50.0))
     temp_events = [
-        e for e in events
+        e
+        for e in events
         if e.event_type == EventType.THRESHOLD_CROSSED
         and e.metadata.get("metric") == "temperature_c"
     ]
@@ -283,7 +293,8 @@ def test_threshold_crossed_temperature_not_emitted_when_already_above_limit() ->
         proc.process(_snap(temperature_c=50.0))  # already above limit
         events = proc.process(_snap(temperature_c=55.0))
     temp_events = [
-        e for e in events
+        e
+        for e in events
         if e.event_type == EventType.THRESHOLD_CROSSED
         and e.metadata.get("metric") == "temperature_c"
     ]
@@ -300,6 +311,7 @@ def test_threshold_crossed_temperature_not_emitted_when_temp_is_none() -> None:
         proc.process(_snap())  # temperature_c is None
         events = proc.process(_snap())
     assert not any(
-        e.event_type == EventType.THRESHOLD_CROSSED and e.metadata.get("metric") == "temperature_c"
+        e.event_type == EventType.THRESHOLD_CROSSED
+        and e.metadata.get("metric") == "temperature_c"
         for e in events
     )

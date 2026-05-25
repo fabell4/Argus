@@ -1,4 +1,5 @@
 """Tests for alert provider implementations and SSRF/URL validation."""
+
 from __future__ import annotations
 
 from datetime import datetime, timezone
@@ -24,12 +25,16 @@ def _ts() -> datetime:
 # URL validation / SSRF guard
 # ---------------------------------------------------------------------------
 
+
 class TestValidateProviderUrl:
     """Tests for _validate_provider_url SSRF guard and scheme enforcement."""
 
     def test_https_public_accepted(self) -> None:
         """Public HTTPS URLs are accepted unchanged."""
-        assert _validate_provider_url("https://gotify.example.com") == "https://gotify.example.com"
+        assert (
+            _validate_provider_url("https://gotify.example.com")
+            == "https://gotify.example.com"
+        )
 
     def test_http_public_rejected(self) -> None:
         """Public HTTP URLs are rejected to enforce encrypted transport."""
@@ -45,7 +50,9 @@ class TestValidateProviderUrl:
     def test_link_local_metadata_blocked(self) -> None:
         """Link-local cloud metadata endpoint is blocked."""
         with pytest.raises(ValueError, match="blocked"):
-            _validate_provider_url("https://169.254.169.254/latest/meta-data/")  # NOSONAR
+            _validate_provider_url(
+                "https://169.254.169.254/latest/meta-data/"
+            )  # NOSONAR
 
     def test_link_local_range_blocked(self) -> None:
         """Any address in the 169.254.0.0/16 link-local range is blocked."""
@@ -55,7 +62,9 @@ class TestValidateProviderUrl:
     def test_metadata_google_internal_blocked(self) -> None:
         """GCP metadata hostname is blocked."""
         with pytest.raises(ValueError, match="blocked"):
-            _validate_provider_url("https://metadata.google.internal/computeMetadata/v1/")
+            _validate_provider_url(
+                "https://metadata.google.internal/computeMetadata/v1/"
+            )
 
     def test_metadata_internal_blocked(self) -> None:
         """Generic metadata.internal hostname is blocked."""
@@ -92,6 +101,7 @@ class TestValidateProviderUrl:
 # WebhookProvider
 # ---------------------------------------------------------------------------
 
+
 class TestWebhookProvider:
     """Tests for WebhookProvider HTTP POST alert delivery."""
 
@@ -100,7 +110,9 @@ class TestWebhookProvider:
         provider = WebhookProvider(url="https://example.com/hook")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
             provider.send_alert(3, "poll failed", _ts())
             mock_post.assert_called_once()
             payload = mock_post.call_args.kwargs["json"]
@@ -113,8 +125,12 @@ class TestWebhookProvider:
         provider = WebhookProvider(url="https://example.com/hook")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
-            provider.send_event_alert("on_battery", "dev-1", "UPS on battery", "high", _ts())
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "on_battery", "dev-1", "UPS on battery", "high", _ts()
+            )
             payload = mock_post.call_args.kwargs["json"]
             assert payload["event_type"] == "on_battery"
             assert payload["device_id"] == "dev-1"
@@ -139,6 +155,7 @@ class TestWebhookProvider:
 # GotifyProvider
 # ---------------------------------------------------------------------------
 
+
 class TestGotifyProvider:
     """Tests for GotifyProvider message delivery and priority mapping."""
 
@@ -147,7 +164,9 @@ class TestGotifyProvider:
         provider = GotifyProvider(url="https://gotify.example.com", token="tok")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
             provider.send_alert(2, "error", _ts())
             url_called = mock_post.call_args.args[0]
             assert url_called == "https://gotify.example.com/message"
@@ -157,7 +176,9 @@ class TestGotifyProvider:
         provider = GotifyProvider(url="https://gotify.example.com", token="my-token")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
             provider.send_alert(1, "e", _ts())
             headers = mock_post.call_args.kwargs["headers"]
             assert headers["X-Gotify-Key"] == "my-token"
@@ -167,8 +188,12 @@ class TestGotifyProvider:
         provider = GotifyProvider(url="https://gotify.example.com", token="tok")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
-            provider.send_event_alert("battery_low", "dev-1", "Battery critical", "critical", _ts())
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "battery_low", "dev-1", "Battery critical", "critical", _ts()
+            )
             payload = mock_post.call_args.kwargs["json"]
             assert payload["priority"] == 10
 
@@ -177,8 +202,12 @@ class TestGotifyProvider:
         provider = GotifyProvider(url="https://gotify.example.com", token="tok")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
-            provider.send_event_alert("power_restored", "dev-1", "Power restored", "low", _ts())
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "power_restored", "dev-1", "Power restored", "low", _ts()
+            )
             payload = mock_post.call_args.kwargs["json"]
             assert payload["priority"] == 3
 
@@ -187,8 +216,12 @@ class TestGotifyProvider:
         provider = GotifyProvider(url="https://gotify.example.com", token="tok")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
-            provider.send_event_alert("on_battery", "dev-1", "On battery", "high", _ts())
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "on_battery", "dev-1", "On battery", "high", _ts()
+            )
             payload = mock_post.call_args.kwargs["json"]
             assert payload["priority"] == 8
 
@@ -196,6 +229,7 @@ class TestGotifyProvider:
 # ---------------------------------------------------------------------------
 # NtfyProvider
 # ---------------------------------------------------------------------------
+
 
 class TestNtfyProvider:
     """Tests for NtfyProvider message delivery and priority/tag mapping."""
@@ -205,7 +239,9 @@ class TestNtfyProvider:
         provider = NtfyProvider(url="https://ntfy.sh", topic="argus-alerts")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
             provider.send_alert(1, "err", _ts())
             url_called = mock_post.call_args.args[0]
             assert url_called == "https://ntfy.sh/argus-alerts"
@@ -215,8 +251,12 @@ class TestNtfyProvider:
         provider = NtfyProvider(url="https://ntfy.sh", topic="argus")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
-            provider.send_event_alert("battery_low", "dev-1", "Battery low", "critical", _ts())
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "battery_low", "dev-1", "Battery low", "critical", _ts()
+            )
             headers = mock_post.call_args.kwargs["headers"]
             assert headers["Priority"] == "urgent"
 
@@ -225,8 +265,12 @@ class TestNtfyProvider:
         provider = NtfyProvider(url="https://ntfy.sh", topic="argus")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
-            provider.send_event_alert("power_restored", "dev-1", "Restored", "low", _ts())
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "power_restored", "dev-1", "Restored", "low", _ts()
+            )
             headers = mock_post.call_args.kwargs["headers"]
             assert headers["Priority"] == "low"
 
@@ -235,8 +279,12 @@ class TestNtfyProvider:
         provider = NtfyProvider(url="https://ntfy.sh", topic="argus")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
-            provider.send_event_alert("on_battery", "dev-1", "On battery", "high", _ts())
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "on_battery", "dev-1", "On battery", "high", _ts()
+            )
             headers = mock_post.call_args.kwargs["headers"]
             assert headers["Tags"] == "on_battery"
 
@@ -244,6 +292,7 @@ class TestNtfyProvider:
 # ---------------------------------------------------------------------------
 # AppriseProvider
 # ---------------------------------------------------------------------------
+
 
 class TestAppriseProvider:
     """Tests for AppriseProvider JSON alert delivery."""
@@ -253,7 +302,9 @@ class TestAppriseProvider:
         provider = AppriseProvider(url="https://apprise.example.com/notify")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
             provider.send_alert(2, "err", _ts())
             payload = mock_post.call_args.kwargs["json"]
             assert "title" in payload
@@ -264,8 +315,12 @@ class TestAppriseProvider:
         provider = AppriseProvider(url="https://apprise.example.com/notify")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
-            provider.send_event_alert("on_battery", "dev-1", "On battery", "high", _ts())
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "on_battery", "dev-1", "On battery", "high", _ts()
+            )
             payload = mock_post.call_args.kwargs["json"]
             assert "HIGH" in payload["title"]
 
@@ -274,7 +329,9 @@ class TestAppriseProvider:
         provider = AppriseProvider(url="https://apprise.example.com/notify")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
-        with patch.object(provider._session, "post", return_value=mock_resp) as mock_post:
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
             provider.send_event_alert(
                 "battery_low", "dev-1", "Battery critically low", "critical", _ts()
             )
@@ -285,6 +342,7 @@ class TestAppriseProvider:
 # ---------------------------------------------------------------------------
 # Per-provider minimum severity filter
 # ---------------------------------------------------------------------------
+
 
 class TestMeetsMinSeverity:
     """Tests for AlertProvider.meets_min_severity severity filtering."""
@@ -297,7 +355,9 @@ class TestMeetsMinSeverity:
 
     def test_min_severity_critical_only_accepts_critical(self) -> None:
         """min_severity='critical' rejects low, medium, and high."""
-        provider = WebhookProvider(url="https://example.com/hook", min_severity="critical")
+        provider = WebhookProvider(
+            url="https://example.com/hook", min_severity="critical"
+        )
         assert not provider.meets_min_severity("low")
         assert not provider.meets_min_severity("medium")
         assert not provider.meets_min_severity("high")
@@ -313,7 +373,9 @@ class TestMeetsMinSeverity:
 
     def test_min_severity_medium_accepts_medium_and_above(self) -> None:
         """min_severity='medium' accepts medium, high, and critical but rejects low."""
-        provider = WebhookProvider(url="https://example.com/hook", min_severity="medium")
+        provider = WebhookProvider(
+            url="https://example.com/hook", min_severity="medium"
+        )
         assert not provider.meets_min_severity("low")
         assert provider.meets_min_severity("medium")
         assert provider.meets_min_severity("high")
@@ -332,6 +394,10 @@ class TestMeetsMinSeverity:
 
     def test_all_providers_accept_min_severity_kwarg(self) -> None:
         """All four provider classes accept min_severity as a constructor argument."""
-        GotifyProvider(url="https://gotify.example.com", token="tok", min_severity="high")
+        GotifyProvider(
+            url="https://gotify.example.com", token="tok", min_severity="high"
+        )
         NtfyProvider(url="https://ntfy.sh", topic="argus", min_severity="medium")
-        AppriseProvider(url="https://apprise.example.com/notify", min_severity="critical")
+        AppriseProvider(
+            url="https://apprise.example.com/notify", min_severity="critical"
+        )

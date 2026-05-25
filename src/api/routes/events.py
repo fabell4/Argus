@@ -1,4 +1,5 @@
 """GET /api/events — power event history."""
+
 from __future__ import annotations
 
 import json

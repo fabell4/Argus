@@ -1,4 +1,5 @@
 """Alert provider implementations (Webhook, Gotify, ntfy, Apprise)."""
+
 from __future__ import annotations
 
 import ipaddress
@@ -40,14 +41,16 @@ _GOTIFY_PRIORITY: dict[str, int] = {
 # Private RFC 1918 ranges are intentionally allowed for self-hosted deployments.
 _BLOCKED_NETWORKS: list[ipaddress.IPv4Network | ipaddress.IPv6Network] = [
     ipaddress.ip_network("169.254.0.0/16"),  # NOSONAR - IPv4 link-local / AWS metadata
-    ipaddress.ip_network("100.64.0.0/10"),   # NOSONAR - RFC 6598 shared address space
-    ipaddress.ip_network("fe80::/10"),        # NOSONAR - IPv6 link-local
+    ipaddress.ip_network("100.64.0.0/10"),  # NOSONAR - RFC 6598 shared address space
+    ipaddress.ip_network("fe80::/10"),  # NOSONAR - IPv6 link-local
 ]
-_BLOCKED_HOSTNAMES = frozenset({
-    "metadata.google.internal",
-    "metadata.internal",
-    "::1",  # IPv6 loopback literal
-})
+_BLOCKED_HOSTNAMES = frozenset(
+    {
+        "metadata.google.internal",
+        "metadata.internal",
+        "::1",  # IPv6 loopback literal
+    }
+)
 
 
 def _validate_provider_url(url: str) -> str:
@@ -85,7 +88,9 @@ def _validate_provider_url(url: str) -> str:
 
 def _build_session() -> requests.Session:
     session = requests.Session()
-    retry = Retry(total=2, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504])
+    retry = Retry(
+        total=2, backoff_factor=0.5, status_forcelist=[429, 500, 502, 503, 504]
+    )
     session.mount("https://", HTTPAdapter(max_retries=retry))
     session.mount("http://", HTTPAdapter(max_retries=retry))
     return session
@@ -103,7 +108,9 @@ class AlertProvider(ABC):
         return sev >= _SEVERITY_ORDER.get(self._min_severity, 0)
 
     @abstractmethod
-    def send_alert(self, failure_count: int, last_error: str, timestamp: datetime) -> None:
+    def send_alert(
+        self, failure_count: int, last_error: str, timestamp: datetime
+    ) -> None:
         """Send a poll-failure alert to this provider."""
 
     def send_event_alert(
@@ -134,7 +141,9 @@ class WebhookProvider(AlertProvider):
         self._timeout = timeout
         self._session = _build_session()
 
-    def send_alert(self, failure_count: int, last_error: str, timestamp: datetime) -> None:
+    def send_alert(
+        self, failure_count: int, last_error: str, timestamp: datetime
+    ) -> None:
         payload = {
             "source": "Argus",
             "failure_count": failure_count,
@@ -168,7 +177,11 @@ class GotifyProvider(AlertProvider):
     """Sends alerts via the Gotify push notification server."""
 
     def __init__(
-        self, url: str, token: str, timeout: int = _DEFAULT_TIMEOUT, min_severity: str = "low"
+        self,
+        url: str,
+        token: str,
+        timeout: int = _DEFAULT_TIMEOUT,
+        min_severity: str = "low",
     ) -> None:
         super().__init__(min_severity)
         self._url = _validate_provider_url(url).rstrip("/")
@@ -176,7 +189,9 @@ class GotifyProvider(AlertProvider):
         self._timeout = timeout
         self._session = _build_session()
 
-    def send_alert(self, failure_count: int, last_error: str, timestamp: datetime) -> None:
+    def send_alert(
+        self, failure_count: int, last_error: str, timestamp: datetime
+    ) -> None:
         resp = self._session.post(
             f"{self._url}/message",
             json={
@@ -215,7 +230,11 @@ class NtfyProvider(AlertProvider):
     """Sends alerts via the ntfy push notification service."""
 
     def __init__(
-        self, url: str, topic: str, timeout: int = _DEFAULT_TIMEOUT, min_severity: str = "low"
+        self,
+        url: str,
+        topic: str,
+        timeout: int = _DEFAULT_TIMEOUT,
+        min_severity: str = "low",
     ) -> None:
         super().__init__(min_severity)
         self._url = _validate_provider_url(url).rstrip("/")
@@ -223,7 +242,9 @@ class NtfyProvider(AlertProvider):
         self._timeout = timeout
         self._session = _build_session()
 
-    def send_alert(self, failure_count: int, last_error: str, timestamp: datetime) -> None:
+    def send_alert(
+        self, failure_count: int, last_error: str, timestamp: datetime
+    ) -> None:
         resp = self._session.post(
             f"{self._url}/{self._topic}",
             data=f"Argus: {failure_count} consecutive poll failures\n{last_error}",
@@ -269,7 +290,9 @@ class AppriseProvider(AlertProvider):
         self._timeout = timeout
         self._session = _build_session()
 
-    def send_alert(self, failure_count: int, last_error: str, timestamp: datetime) -> None:
+    def send_alert(
+        self, failure_count: int, last_error: str, timestamp: datetime
+    ) -> None:
         resp = self._session.post(
             self._url,
             json={

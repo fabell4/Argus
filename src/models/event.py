@@ -1,4 +1,5 @@
 """PowerEvent — structured state-transition event emitted by the EventProcessor."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

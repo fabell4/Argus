@@ -1,4 +1,5 @@
 """Lightweight HTTP health server running in a daemon thread."""
+
 from __future__ import annotations
 
 import json
@@ -13,7 +14,9 @@ _LOG = logging.getLogger(__name__)
 class HealthServer:
     """Serves GET /health on a background thread."""
 
-    def __init__(self, port: int = 9100, status_fn: Callable[[], dict[str, Any]] | None = None) -> None:
+    def __init__(
+        self, port: int = 9100, status_fn: Callable[[], dict[str, Any]] | None = None
+    ) -> None:
         self._port = port
         self._status_fn = status_fn or (lambda: {"status": "ok"})
         self._thread: threading.Thread | None = None

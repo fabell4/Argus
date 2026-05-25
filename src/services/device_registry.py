@@ -4,6 +4,7 @@ Both the scheduler (src/main.py) and the API (src/api/routes/devices.py) use
 this module so they share a single source of truth for the device list.
 Writes use atomic rename to prevent partial reads.
 """
+
 from __future__ import annotations
 
 import json
@@ -19,6 +20,7 @@ _DEVICES_FILE = os.path.join("data", "devices.json")
 # ---------------------------------------------------------------------------
 # Low-level I/O
 # ---------------------------------------------------------------------------
+
 
 def _load_raw() -> list[dict[str, Any]]:
     if not os.path.exists(_DEVICES_FILE):
@@ -49,6 +51,7 @@ def _save_raw(devices: list[dict[str, Any]]) -> None:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 def load_devices() -> list[dict[str, Any]]:
     """Return the full device list."""

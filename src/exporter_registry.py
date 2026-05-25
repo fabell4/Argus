@@ -1,4 +1,5 @@
 """Registry mapping exporter names to factory callables."""
+
 from __future__ import annotations
 
 import logging
@@ -19,9 +20,12 @@ _LOG = logging.getLogger(__name__)
 
 def _build_influxdb() -> "BaseExporter | None":
     if not config.INFLUXDB_URL or not config.INFLUXDB_TOKEN:
-        _LOG.warning("InfluxDB exporter requested but INFLUXDB_URL/INFLUXDB_TOKEN not set.")
+        _LOG.warning(
+            "InfluxDB exporter requested but INFLUXDB_URL/INFLUXDB_TOKEN not set."
+        )
         return None
     from src.exporters.influxdb_exporter import InfluxDBExporter
+
     return InfluxDBExporter(
         url=config.INFLUXDB_URL,
         token=config.INFLUXDB_TOKEN,
@@ -35,6 +39,7 @@ def _build_loki() -> "BaseExporter | None":
         _LOG.warning("Loki exporter requested but LOKI_URL not set.")
         return None
     from src.exporters.loki_exporter import LokiExporter
+
     return LokiExporter(
         url=config.LOKI_URL,
         job_label=config.LOKI_JOB_LABEL,

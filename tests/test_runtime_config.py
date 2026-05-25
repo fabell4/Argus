@@ -1,11 +1,9 @@
 """Tests for RuntimeConfig — validation, atomic write, cache, edge cases."""
+
 from __future__ import annotations
 
 import json
-import os
-import tempfile
 from pathlib import Path
-from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -17,17 +15,23 @@ from src import runtime_config
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _patch_path(tmp_path: Path) -> "pytest.MonkeyPatch":
     """Return a context-free patch. Use as a context manager in tests."""
-    return patch.object(runtime_config, "_CONFIG_PATH", str(tmp_path / "runtime_config.json"))
+    return patch.object(
+        runtime_config, "_CONFIG_PATH", str(tmp_path / "runtime_config.json")
+    )
 
 
 # ---------------------------------------------------------------------------
 # load() returns defaults when file absent
 # ---------------------------------------------------------------------------
 
+
 def test_load_returns_defaults_when_no_file(tmp_path: Path) -> None:
-    with patch.object(runtime_config, "_CONFIG_PATH", str(tmp_path / "runtime_config.json")):
+    with patch.object(
+        runtime_config, "_CONFIG_PATH", str(tmp_path / "runtime_config.json")
+    ):
         data = runtime_config.load()
     assert "poll_interval_minutes" in data
     assert "enabled_exporters" in data
@@ -54,6 +58,7 @@ def test_load_resets_to_defaults_on_corrupt_json(tmp_path: Path) -> None:
 # save() performs atomic write
 # ---------------------------------------------------------------------------
 
+
 def test_save_creates_file(tmp_path: Path) -> None:
     cfg_path = tmp_path / "runtime_config.json"
     with (
@@ -79,6 +84,7 @@ def test_save_is_idempotent(tmp_path: Path) -> None:
 # get_interval_minutes / set_interval_minutes
 # ---------------------------------------------------------------------------
 
+
 def test_set_and_get_interval(tmp_path: Path) -> None:
     with patch.object(runtime_config, "_CONFIG_PATH", str(tmp_path / "rc.json")):
         runtime_config.set_interval_minutes(10)
@@ -101,6 +107,7 @@ def test_set_interval_rejects_negative(tmp_path: Path) -> None:
 # get_enabled_exporters / set_enabled_exporters
 # ---------------------------------------------------------------------------
 
+
 def test_set_and_get_enabled_exporters(tmp_path: Path) -> None:
     with patch.object(runtime_config, "_CONFIG_PATH", str(tmp_path / "rc.json")):
         runtime_config.set_enabled_exporters(["sqlite", "prometheus"])
@@ -119,6 +126,7 @@ def test_set_enabled_exporters_rejects_unknown(tmp_path: Path) -> None:
 # Scheduler paused
 # ---------------------------------------------------------------------------
 
+
 def test_set_scheduler_paused(tmp_path: Path) -> None:
     with patch.object(runtime_config, "_CONFIG_PATH", str(tmp_path / "rc.json")):
         runtime_config.set_scheduler_paused(True)
@@ -130,6 +138,7 @@ def test_set_scheduler_paused(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # Alert config
 # ---------------------------------------------------------------------------
+
 
 def test_get_alert_config_returns_empty_by_default(tmp_path: Path) -> None:
     with patch.object(runtime_config, "_CONFIG_PATH", str(tmp_path / "rc.json")):
@@ -150,6 +159,7 @@ def test_alert_config_persisted_via_save(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # Poll trigger sentinel
 # ---------------------------------------------------------------------------
+
 
 def test_consume_poll_trigger_returns_false_when_no_sentinel(tmp_path: Path) -> None:
     with (
@@ -173,6 +183,7 @@ def test_consume_poll_trigger_returns_true_and_removes_file(tmp_path: Path) -> N
 # ---------------------------------------------------------------------------
 # mark_running / mark_done / is_running
 # ---------------------------------------------------------------------------
+
 
 def test_mark_running_creates_sentinel(tmp_path: Path) -> None:
     sentinel = tmp_path / ".running"
@@ -221,8 +232,10 @@ def test_is_running_false_when_no_sentinel(tmp_path: Path) -> None:
 # Timestamps — next_poll_at / last_poll_at
 # ---------------------------------------------------------------------------
 
+
 def test_set_and_get_next_poll_at(tmp_path: Path) -> None:
     from datetime import datetime, timezone
+
     dt = datetime(2026, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
     with patch.object(runtime_config, "_CONFIG_PATH", str(tmp_path / "rc.json")):
         runtime_config.set_next_poll_at(dt)
@@ -240,6 +253,7 @@ def test_set_next_poll_at_none_clears_value(tmp_path: Path) -> None:
 
 def test_set_and_get_last_poll_at(tmp_path: Path) -> None:
     from datetime import datetime, timezone
+
     dt = datetime(2026, 6, 1, 12, 0, 0, tzinfo=timezone.utc)
     with patch.object(runtime_config, "_CONFIG_PATH", str(tmp_path / "rc.json")):
         runtime_config.set_last_poll_at(dt)
@@ -251,6 +265,7 @@ def test_set_and_get_last_poll_at(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 # alert_config get/set
 # ---------------------------------------------------------------------------
+
 
 def test_set_and_get_alert_config(tmp_path: Path) -> None:
     cfg = {"failure_threshold": 3, "cooldown_seconds": 60}
