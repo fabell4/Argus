@@ -1,0 +1,6 @@
+{
+  "files.exclude": {
+    "**/AppData/Local/Programs/Python/**": true,
+    "**/AppData/Roaming/Python/**": true
+  }
+}

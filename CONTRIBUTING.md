@@ -4,15 +4,14 @@ Thanks for contributing to Argus.
 
 ## Development setup
 
-- Backend: Python 3.11+
+- Backend: Python 3.12+
 - Frontend: Node.js 22+
 
 ### Backend
 
 ```bash
-cd backend
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements-dev.txt
 pytest
 ruff check .

@@ -4,9 +4,23 @@ __pycache__/
 .venv/
 .pytest_cache/
 .ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+coverage.xml
 
 node_modules/
 frontend/node_modules/
+frontend/dist/
+frontend/coverage/
 
 .DS_Store
+Thumbs.db
 .env
+
+# Argus runtime data
+data/argus.db
+data/.run_trigger
+data/.running
+logs/
+
