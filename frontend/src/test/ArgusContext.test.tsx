@@ -50,7 +50,7 @@ function setupHappyPath() {
 }
 
 // Consumer component to read context values
-function ContextReader({ field }: { field: keyof ArgusContextType }) {
+function ContextReader({ field }: Readonly<{ field: keyof ArgusContextType }>) {
   const ctx = useArgus()
   const value = ctx[field]
   if (typeof value === 'boolean') return <span data-testid="value">{String(value)}</span>
@@ -71,10 +71,7 @@ function renderWithProvider(ui: React.ReactNode) {
 describe('ArgusContext - ArgusProvider', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key) => {
-      if (key === 'argus_theme') return null
-      return null
-    })
+    vi.spyOn(Storage.prototype, 'getItem').mockReturnValue(null)
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {})
   })
 

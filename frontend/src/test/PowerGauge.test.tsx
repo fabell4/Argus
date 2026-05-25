@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import { PowerGauge } from '@/components/PowerGauge'
 
@@ -20,7 +20,7 @@ describe('PowerGauge', () => {
   })
 
   it('renders temperature metric without error', () => {
-    render(<PowerGauge label="Temp" value={42.0} unit="°C" metric="temperature" />)
+    render(<PowerGauge label="Temp" value={42} unit="°C" metric="temperature" />)
     expect(screen.getByText('Temp')).toBeDefined()
     expect(screen.getByText('42.0')).toBeDefined()
   })
@@ -31,7 +31,7 @@ describe('PowerGauge', () => {
   })
 
   it('renders load metric', () => {
-    render(<PowerGauge label="Load" value={60.0} unit="%" metric="load" />)
+    render(<PowerGauge label="Load" value={60} unit="%" metric="load" />)
     expect(screen.getByText('60.0')).toBeDefined()
   })
 })
