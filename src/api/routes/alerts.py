@@ -8,13 +8,14 @@ from pydantic import BaseModel, Field, field_validator
 
 from src import runtime_config, shared_state
 from src.api.auth import require_api_key
+from src.constants import AlertSeverity
 
 router = APIRouter(tags=["alerts"])
 
 
-def _require_http_or_https(v: str) -> str:
-    if not v.startswith(("http://", "https://")):
-        raise ValueError("URL must start with http:// or https://")
+def _require_https(v: str) -> str:
+    if not v.startswith("https://"):
+        raise ValueError("URL must use https:// scheme (http is not permitted)")
     return v
 
 
@@ -24,11 +25,12 @@ class WebhookProviderConfig(BaseModel):
     type: Literal["webhook"] = "webhook"
     enabled: bool = True
     url: str
+    min_severity: AlertSeverity = AlertSeverity.LOW
 
     @field_validator("url")
     @classmethod
     def _validate_url(cls, v: str) -> str:
-        return _require_http_or_https(v)
+        return _require_https(v)
 
 
 class GotifyProviderConfig(BaseModel):
@@ -38,11 +40,12 @@ class GotifyProviderConfig(BaseModel):
     enabled: bool = True
     url: str
     token: str
+    min_severity: AlertSeverity = AlertSeverity.LOW
 
     @field_validator("url")
     @classmethod
     def _validate_url(cls, v: str) -> str:
-        return _require_http_or_https(v)
+        return _require_https(v)
 
 
 class NtfyProviderConfig(BaseModel):
@@ -52,11 +55,12 @@ class NtfyProviderConfig(BaseModel):
     enabled: bool = True
     url: str
     topic: str
+    min_severity: AlertSeverity = AlertSeverity.LOW
 
     @field_validator("url")
     @classmethod
     def _validate_url(cls, v: str) -> str:
-        return _require_http_or_https(v)
+        return _require_https(v)
 
 
 class AppriseProviderConfig(BaseModel):
@@ -65,11 +69,12 @@ class AppriseProviderConfig(BaseModel):
     type: Literal["apprise"] = "apprise"
     enabled: bool = True
     url: str
+    min_severity: AlertSeverity = AlertSeverity.LOW
 
     @field_validator("url")
     @classmethod
     def _validate_url(cls, v: str) -> str:
-        return _require_http_or_https(v)
+        return _require_https(v)
 
 
 AlertProviderConfig = Annotated[
@@ -84,6 +89,11 @@ class AlertConfigSchema(BaseModel):
     providers: list[AlertProviderConfig] = []
     failure_threshold: int = Field(default=3, ge=1, le=100)
     cooldown_seconds: int = Field(default=3600, ge=60, le=86400)
+    alert_on_battery: bool = True
+    alert_on_battery_low: bool = True
+    alert_on_device_offline: bool = True
+    alert_recovery_notifications: bool = True
+    recovery_cooldown_seconds: int = Field(default=300, ge=60, le=86400)
 
 
 @router.get("/alerts")
@@ -115,5 +125,11 @@ def test_alert() -> dict[str, str]:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Alert manager not available (scheduler not running).",
         )
-    alert_mgr.send_test_alert()
+    try:
+        alert_mgr.send_test_alert()
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=str(exc),
+        ) from exc
     return {"status": "ok", "message": "Test alert dispatched."}

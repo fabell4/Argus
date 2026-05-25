@@ -6,10 +6,11 @@ from pydantic import BaseModel, field_validator
 
 from src import runtime_config
 from src.api.auth import require_api_key
+from src.constants import ExporterType
 
 router = APIRouter(tags=["config"])
 
-_VALID_EXPORTERS = {"sqlite", "prometheus", "influxdb", "loki"}
+_VALID_EXPORTERS = frozenset(ExporterType)
 
 
 class RuntimeConfigSchema(BaseModel):

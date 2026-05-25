@@ -5,6 +5,7 @@ import logging
 from typing import TYPE_CHECKING, Callable
 
 from src import config
+from src.constants import ExporterType
 from src.exporters.csv_exporter import CSVExporter
 from src.exporters.energy_accumulator import EnergyAccumulatorExporter
 from src.exporters.prometheus_exporter import PrometheusExporter
@@ -41,24 +42,24 @@ def _build_loki() -> "BaseExporter | None":
     )
 
 
-EXPORTER_REGISTRY: dict[str, Callable[[], "BaseExporter | None"]] = {
-    "sqlite": lambda: SQLiteExporter(
+EXPORTER_REGISTRY: dict[ExporterType, Callable[[], "BaseExporter | None"]] = {
+    ExporterType.SQLITE: lambda: SQLiteExporter(
         db_path=config.SQLITE_PATH,
         retention_days=config.SQLITE_RETENTION_DAYS,
         max_rows=config.SQLITE_MAX_ROWS,
     ),
-    "prometheus": lambda: PrometheusExporter(
+    ExporterType.PROMETHEUS: lambda: PrometheusExporter(
         port=config.PROMETHEUS_PORT,
         disable_labels=config.PROMETHEUS_DISABLE_LABELS,
     ),
-    "influxdb": _build_influxdb,
-    "loki": _build_loki,
-    "csv": lambda: CSVExporter(
+    ExporterType.INFLUXDB: _build_influxdb,
+    ExporterType.LOKI: _build_loki,
+    ExporterType.CSV: lambda: CSVExporter(
         path=config.CSV_PATH,
         max_size_mb=config.CSV_MAX_SIZE_MB,
         retention_days=config.CSV_RETENTION_DAYS,
     ),
-    "energy": lambda: EnergyAccumulatorExporter(
+    ExporterType.ENERGY: lambda: EnergyAccumulatorExporter(
         db_path=config.SQLITE_PATH,
         rate_per_kwh=config.ENERGY_RATE_PER_KWH,
     ),

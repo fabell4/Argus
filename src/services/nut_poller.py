@@ -5,12 +5,13 @@ import io
 import logging
 import socket
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Callable, TypeVar
 
 from src.constants import DeviceType
 from src.models.power_snapshot import PowerSnapshot
 
 _LOG = logging.getLogger(__name__)
+_T = TypeVar("_T")
 
 # NUT variable → PowerSnapshot field mapping
 _NUT_FIELD_MAP: dict[str, str] = {
@@ -55,6 +56,25 @@ class NUTPoller:
         self._timeout = timeout
         self._max_retries = max_retries
 
+    def _with_retry(self, func: Callable[[], _T], operation: str) -> _T:
+        """Run *func*, retrying up to ``max_retries`` times on :class:`OSError`."""
+        last_exc: OSError | None = None
+        for attempt in range(self._max_retries + 1):
+            try:
+                return func()
+            except OSError as exc:
+                last_exc = exc
+                if attempt < self._max_retries:
+                    _LOG.warning(
+                        "%s attempt %d/%d failed (%s); retrying.",
+                        operation,
+                        attempt + 1,
+                        self._max_retries + 1,
+                        exc,
+                    )
+        assert last_exc is not None
+        raise last_exc
+
     def poll(self) -> PowerSnapshot:
         """Connect to NUT, retrieve all variables, and return a PowerSnapshot.
 
@@ -62,24 +82,11 @@ class NUTPoller:
         Authentication failures and protocol errors (``RuntimeError``) propagate
         immediately and are not retried.
         """
-        last_exc: OSError = OSError(
-            f"All {self._max_retries + 1} poll attempt(s) for "
-            f"{self._ups_name}@{self._host}:{self._port} failed."
-        )
-        for attempt in range(self._max_retries + 1):
-            try:
-                raw = self._fetch_vars()
-                return self._build_snapshot(raw)
-            except OSError as exc:
-                last_exc = exc
-                if attempt < self._max_retries:
-                    _LOG.warning(
-                        "NUT poll attempt %d/%d failed (%s); retrying.",
-                        attempt + 1,
-                        self._max_retries + 1,
-                        exc,
-                    )
-        raise last_exc
+        def _do() -> PowerSnapshot:
+            raw = self._fetch_vars()
+            return self._build_snapshot(raw)
+
+        return self._with_retry(_do, f"NUT poll for {self._ups_name}@{self._host}:{self._port}")
 
     # ------------------------------------------------------------------
     # NUT protocol helpers
@@ -159,49 +166,22 @@ class NUTPoller:
 
         Retries up to ``max_retries`` times on transient socket errors.
         """
-        last_exc: OSError = OSError(
-            f"LIST UPS query failed for {self._host}:{self._port}."
+        return self._with_retry(
+            self._fetch_ups_list,
+            f"LIST UPS for {self._host}:{self._port}",
         )
-        for attempt in range(self._max_retries + 1):
-            try:
-                return self._fetch_ups_list()
-            except OSError as exc:
-                last_exc = exc
-                if attempt < self._max_retries:
-                    _LOG.warning(
-                        "LIST UPS attempt %d/%d failed (%s); retrying.",
-                        attempt + 1,
-                        self._max_retries + 1,
-                        exc,
-                    )
-        raise last_exc
 
     def poll_with_metadata(
         self,
-    ) -> tuple["PowerSnapshot", dict[str, str]]:
+    ) -> tuple[PowerSnapshot, dict[str, str]]:
         """Like :meth:`poll` but also returns UPS metadata (model, firmware, serial, mfr)."""
-        last_exc: OSError = OSError(
-            f"All {self._max_retries + 1} poll attempt(s) for "
-            f"{self._ups_name}@{self._host}:{self._port} failed."
-        )
-        for attempt in range(self._max_retries + 1):
-            try:
-                raw = self._fetch_vars()
-                snapshot = self._build_snapshot(raw)
-                metadata = {
-                    k: raw[k] for k in _NUT_METADATA_KEYS if k in raw
-                }
-                return snapshot, metadata
-            except OSError as exc:
-                last_exc = exc
-                if attempt < self._max_retries:
-                    _LOG.warning(
-                        "NUT poll attempt %d/%d failed (%s); retrying.",
-                        attempt + 1,
-                        self._max_retries + 1,
-                        exc,
-                    )
-        raise last_exc
+        def _do() -> tuple[PowerSnapshot, dict[str, str]]:
+            raw = self._fetch_vars()
+            snapshot = self._build_snapshot(raw)
+            metadata = {k: raw[k] for k in _NUT_METADATA_KEYS if k in raw}
+            return snapshot, metadata
+
+        return self._with_retry(_do, f"NUT poll for {self._ups_name}@{self._host}:{self._port}")
 
     @staticmethod
     def _apply_field(
@@ -231,8 +211,8 @@ class NUTPoller:
             return
         try:
             kwargs["power_watts"] = float(nominal_raw) * (float(load) / 100.0)
-        except (ValueError, TypeError):
-            pass
+        except (ValueError, TypeError) as exc:
+            _LOG.debug("Could not derive power_watts from NUT vars (%s); skipping.", exc)
 
     def _build_snapshot(self, raw: dict[str, str]) -> PowerSnapshot:
         kwargs: dict[str, Any] = {

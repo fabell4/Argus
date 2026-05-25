@@ -10,8 +10,8 @@ from urllib.parse import urlparse
 
 import requests
 
-from src.models.power_snapshot import PowerSnapshot
 from src.exporters.base_exporter import BaseExporter
+from src.models.power_snapshot import PowerSnapshot
 
 _LOG = logging.getLogger(__name__)
 

@@ -1,6 +1,7 @@
 """API key authentication and per-key sliding-window rate limiting."""
 from __future__ import annotations
 
+import hmac
 import threading
 import time
 from collections import deque
@@ -18,6 +19,7 @@ class _RateLimiter:
         self._lock = threading.Lock()
 
     def is_allowed(self) -> bool:
+        """Return True if the request is within the rate limit window."""
         now = time.monotonic()
         with self._lock:
             cutoff = now - self._window
@@ -42,7 +44,7 @@ def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing X-Api-Key header.",
         )
-    if x_api_key != config.API_KEY:
+    if not hmac.compare_digest(x_api_key, config.API_KEY):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Invalid API key.",
@@ -51,4 +53,5 @@ def require_api_key(x_api_key: str | None = Header(default=None)) -> None:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Rate limit exceeded. Slow down.",
+            headers={"Retry-After": "60"},
         )

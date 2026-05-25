@@ -14,6 +14,7 @@ from datetime import datetime
 from typing import Any
 
 from src import config
+from src.constants import ExporterType
 
 _LOG = logging.getLogger(__name__)
 _CONFIG_PATH = os.path.join("data", "runtime_config.json")
@@ -58,12 +59,46 @@ def _save_raw(data: dict[str, Any]) -> None:
 
 
 def load() -> dict[str, Any]:
+    """Load config from disk, apply defaults, and sanitize values."""
     data = _DEFAULTS.copy()
     data.update(_load_raw())
+    _sanitize(data)
     return data
 
 
+def _sanitize(data: dict[str, Any]) -> None:
+    """Coerce and clamp values loaded from disk to valid types and ranges.
+
+    Prevents malformed data in runtime_config.json from propagating into the
+    application when the file is manually edited or written by an older version.
+    """
+    # poll_interval_minutes: must be an int in [1, 10080]
+    try:
+        minutes = int(data["poll_interval_minutes"])
+        data["poll_interval_minutes"] = max(1, min(10080, minutes))
+    except (TypeError, ValueError, KeyError):
+        data["poll_interval_minutes"] = _DEFAULTS["poll_interval_minutes"]
+
+    # enabled_exporters: must be a list of known exporter strings
+    exporters = data.get("enabled_exporters")
+    if not isinstance(exporters, list):
+        data["enabled_exporters"] = list(_DEFAULTS["enabled_exporters"])
+    else:
+        data["enabled_exporters"] = [
+            e for e in exporters if isinstance(e, str) and e in _VALID_EXPORTERS
+        ]
+
+    # boolean flags
+    data["scheduler_paused"] = bool(data.get("scheduler_paused", False))
+    data["scanning_disabled"] = bool(data.get("scanning_disabled", False))
+
+    # alert_config: must be a dict
+    if not isinstance(data.get("alert_config"), dict):
+        data["alert_config"] = {}
+
+
 def save(data: dict[str, Any]) -> None:
+    """Persist *data* to the runtime config file atomically."""
     _save_raw(data)
 
 
@@ -72,10 +107,12 @@ def save(data: dict[str, Any]) -> None:
 # ---------------------------------------------------------------------------
 
 def get_interval_minutes() -> int:
+    """Return the configured poll interval in minutes."""
     return int(load().get("poll_interval_minutes", _DEFAULTS["poll_interval_minutes"]))
 
 
 def set_interval_minutes(minutes: int) -> None:
+    """Validate and persist a new poll interval in minutes."""
     _validate_interval_minutes(minutes)
     data = load()
     data["poll_interval_minutes"] = minutes
@@ -87,10 +124,12 @@ def set_interval_minutes(minutes: int) -> None:
 # ---------------------------------------------------------------------------
 
 def get_enabled_exporters() -> list[str]:
+    """Return the list of enabled exporter names."""
     return list(load().get("enabled_exporters", _DEFAULTS["enabled_exporters"]))
 
 
 def set_enabled_exporters(exporters: list[str]) -> None:
+    """Validate and persist the list of enabled exporter names."""
     _validate_enabled_exporters(exporters)
     data = load()
     data["enabled_exporters"] = exporters
@@ -102,10 +141,12 @@ def set_enabled_exporters(exporters: list[str]) -> None:
 # ---------------------------------------------------------------------------
 
 def get_scheduler_paused() -> bool:
+    """Return True if the scheduler is currently paused."""
     return bool(load().get("scheduler_paused", False))
 
 
 def set_scheduler_paused(paused: bool) -> None:
+    """Persist the scheduler paused flag."""
     data = load()
     data["scheduler_paused"] = bool(paused)
     save(data)
@@ -116,20 +157,24 @@ def set_scheduler_paused(paused: bool) -> None:
 # ---------------------------------------------------------------------------
 
 def get_next_poll_at() -> str | None:
+    """Return the ISO-format next-poll timestamp, or None if unset."""
     return load().get("next_poll_at")
 
 
 def set_next_poll_at(dt: datetime | None) -> None:
+    """Persist the next scheduled poll timestamp."""
     data = load()
     data["next_poll_at"] = dt.isoformat() if dt else None
     save(data)
 
 
 def get_last_poll_at() -> str | None:
+    """Return the ISO-format last-poll timestamp, or None if never polled."""
     return load().get("last_poll_at")
 
 
 def set_last_poll_at(dt: datetime) -> None:
+    """Persist the last-poll timestamp."""
     data = load()
     data["last_poll_at"] = dt.isoformat()
     save(data)
@@ -158,12 +203,14 @@ def consume_poll_trigger() -> bool:
 
 
 def mark_running() -> None:
+    """Create the running sentinel file to signal that the scheduler is active."""
     os.makedirs("data", exist_ok=True)
     with open(_RUNNING_SENTINEL, "w", encoding="utf-8") as f:
         f.write("")
 
 
 def mark_done() -> None:
+    """Remove the running sentinel file."""
     try:
         os.remove(_RUNNING_SENTINEL)
     except FileNotFoundError:
@@ -171,6 +218,7 @@ def mark_done() -> None:
 
 
 def is_running() -> bool:
+    """Return True if the running sentinel file exists."""
     return os.path.exists(_RUNNING_SENTINEL)
 
 
@@ -179,10 +227,12 @@ def is_running() -> bool:
 # ---------------------------------------------------------------------------
 
 def get_alert_config() -> dict[str, Any]:
+    """Return a copy of the persisted alert provider configuration."""
     return dict(load().get("alert_config", {}))
 
 
 def set_alert_config(cfg: dict[str, Any]) -> None:
+    """Validate and persist the alert provider configuration."""
     _validate_alert_config(cfg)
     data = load()
     data["alert_config"] = cfg
@@ -198,7 +248,7 @@ def _validate_interval_minutes(value: int) -> None:
         raise ValueError("poll_interval_minutes must be an integer between 1 and 10080.")
 
 
-_VALID_EXPORTERS: frozenset[str] = frozenset({"sqlite", "prometheus", "influxdb", "loki"})
+_VALID_EXPORTERS: frozenset[str] = frozenset(ExporterType)
 
 
 def _validate_enabled_exporters(value: list[str]) -> None:

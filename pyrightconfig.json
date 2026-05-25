@@ -1,10 +1,11 @@
 {
   "include": ["src/**", "tests/**"],
-  "exclude": ["frontend/**", ".venv/**"],
+  "exclude": ["frontend/**", ".venv/**", "**/node_modules", "**/__pycache__", "**/.*"],
   "pythonVersion": "3.12",
   "typeCheckingMode": "strict",
   "reportMissingTypeStubs": "none",
   "reportUnknownMemberType": "none",
   "reportUnknownVariableType": "none",
-  "reportUnknownArgumentType": "none"
+  "reportUnknownArgumentType": "none",
+  "reportPrivateUsage": "none"
 }

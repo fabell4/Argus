@@ -1,6 +1,6 @@
 services:
   argus-scheduler:
-    build: .
+    image: registry.greenflametech.net/argus:latest
     container_name: argus-scheduler
     restart: unless-stopped
     command: python -m src.main
@@ -15,7 +15,7 @@ services:
       retries: 3
 
   argus-api:
-    build: .
+    image: registry.greenflametech.net/argus:latest
     container_name: argus-api
     restart: unless-stopped
     command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000

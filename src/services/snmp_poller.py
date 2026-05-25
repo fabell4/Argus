@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
@@ -21,6 +22,17 @@ _UPS_MIB: dict[str, str] = {
 }
 
 
+@dataclass
+class SNMPv3Config:
+    """SNMPv3 authPriv credentials.  Pass to ``SNMPPoller`` via ``v3_config``."""
+
+    username: str
+    auth_protocol: str = "MD5"
+    auth_key: str = ""
+    priv_protocol: str = "DES"
+    priv_key: str = ""
+
+
 class SNMPPoller:
     """Polls a device via SNMP and returns a PowerSnapshot."""
 
@@ -36,12 +48,7 @@ class SNMPPoller:
         timeout: int | None = None,
         retries: int | None = None,
         max_retries: int = 1,
-        # SNMPv3 authPriv parameters (all optional; v1/v2c community used when empty)
-        v3_username: str = "",
-        v3_auth_protocol: str = "MD5",
-        v3_auth_key: str = "",
-        v3_priv_protocol: str = "DES",
-        v3_priv_key: str = "",
+        v3_config: SNMPv3Config | None = None,
     ) -> None:
         self._host = host
         self._port = port
@@ -53,11 +60,12 @@ class SNMPPoller:
         self._timeout = timeout if timeout is not None else config.SNMP_TIMEOUT
         self._retries = retries if retries is not None else config.SNMP_RETRIES
         self._max_retries = max_retries
-        self._v3_username = v3_username
-        self._v3_auth_protocol = v3_auth_protocol.upper()
-        self._v3_auth_key = v3_auth_key
-        self._v3_priv_protocol = v3_priv_protocol.upper()
-        self._v3_priv_key = v3_priv_key
+        _v3 = v3_config or SNMPv3Config(username="")
+        self._v3_username = _v3.username
+        self._v3_auth_protocol = _v3.auth_protocol.upper()
+        self._v3_auth_key = _v3.auth_key
+        self._v3_priv_protocol = _v3.priv_protocol.upper()
+        self._v3_priv_key = _v3.priv_key
 
     def poll(self) -> PowerSnapshot:
         """Perform SNMP GET for all OIDs and return a PowerSnapshot.
@@ -81,7 +89,7 @@ class SNMPPoller:
                     )
         if last_exc is not None:
             raise last_exc
-        return self._build_snapshot({})
+        return self._build_snapshot({})  # pragma: no cover
 
     def _snmp_get(self, oids: list[str]) -> dict[str, Any]:
         """Perform SNMP GET for each OID; returns {oid: value} dict."""
@@ -139,7 +147,7 @@ class SNMPPoller:
 
         return results
 
-    def _build_v3_auth(self, UsmUserData: type) -> object:  # type: ignore[type-arg]
+    def _build_v3_auth(self, usm_cls: type) -> object:  # type: ignore[type-arg]
         """Construct a UsmUserData instance for authPriv mode."""
         try:
             from pysnmp.hlapi import (  # type: ignore[import-untyped]
@@ -154,25 +162,25 @@ class SNMPPoller:
             )
         except ImportError:
             _LOG.warning("pysnmp SNMPv3 protocol constants unavailable; falling back.")
-            return UsmUserData(self._v3_username)
+            return usm_cls(self._v3_username)
 
-        _AUTH_MAP = {
+        _auth_map = {
             "MD5": usmHMACMD5AuthProtocol,
             "SHA": usmHMACSHAAuthProtocol,
             "SHA224": usmHMAC128SHA224AuthProtocol,
             "SHA256": usmHMAC192SHA256AuthProtocol,
             "NONE": usmNoAuthProtocol,
         }
-        _PRIV_MAP = {
+        _priv_map = {
             "DES": usmDESPrivProtocol,
             "AES": usmAesCfb128Protocol,
             "NONE": usmNoPrivProtocol,
         }
 
-        auth_proto = _AUTH_MAP.get(self._v3_auth_protocol, usmHMACMD5AuthProtocol)
-        priv_proto = _PRIV_MAP.get(self._v3_priv_protocol, usmDESPrivProtocol)
+        auth_proto = _auth_map.get(self._v3_auth_protocol, usmHMACMD5AuthProtocol)
+        priv_proto = _priv_map.get(self._v3_priv_protocol, usmDESPrivProtocol)
 
-        return UsmUserData(
+        return usm_cls(
             self._v3_username,
             authKey=self._v3_auth_key or None,
             privKey=self._v3_priv_key or None,

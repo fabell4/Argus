@@ -61,7 +61,7 @@ class EnergyAccumulatorExporter(BaseExporter):
             conn.commit()
 
     def _connect(self) -> sqlite3.Connection:
-        return sqlite3.connect(self._db_path, check_same_thread=False)
+        return sqlite3.connect(self._db_path, check_same_thread=False, timeout=30)
 
     def _init_prometheus(self) -> None:
         try:
@@ -73,7 +73,7 @@ class EnergyAccumulatorExporter(BaseExporter):
                 ["device_id"],
             )
         except ImportError:
-            pass
+            _LOG.debug("prometheus_client not installed; energy kWh counter disabled.")
 
     # ------------------------------------------------------------------
     # BaseExporter
@@ -123,7 +123,8 @@ class EnergyAccumulatorExporter(BaseExporter):
 
         if self._counter is not None:
             increment_kwh = increment_wh / 1000.0
-            self._counter.labels(device_id=device_id).inc(increment_kwh)  # type: ignore[attr-defined]
+            labels = self._counter.labels(device_id=device_id)  # type: ignore[attr-defined]
+            labels.inc(increment_kwh)
 
     # ------------------------------------------------------------------
     # Query helpers (used by GET /api/energy)

@@ -83,7 +83,7 @@ class SQLiteExporter(BaseExporter):
             conn.commit()
 
     def _connect(self) -> sqlite3.Connection:
-        return sqlite3.connect(self._db_path, check_same_thread=False)
+        return sqlite3.connect(self._db_path, check_same_thread=False, timeout=30)
 
     def export(self, snapshot: PowerSnapshot) -> None:
         with self._lock, self._connect() as conn:
@@ -161,4 +161,5 @@ class SQLiteExporter(BaseExporter):
             conn.isolation_level = ""
 
     def get_db_path(self) -> str:
+        """Return the filesystem path to the SQLite database file."""
         return self._db_path

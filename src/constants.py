@@ -21,6 +21,9 @@ class ExporterType(StrEnum):
     SQLITE = "sqlite"
     PROMETHEUS = "prometheus"
     INFLUXDB = "influxdb"
+    LOKI = "loki"
+    CSV = "csv"
+    ENERGY = "energy"
 
 
 class AlertProviderType(StrEnum):
@@ -48,3 +51,10 @@ class UPSStatus(StrEnum):
     DISCHARGING = "DISCHRG"
     BYPASS = "BYPASS"
     UNKNOWN = "UNKNOWN"
+
+
+class AlertSeverity(StrEnum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"

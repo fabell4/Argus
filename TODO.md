@@ -166,13 +166,13 @@ _Goal: harden alerting for power-specific events and complete pre-release code r
 
 ### Power-Aware Alerting
 
-- [ ] Power event alerting — fire alert notifications on `ON_BATTERY`, `BATTERY_LOW`, and
+- [x] Power event alerting — fire alert notifications on `ON_BATTERY`, `BATTERY_LOW`, and
   `DEVICE_OFFLINE` events (not just consecutive poll failures); configurable per event type
-- [ ] Alert severity levels — LOW / MEDIUM / HIGH / CRITICAL mapped to event types;
+- [x] Alert severity levels — LOW / MEDIUM / HIGH / CRITICAL mapped to event types;
   allow per-provider severity filter
-- [ ] Alert recovery notifications — send "power restored" and "device online" notifications
+- [x] Alert recovery notifications — send "power restored" and "device online" notifications
   when a device recovers; configurable cooldown per device
-- [ ] Alert test cooldown — enforce a minimum 10-second cooldown between test-alert requests
+- [x] Alert test cooldown — enforce a minimum 10-second cooldown between test-alert requests
   from the UI to prevent provider rate-limit exhaustion
 
 ### Quality Assurance
@@ -194,19 +194,19 @@ _Goal: harden alerting for power-specific events and complete pre-release code r
   - `SnapshotDispatcher` (fan-out, partial failure aggregation)
   - Frontend component tests (Dashboard, Devices, Events, Settings, Layout)
   - Integration tests (poll→SQLite, poll→Prometheus, event→alert lifecycle)
-- [ ] Security audit — SSRF protection in alert providers, API key validation, rate limiting
+- [x] Security audit — SSRF protection in alert providers, API key validation, rate limiting
   headers, input validation on all routes, CORS policy review, HTTPS-only scheme enforcement
   in all alert provider URL validation (reject `http://` URLs)
-- [ ] Defensive coding review — runtime config validation, shared state thread safety,
+- [x] Defensive coding review — runtime config validation, shared state thread safety,
   atomic exporter writes, alert provider URL validation, SQLite lock timeout handling
-- [ ] Best practices review — type hint modernization (Python 3.10+ style), magic string
+- [x] Best practices review — type hint modernization (Python 3.10+ style), magic string
   extraction, import organisation, duplicate logic elimination
-- [ ] Modernization review — StrEnum usage, context managers for SQLite, deprecated API removal
-- [ ] Error handling completeness — classify all exception sites; ensure no silent swallows;
+- [x] Modernization review — StrEnum usage, context managers for SQLite, deprecated API removal
+- [x] Error handling completeness — classify all exception sites; ensure no silent swallows;
   document error catalog and error handling conventions
-- [ ] Test coverage gaps — fix any `ResourceWarning` (unclosed DB connections), achieve ≥90%
+- [x] Test coverage gaps — fix any `ResourceWarning` (unclosed DB connections), achieve ≥90%
   Python coverage, ≥70% frontend coverage
-- [ ] Documentation accuracy — verify README matches actual commands, env vars, and API schemas;
+- [x] Documentation accuracy — verify README matches actual commands, env vars, and API schemas;
   update test counts and coverage stats
 
 > 🏁 **v1.0 release gate** — all Phase 4 items must be complete before tagging v1.0.
