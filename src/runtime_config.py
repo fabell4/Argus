@@ -208,7 +208,9 @@ def consume_poll_trigger() -> bool:
         try:
             os.remove(_RUN_TRIGGER)
         except FileNotFoundError:
-            _LOG.debug("Poll trigger file already removed (TOCTOU race — safe to ignore).")
+            _LOG.debug(
+                "Poll trigger file already removed (TOCTOU race — safe to ignore)."
+            )
         return True
     return False
 

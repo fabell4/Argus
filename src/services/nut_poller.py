@@ -6,7 +6,7 @@ import io
 import logging
 import socket
 from datetime import datetime, timezone
-from typing import Any, Callable
+from typing import Any, Callable, TypeVar
 
 from src.constants import DeviceType
 from src.models.power_snapshot import PowerSnapshot
@@ -35,6 +35,9 @@ _NUT_METADATA_KEYS: tuple[str, ...] = (
 )
 
 
+_T = TypeVar("_T")
+
+
 class NUTPoller:
     """Polls a single UPS device via NUT's simple text protocol."""
 
@@ -56,7 +59,7 @@ class NUTPoller:
         self._timeout = timeout
         self._max_retries = max_retries
 
-    def _with_retry[T](self, func: Callable[[], T], operation: str) -> T:
+    def _with_retry(self, func: Callable[[], _T], operation: str) -> _T:
         """Run *func*, retrying up to ``max_retries`` times on :class:`OSError`."""
         last_exc: OSError | None = None
         for attempt in range(self._max_retries + 1):
