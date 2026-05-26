@@ -36,7 +36,10 @@ class RuntimeConfigSchema(BaseModel):
     )
     nut_password: str = Field(
         default="",
-        description="Optional NUT password. Send an empty string to keep the existing stored password.",
+        description=(
+            "Optional NUT password. Send an empty string to keep the existing "
+            "stored password."
+        ),
     )
     nut_ups_name: str = Field(
         default="ups",

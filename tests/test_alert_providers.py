@@ -227,7 +227,9 @@ class TestGotifyProvider:
 
     def test_priority_override_used_in_send_event_alert(self) -> None:
         """Configured priority overrides severity-based Gotify priority."""
-        provider = GotifyProvider(url="https://gotify.example.com", token="tok", priority=2)
+        provider = GotifyProvider(
+            url="https://gotify.example.com", token="tok", priority=2
+        )
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
         with patch.object(
@@ -241,7 +243,9 @@ class TestGotifyProvider:
 
     def test_priority_override_used_in_send_alert(self) -> None:
         """Configured priority overrides the default 8 in send_alert."""
-        provider = GotifyProvider(url="https://gotify.example.com", token="tok", priority=5)
+        provider = GotifyProvider(
+            url="https://gotify.example.com", token="tok", priority=5
+        )
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
         with patch.object(
@@ -342,9 +346,7 @@ class TestNtfyProvider:
 
     def test_priority_override_used_instead_of_severity_mapping(self) -> None:
         """Configured priority overrides severity-based ntfy priority."""
-        provider = NtfyProvider(
-            url="https://ntfy.sh", topic="argus", priority="min"
-        )
+        provider = NtfyProvider(url="https://ntfy.sh", topic="argus", priority="min")
         mock_resp = MagicMock()
         mock_resp.raise_for_status = MagicMock()
         with patch.object(

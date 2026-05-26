@@ -55,7 +55,9 @@ def register_gotify_provider(manager: AlertManager) -> None:
         priority = int(priority_str) if priority_str else 0
         min_sev = _get_provider_min_severity(AlertProviderType.GOTIFY)
         manager.add_provider(
-            GotifyProvider(url=url, token=token, priority=priority, min_severity=min_sev)
+            GotifyProvider(
+                url=url, token=token, priority=priority, min_severity=min_sev
+            )
         )
         _LOG.info("Registered GotifyProvider.")
 
