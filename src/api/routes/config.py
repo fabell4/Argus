@@ -121,7 +121,7 @@ def get_config() -> RuntimeConfigSchema:
         nut_host=nut["host"],
         nut_port=nut["port"],
         nut_username=nut["username"],
-        nut_password="",  # never expose stored password
+        nut_password="",  # never expose stored password  # nosec B105
         nut_ups_name=nut["ups_name"],
         nut_auto_discover=nut["auto_discover"],
         device_offline_missed_polls=thr["device_offline_missed_polls"],
@@ -161,4 +161,4 @@ def update_config(body: RuntimeConfigSchema) -> RuntimeConfigSchema:
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
         ) from exc
     # Return with masked password
-    return RuntimeConfigSchema(**{**body.model_dump(), "nut_password": ""})
+    return RuntimeConfigSchema(**{**body.model_dump(), "nut_password": ""})  # nosec B105

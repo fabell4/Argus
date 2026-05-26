@@ -154,15 +154,15 @@ def _sanitize(data: dict[str, Any]) -> None:
         data["device_offline_missed_polls"] = config.DEVICE_OFFLINE_MISSED_POLLS
 
     # float thresholds
-    for _key, _default, _lo, _hi in (
+    for _fkey, _fdefault, _lo, _hi in (
         ("shutdown_battery_floor_pct", config.SHUTDOWN_BATTERY_FLOOR_PCT, 0.0, 99.0),
         ("threshold_load_percent", config.THRESHOLD_LOAD_PERCENT, 0.0, 100.0),
         ("threshold_temp_celsius", config.THRESHOLD_TEMP_CELSIUS, 0.0, 200.0),
     ):
         try:
-            data[_key] = max(_lo, min(_hi, float(data.get(_key, _default))))
+            data[_fkey] = max(_lo, min(_hi, float(data.get(_fkey, _fdefault))))
         except (TypeError, ValueError):
-            data[_key] = _default
+            data[_fkey] = _fdefault
 
 
 def save(data: dict[str, Any]) -> None:

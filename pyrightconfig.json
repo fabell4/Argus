@@ -7,5 +7,6 @@
   "reportUnknownMemberType": "none",
   "reportUnknownVariableType": "none",
   "reportUnknownArgumentType": "none",
-  "reportPrivateUsage": "none"
+  "reportPrivateUsage": "none",
+  "reportUnnecessaryIsInstance": "none"
 }
