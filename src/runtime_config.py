@@ -208,7 +208,7 @@ def consume_poll_trigger() -> bool:
         try:
             os.remove(_RUN_TRIGGER)
         except FileNotFoundError:
-            pass
+            _LOG.debug("Poll trigger file already removed (TOCTOU race — safe to ignore).")
         return True
     return False
 
@@ -225,7 +225,7 @@ def mark_done() -> None:
     try:
         os.remove(_RUNNING_SENTINEL)
     except FileNotFoundError:
-        pass
+        _LOG.debug("Running sentinel already absent (TOCTOU race — safe to ignore.)")
 
 
 def is_running() -> bool:

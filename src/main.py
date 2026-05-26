@@ -25,7 +25,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
 
 from src import config, runtime_config, shared_state
-from src.constants import DeviceType, PollerType
+from src.constants import DeviceType, ExporterType, PollerType
 from src.models.event import PowerEvent
 from src.models.power_snapshot import PowerSnapshot
 from src.exporter_registry import EXPORTER_REGISTRY
@@ -56,7 +56,12 @@ def build_dispatcher() -> SnapshotDispatcher:
     """Build a SnapshotDispatcher populated with all currently enabled exporters."""
     dispatcher = SnapshotDispatcher()
     for name in runtime_config.get_enabled_exporters():
-        factory = EXPORTER_REGISTRY.get(name)
+        try:
+            exporter_type = ExporterType(name)
+        except ValueError:
+            _LOG.warning("Unknown exporter: %s", name)
+            continue
+        factory = EXPORTER_REGISTRY.get(exporter_type)
         if factory is None:
             _LOG.warning("Unknown exporter: %s", name)
             continue

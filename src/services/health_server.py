@@ -22,8 +22,9 @@ class HealthServer:
         self._thread: threading.Thread | None = None
 
     def start(self) -> None:
+        """Start the health server on a background daemon thread."""
         handler_factory = self._make_handler
-        server = HTTPServer(("0.0.0.0", self._port), handler_factory)  # noqa: S104
+        server = HTTPServer(("0.0.0.0", self._port), handler_factory)  # noqa: S104  # nosec B104
 
         self._thread = threading.Thread(target=server.serve_forever, daemon=True)
         self._thread.start()
@@ -43,7 +44,8 @@ class _HealthHandler(BaseHTTPRequestHandler):
         self._status_fn = status_fn
         super().__init__(*args, **kwargs)
 
-    def do_GET(self) -> None:  # noqa: N802
+    def do_GET(self) -> None:  # noqa: N802  # pylint: disable=invalid-name
+        """Serve GET /health — return JSON health status."""
         if self.path != "/health":
             self.send_response(404)
             self.end_headers()
@@ -59,5 +61,5 @@ class _HealthHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(self, fmt: str, *args: Any) -> None:  # noqa: ANN401  # pylint: disable=arguments-differ
+    def log_message(self, _fmt: str, *args: Any) -> None:  # noqa: ANN401  # pylint: disable=arguments-differ
         """Suppress default HTTP access logging."""

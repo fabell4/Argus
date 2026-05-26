@@ -24,7 +24,7 @@ class InfluxDBExporter(BaseExporter):
 
     def _build_client(self) -> Any:
         try:
-            from influxdb_client import InfluxDBClient  # type: ignore[import-untyped]
+            from influxdb_client import InfluxDBClient
         except ImportError:
             _LOG.warning("influxdb-client not installed; InfluxDB exporter disabled.")
             return None
@@ -38,8 +38,8 @@ class InfluxDBExporter(BaseExporter):
         if self._client is None:
             return
         try:
-            from influxdb_client import Point  # type: ignore[import-untyped]
-            from influxdb_client.client.write_api import SYNCHRONOUS  # type: ignore[import-untyped]
+            from influxdb_client import Point
+            from influxdb_client.client.write_api import SYNCHRONOUS
         except ImportError:
             _LOG.warning("influxdb-client unavailable; skipping export.")
             return

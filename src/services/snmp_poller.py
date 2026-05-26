@@ -95,7 +95,7 @@ class SNMPPoller:
     def _snmp_get(self, oids: list[str]) -> dict[str, Any]:
         """Perform SNMP GET for each OID; returns {oid: value} dict."""
         try:
-            from pysnmp.hlapi import (  # type: ignore[import-untyped]
+            from pysnmp.hlapi import (
                 CommunityData,
                 ContextData,
                 ObjectIdentity,
@@ -105,7 +105,7 @@ class SNMPPoller:
                 UsmUserData,
                 getCmd,
             )
-            from pysnmp.proto.rfc1905 import noSuchObject  # type: ignore[import-untyped]
+            from pysnmp.proto.rfc1905 import noSuchObject
         except ImportError:
             _LOG.warning("pysnmp not installed; SNMP polling unavailable.")
             return {}
@@ -151,7 +151,7 @@ class SNMPPoller:
     def _build_v3_auth(self, usm_cls: type) -> object:
         """Construct a UsmUserData instance for authPriv mode."""
         try:
-            from pysnmp.hlapi import (  # type: ignore[import-untyped]
+            from pysnmp.hlapi import (
                 usmAesCfb128Protocol,
                 usmDESPrivProtocol,
                 usmHMAC128SHA224AuthProtocol,

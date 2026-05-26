@@ -88,7 +88,8 @@ INFLUXDB_ORG: str = _get_str("INFLUXDB_ORG", "")
 INFLUXDB_BUCKET: str = _get_str("INFLUXDB_BUCKET", "argus")
 
 # --- API ---
-API_HOST: str = _get_str("API_HOST", "0.0.0.0")
+# Intentional for container deployments; restrict to 127.0.0.1 via API_HOST env var in production.
+API_HOST: str = _get_str("API_HOST", "0.0.0.0")  # nosec B104
 API_PORT: int = _get_int("API_PORT", 8000)
 API_KEY: str = _get_str("API_KEY", "")
 ALLOWED_ORIGINS: list[str] = _get_csv_list(

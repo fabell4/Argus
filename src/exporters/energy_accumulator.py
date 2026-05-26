@@ -66,7 +66,7 @@ class EnergyAccumulatorExporter(BaseExporter):
 
     def _init_prometheus(self) -> None:
         try:
-            from prometheus_client import Counter  # type: ignore[import-untyped]
+            from prometheus_client import Counter
 
             self._counter = Counter(
                 "argus_energy_kwh_total",

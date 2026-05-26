@@ -15,21 +15,23 @@ _VALID_EXPORTERS = frozenset(ExporterType)
 
 
 class RuntimeConfigSchema(BaseModel):
+    """Serialised runtime configuration record."""
+
     poll_interval_minutes: int
     enabled_exporters: list[str]
     scanning_disabled: bool
     scheduler_paused: bool
 
     @field_validator("poll_interval_minutes")
-    @classmethod
-    def _validate_interval(cls, v: int) -> int:
+    @staticmethod
+    def _validate_interval(v: int) -> int:
         if v < 1 or v > 10080:
             raise ValueError("poll_interval_minutes must be between 1 and 10080.")
         return v
 
     @field_validator("enabled_exporters")
-    @classmethod
-    def _validate_exporters(cls, v: list[str]) -> list[str]:
+    @staticmethod
+    def _validate_exporters(v: list[str]) -> list[str]:
         invalid = set(v) - _VALID_EXPORTERS
         if invalid:
             raise ValueError(f"Unknown exporters: {invalid}. Valid: {_VALID_EXPORTERS}")
@@ -38,6 +40,7 @@ class RuntimeConfigSchema(BaseModel):
 
 @router.get("/config")
 def get_config() -> RuntimeConfigSchema:
+    """Return the current runtime configuration."""
     data = runtime_config.load()
     return RuntimeConfigSchema(
         poll_interval_minutes=data.get("poll_interval_minutes", 5),
@@ -52,6 +55,7 @@ def get_config() -> RuntimeConfigSchema:
     dependencies=[Depends(require_api_key)],
 )
 def update_config(body: RuntimeConfigSchema) -> RuntimeConfigSchema:
+    """Replace the runtime configuration with the provided values."""
     try:
         runtime_config.set_interval_minutes(body.poll_interval_minutes)
         runtime_config.set_enabled_exporters(body.enabled_exporters)

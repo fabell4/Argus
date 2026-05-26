@@ -6,13 +6,12 @@ import io
 import logging
 import socket
 from datetime import datetime, timezone
-from typing import Any, Callable, TypeVar
+from typing import Any, Callable
 
 from src.constants import DeviceType
 from src.models.power_snapshot import PowerSnapshot
 
 _LOG = logging.getLogger(__name__)
-_T = TypeVar("_T")
 
 # NUT variable → PowerSnapshot field mapping
 _NUT_FIELD_MAP: dict[str, str] = {
@@ -57,7 +56,7 @@ class NUTPoller:
         self._timeout = timeout
         self._max_retries = max_retries
 
-    def _with_retry(self, func: Callable[[], _T], operation: str) -> _T:
+    def _with_retry[T](self, func: Callable[[], T], operation: str) -> T:
         """Run *func*, retrying up to ``max_retries`` times on :class:`OSError`."""
         last_exc: OSError | None = None
         for attempt in range(self._max_retries + 1):
