@@ -59,9 +59,9 @@ class NUTPoller:
         self._timeout = timeout
         self._max_retries = max_retries
 
-    def _with_retry(
+    def _with_retry(  # NOSONAR python:S6796 — PEP 695 syntax requires Python 3.12+; CI runner uses 3.11
         self, func: Callable[[], _T], operation: str
-    ) -> _T:  # NOSONAR python:S6796 — PEP 695 syntax requires Python 3.12+; CI runner uses 3.11
+    ) -> _T:
         """Run *func*, retrying up to ``max_retries`` times on :class:`OSError`."""
         last_exc: OSError | None = None
         for attempt in range(self._max_retries + 1):
