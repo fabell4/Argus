@@ -207,13 +207,13 @@ describe('Settings', () => {
 
   it('renders poll interval input', () => {
     renderWithContext(<Settings />)
-    const input = screen.getByRole('spinbutton')
+    const input = screen.getByLabelText(/poll interval \(minutes\)/i)
     expect(input).toBeDefined()
   })
 
   it('shows poll interval value', () => {
     renderWithContext(<Settings />, { config: makeConfig({ poll_interval_minutes: 5 }) })
-    const input = screen.getByRole('spinbutton') as HTMLInputElement
+    const input = screen.getByLabelText(/poll interval \(minutes\)/i) as HTMLInputElement
     expect(input.value).toBe('5')
   })
 
@@ -235,9 +235,15 @@ describe('Settings', () => {
     expect(screen.getByRole('button', { name: /save changes/i })).toBeDefined()
   })
 
+  it('explains comma-separated UPS names', () => {
+    renderWithContext(<Settings />)
+    expect(screen.getByText('UPS Name(s)')).toBeDefined()
+    expect(screen.getByText(/comma-separated list such as ups1,ups2/i)).toBeDefined()
+  })
+
   it('updates poll interval input', () => {
     renderWithContext(<Settings />)
-    const input = screen.getByRole('spinbutton') as HTMLInputElement
+    const input = screen.getByLabelText(/poll interval \(minutes\)/i) as HTMLInputElement
     fireEvent.change(input, { target: { value: '10' } })
     expect(input.value).toBe('10')
   })

@@ -113,20 +113,20 @@ def _get_ups_names(discovery_poller: NUTPoller) -> list[str]:
     """Return the list of UPS names to poll, using auto-discovery when enabled."""
     nut = runtime_config.get_nut_config()
     if not nut["auto_discover"]:
-        return [nut["ups_name"]]
+        return nut["ups_names"]
     try:
         ups_names = discovery_poller.list_ups()
         if not ups_names:
             _LOG.warning(
                 "NUT auto-discover returned no devices; falling back to NUT_UPS_NAME."
             )
-            return [nut["ups_name"]]
+            return nut["ups_names"]
         return ups_names
     except (OSError, RuntimeError) as exc:
         _LOG.warning(
             "NUT auto-discover failed (%s); falling back to NUT_UPS_NAME.", exc
         )
-        return [nut["ups_name"]]
+        return nut["ups_names"]
 
 
 def _poll_single_device(
@@ -232,8 +232,8 @@ def poll_once() -> None:
     """Execute one full poll cycle: collect → dispatch → detect events.
 
     Supports multi-device via NUT auto-discovery (LIST UPS) when
-    ``NUT_AUTO_DISCOVER=true``; falls back to the single ``NUT_UPS_NAME``
-    when auto-discovery is disabled or the daemon is unreachable.
+    ``NUT_AUTO_DISCOVER=true``; falls back to the configured ``NUT_UPS_NAME``
+    list when auto-discovery is disabled or the daemon is unreachable.
     """
     runtime_config.mark_running()
     _LOG.info("Starting poll cycle.")

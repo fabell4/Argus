@@ -129,6 +129,7 @@ def test_get_ups_names_returns_config_name_when_auto_discover_false() -> None:
         return_value={
             "auto_discover": False,
             "ups_name": "ups1",
+            "ups_names": ["ups1"],
             "host": "localhost",
             "port": 3493,
             "username": "",
@@ -138,6 +139,29 @@ def test_get_ups_names_returns_config_name_when_auto_discover_false() -> None:
         result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
 
     assert result == ["ups1"]
+
+
+def test_get_ups_names_returns_multiple_config_names_when_auto_discover_false() -> None:
+    """_get_ups_names returns all configured names when auto-discover is disabled."""
+    from src import main as main_mod
+
+    mock_poller = MagicMock()
+
+    with patch(
+        "src.main.runtime_config.get_nut_config",
+        return_value={
+            "auto_discover": False,
+            "ups_name": "ups1,ups2",
+            "ups_names": ["ups1", "ups2"],
+            "host": "localhost",
+            "port": 3493,
+            "username": "",
+            "password": "",
+        },
+    ):
+        result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
+
+    assert result == ["ups1", "ups2"]
 
 
 def test_get_ups_names_uses_list_ups_when_auto_discover_true() -> None:
@@ -152,6 +176,7 @@ def test_get_ups_names_uses_list_ups_when_auto_discover_true() -> None:
         return_value={
             "auto_discover": True,
             "ups_name": "ups",
+            "ups_names": ["ups"],
             "host": "localhost",
             "port": 3493,
             "username": "",
@@ -174,7 +199,8 @@ def test_get_ups_names_falls_back_on_empty_list() -> None:
         "src.main.runtime_config.get_nut_config",
         return_value={
             "auto_discover": True,
-            "ups_name": "fallback_ups",
+            "ups_name": "fallback_ups_1,fallback_ups_2",
+            "ups_names": ["fallback_ups_1", "fallback_ups_2"],
             "host": "localhost",
             "port": 3493,
             "username": "",
@@ -183,7 +209,7 @@ def test_get_ups_names_falls_back_on_empty_list() -> None:
     ):
         result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
 
-    assert result == ["fallback_ups"]
+    assert result == ["fallback_ups_1", "fallback_ups_2"]
 
 
 def test_get_ups_names_falls_back_on_exception() -> None:
@@ -197,7 +223,8 @@ def test_get_ups_names_falls_back_on_exception() -> None:
         "src.main.runtime_config.get_nut_config",
         return_value={
             "auto_discover": True,
-            "ups_name": "fallback_ups",
+            "ups_name": "fallback_ups_1,fallback_ups_2",
+            "ups_names": ["fallback_ups_1", "fallback_ups_2"],
             "host": "localhost",
             "port": 3493,
             "username": "",
@@ -206,7 +233,7 @@ def test_get_ups_names_falls_back_on_exception() -> None:
     ):
         result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
 
-    assert result == ["fallback_ups"]
+    assert result == ["fallback_ups_1", "fallback_ups_2"]
 
 
 # ===========================================================================

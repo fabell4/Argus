@@ -132,14 +132,15 @@ export function Settings() {
           </label>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-sm text-slate-400">UPS Name</span>
+            <span className="text-sm text-slate-400">UPS Name(s)</span>
             <input
               type="text"
               value={form.nut_ups_name}
+              placeholder="ups1,ups2"
               onChange={(e) => setForm({ ...form, nut_ups_name: e.target.value })}
               className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
             />
-            <span className="text-xs text-slate-500">Used when auto-discover is off</span>
+            <span className="text-xs text-slate-500">Used when auto-discover is off. Enter a single UPS name or a comma-separated list such as ups1,ups2.</span>
           </label>
         </div>
 

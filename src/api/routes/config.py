@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 from src import runtime_config
 from src.api.auth import require_api_key
@@ -22,12 +22,21 @@ class RuntimeConfigSchema(BaseModel):
     scanning_disabled: bool
     scheduler_paused: bool
     # NUT connection
-    nut_host: str = "localhost"
-    nut_port: int = 3493
-    nut_username: str = ""
-    nut_password: str = ""
-    nut_ups_name: str = "ups"
-    nut_auto_discover: bool = True
+    nut_host: str = Field(default="localhost", description="NUT daemon hostname.")
+    nut_port: int = Field(default=3493, description="NUT daemon TCP port.")
+    nut_username: str = Field(default="", description="Optional NUT username.")
+    nut_password: str = Field(
+        default="",
+        description="Optional NUT password. Send an empty string to keep the existing stored password.",
+    )
+    nut_ups_name: str = Field(
+        default="ups",
+        description="UPS name, or a comma-separated list of UPS names when auto-discover is disabled.",
+    )
+    nut_auto_discover: bool = Field(
+        default=True,
+        description="When true, poll all devices returned by LIST UPS instead of nut_ups_name.",
+    )
     # Event thresholds
     device_offline_missed_polls: int = 3
     shutdown_battery_floor_pct: float = 5.0

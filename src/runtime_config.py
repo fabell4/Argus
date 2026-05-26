@@ -329,12 +329,15 @@ _VALID_EXPORTERS: frozenset[str] = frozenset(ExporterType)
 def get_nut_config() -> dict[str, Any]:
     """Return the effective NUT connection config (runtime file → env fallback)."""
     data = load()
+    ups_name = str(data.get("nut_ups_name") or config.NUT_UPS_NAME)
+    ups_names = [name.strip() for name in ups_name.split(",") if name.strip()]
     return {
         "host": str(data.get("nut_host") or config.NUT_HOST),
         "port": int(data.get("nut_port") or config.NUT_PORT),
         "username": str(data.get("nut_username", config.NUT_USERNAME)),
         "password": str(data.get("nut_password", config.NUT_PASSWORD)),
-        "ups_name": str(data.get("nut_ups_name") or config.NUT_UPS_NAME),
+        "ups_name": ups_name,
+        "ups_names": ups_names or [config.NUT_UPS_NAME],
         "auto_discover": bool(data.get("nut_auto_discover", config.NUT_AUTO_DISCOVER)),
     }
 
