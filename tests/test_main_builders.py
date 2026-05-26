@@ -124,9 +124,18 @@ def test_get_ups_names_returns_config_name_when_auto_discover_false() -> None:
 
     mock_poller = MagicMock()
 
-    with patch("src.main.config.NUT_AUTO_DISCOVER", False):
-        with patch("src.main.config.NUT_UPS_NAME", "ups1"):
-            result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
+    with patch(
+        "src.main.runtime_config.get_nut_config",
+        return_value={
+            "auto_discover": False,
+            "ups_name": "ups1",
+            "host": "localhost",
+            "port": 3493,
+            "username": "",
+            "password": "",
+        },
+    ):
+        result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
 
     assert result == ["ups1"]
 
@@ -138,7 +147,17 @@ def test_get_ups_names_uses_list_ups_when_auto_discover_true() -> None:
     mock_poller = MagicMock()
     mock_poller.list_ups.return_value = ["ups1", "ups2"]
 
-    with patch("src.main.config.NUT_AUTO_DISCOVER", True):
+    with patch(
+        "src.main.runtime_config.get_nut_config",
+        return_value={
+            "auto_discover": True,
+            "ups_name": "ups",
+            "host": "localhost",
+            "port": 3493,
+            "username": "",
+            "password": "",
+        },
+    ):
         result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
 
     assert result == ["ups1", "ups2"]
@@ -151,9 +170,18 @@ def test_get_ups_names_falls_back_on_empty_list() -> None:
     mock_poller = MagicMock()
     mock_poller.list_ups.return_value = []
 
-    with patch("src.main.config.NUT_AUTO_DISCOVER", True):
-        with patch("src.main.config.NUT_UPS_NAME", "fallback_ups"):
-            result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
+    with patch(
+        "src.main.runtime_config.get_nut_config",
+        return_value={
+            "auto_discover": True,
+            "ups_name": "fallback_ups",
+            "host": "localhost",
+            "port": 3493,
+            "username": "",
+            "password": "",
+        },
+    ):
+        result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
 
     assert result == ["fallback_ups"]
 
@@ -165,9 +193,18 @@ def test_get_ups_names_falls_back_on_exception() -> None:
     mock_poller = MagicMock()
     mock_poller.list_ups.side_effect = OSError("Connection refused")
 
-    with patch("src.main.config.NUT_AUTO_DISCOVER", True):
-        with patch("src.main.config.NUT_UPS_NAME", "fallback_ups"):
-            result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
+    with patch(
+        "src.main.runtime_config.get_nut_config",
+        return_value={
+            "auto_discover": True,
+            "ups_name": "fallback_ups",
+            "host": "localhost",
+            "port": 3493,
+            "username": "",
+            "password": "",
+        },
+    ):
+        result = main_mod._get_ups_names(mock_poller)  # noqa: SLF001
 
     assert result == ["fallback_ups"]
 

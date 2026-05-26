@@ -13,6 +13,7 @@ Responsibilities:
 from __future__ import annotations
 
 import logging
+import os
 import signal
 import socket
 import sys
@@ -45,6 +46,15 @@ _scheduler: BackgroundScheduler | None = None
 _event_processor: EventProcessor = EventProcessor()
 _health_server: HealthServer | None = None
 _scheduler_status: dict[str, Any] = {"status": "starting"}
+
+
+def _should_log_container_localhost_hint(host: str, exc: Exception) -> bool:
+    """Return True when a NUT localhost failure is likely caused by container networking."""
+    return (
+        isinstance(exc, ConnectionRefusedError)
+        and host in {"localhost", "127.0.0.1", "::1"}
+        and os.path.exists("/.dockerenv")
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -101,33 +111,35 @@ def build_scheduler(interval_minutes: int) -> BackgroundScheduler:
 
 def _get_ups_names(discovery_poller: NUTPoller) -> list[str]:
     """Return the list of UPS names to poll, using auto-discovery when enabled."""
-    if not config.NUT_AUTO_DISCOVER:
-        return [config.NUT_UPS_NAME]
+    nut = runtime_config.get_nut_config()
+    if not nut["auto_discover"]:
+        return [nut["ups_name"]]
     try:
         ups_names = discovery_poller.list_ups()
         if not ups_names:
             _LOG.warning(
                 "NUT auto-discover returned no devices; falling back to NUT_UPS_NAME."
             )
-            return [config.NUT_UPS_NAME]
+            return [nut["ups_name"]]
         return ups_names
     except (OSError, RuntimeError) as exc:
         _LOG.warning(
             "NUT auto-discover failed (%s); falling back to NUT_UPS_NAME.", exc
         )
-        return [config.NUT_UPS_NAME]
+        return [nut["ups_name"]]
 
 
 def _poll_single_device(
     ups_name: str,
 ) -> tuple[PowerSnapshot, list[PowerEvent]] | tuple[None, list[PowerEvent]]:
     """Poll one UPS device and return (snapshot, events), or (None, offline_events) on failure."""
-    device_id = f"nut:{ups_name}@{config.NUT_HOST}"
+    nut = runtime_config.get_nut_config()
+    device_id = f"nut:{ups_name}@{nut['host']}"
     poller = NUTPoller(
-        host=config.NUT_HOST,
-        port=config.NUT_PORT,
-        username=config.NUT_USERNAME,
-        password=config.NUT_PASSWORD,
+        host=nut["host"],
+        port=nut["port"],
+        username=nut["username"],
+        password=nut["password"],
         ups_name=ups_name,
     )
     try:
@@ -138,8 +150,8 @@ def _poll_single_device(
                 "name": metadata.get("ups.model") or ups_name,
                 "type": DeviceType.UPS,
                 "poller": PollerType.NUT,
-                "host": config.NUT_HOST,
-                "port": config.NUT_PORT,
+                "host": nut["host"],
+                "port": nut["port"],
                 "enabled": True,
                 "model": metadata.get("ups.model"),
                 "firmware": metadata.get("ups.firmware"),
@@ -158,6 +170,13 @@ def _poll_single_device(
         return snapshot, events
     except (OSError, RuntimeError) as exc:
         _LOG.exception("Poll failed for %s: %s", ups_name, exc)
+        if _should_log_container_localhost_hint(nut["host"], exc):
+            _LOG.warning(
+                "NUT_HOST=%s points to the scheduler container itself. In Docker, set "
+                "NUT_HOST to the NUT server container/service name, a reachable host "
+                "name, or host.docker.internal.",
+                nut["host"],
+            )
         offline_events = _event_processor.record_missed_poll(
             device_id, datetime.now(timezone.utc)
         )
@@ -219,11 +238,12 @@ def poll_once() -> None:
     runtime_config.mark_running()
     _LOG.info("Starting poll cycle.")
 
+    nut = runtime_config.get_nut_config()
     discovery_poller = NUTPoller(
-        host=config.NUT_HOST,
-        port=config.NUT_PORT,
-        username=config.NUT_USERNAME,
-        password=config.NUT_PASSWORD,
+        host=nut["host"],
+        port=nut["port"],
+        username=nut["username"],
+        password=nut["password"],
     )
     ups_names = _get_ups_names(discovery_poller)
     _LOG.debug("Polling %d UPS device(s): %s", len(ups_names), ups_names)

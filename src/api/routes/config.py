@@ -21,6 +21,18 @@ class RuntimeConfigSchema(BaseModel):
     enabled_exporters: list[str]
     scanning_disabled: bool
     scheduler_paused: bool
+    # NUT connection
+    nut_host: str = "localhost"
+    nut_port: int = 3493
+    nut_username: str = ""
+    nut_password: str = ""
+    nut_ups_name: str = "ups"
+    nut_auto_discover: bool = True
+    # Event thresholds
+    device_offline_missed_polls: int = 3
+    shutdown_battery_floor_pct: float = 5.0
+    threshold_load_percent: float = 90.0
+    threshold_temp_celsius: float = 50.0
 
     @field_validator("poll_interval_minutes")
     @staticmethod
@@ -37,16 +49,59 @@ class RuntimeConfigSchema(BaseModel):
             raise ValueError(f"Unknown exporters: {invalid}. Valid: {_VALID_EXPORTERS}")
         return v
 
+    @field_validator("nut_port")
+    @staticmethod
+    def _validate_nut_port(v: int) -> int:
+        if v < 1 or v > 65535:
+            raise ValueError("nut_port must be between 1 and 65535.")
+        return v
 
-@router.get("/config")
+    @field_validator("device_offline_missed_polls")
+    @staticmethod
+    def _validate_offline_polls(v: int) -> int:
+        if v < 1:
+            raise ValueError("device_offline_missed_polls must be at least 1.")
+        return v
+
+    @field_validator("shutdown_battery_floor_pct", "threshold_load_percent")
+    @staticmethod
+    def _validate_pct(v: float) -> float:
+        if v < 0 or v > 100:
+            raise ValueError("Percentage must be between 0 and 100.")
+        return v
+
+    @field_validator("threshold_temp_celsius")
+    @staticmethod
+    def _validate_temp(v: float) -> float:
+        if v < 0:
+            raise ValueError("threshold_temp_celsius must be >= 0.")
+        return v
+
+
+@router.get(
+    "/config",
+    dependencies=[Depends(require_api_key)],
+)
 def get_config() -> RuntimeConfigSchema:
     """Return the current runtime configuration."""
     data = runtime_config.load()
+    nut = runtime_config.get_nut_config()
+    thr = runtime_config.get_threshold_config()
     return RuntimeConfigSchema(
         poll_interval_minutes=data.get("poll_interval_minutes", 5),
         enabled_exporters=data.get("enabled_exporters", ["sqlite"]),
         scanning_disabled=data.get("scanning_disabled", False),
         scheduler_paused=data.get("scheduler_paused", False),
+        nut_host=nut["host"],
+        nut_port=nut["port"],
+        nut_username=nut["username"],
+        nut_password="",  # never expose stored password
+        nut_ups_name=nut["ups_name"],
+        nut_auto_discover=nut["auto_discover"],
+        device_offline_missed_polls=thr["device_offline_missed_polls"],
+        shutdown_battery_floor_pct=thr["shutdown_battery_floor_pct"],
+        threshold_load_percent=thr["threshold_load_percent"],
+        threshold_temp_celsius=thr["threshold_temp_celsius"],
     )
 
 
@@ -62,9 +117,24 @@ def update_config(body: RuntimeConfigSchema) -> RuntimeConfigSchema:
         data = runtime_config.load()
         data["scanning_disabled"] = body.scanning_disabled
         data["scheduler_paused"] = body.scheduler_paused
+        data["nut_host"] = body.nut_host
+        data["nut_port"] = body.nut_port
+        data["nut_username"] = body.nut_username
+        # Preserve existing password when client sends empty string
+        if body.nut_password:
+            data["nut_password"] = body.nut_password
+        data["nut_ups_name"] = body.nut_ups_name
+        data["nut_auto_discover"] = body.nut_auto_discover
+        data["device_offline_missed_polls"] = body.device_offline_missed_polls
+        data["shutdown_battery_floor_pct"] = body.shutdown_battery_floor_pct
+        data["threshold_load_percent"] = body.threshold_load_percent
+        data["threshold_temp_celsius"] = body.threshold_temp_celsius
         runtime_config.save(data)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
         ) from exc
-    return body
+    # Return with masked password
+    return RuntimeConfigSchema(
+        **{**body.model_dump(), "nut_password": ""}
+    )

@@ -5,7 +5,7 @@ from __future__ import annotations
 import logging
 from datetime import datetime, timezone
 
-from src import config
+from src import runtime_config
 from src.constants import EventType, UPSStatus
 from src.models.event import PowerEvent
 from src.models.power_snapshot import PowerSnapshot
@@ -68,7 +68,7 @@ class EventProcessor:
         """
         count = self._missed_counts.get(device_id, 0) + 1
         self._missed_counts[device_id] = count
-        threshold = config.DEVICE_OFFLINE_MISSED_POLLS
+        threshold = runtime_config.get_threshold_config()["device_offline_missed_polls"]
 
         events: list[PowerEvent] = []
         if count >= threshold and device_id not in self._offline_devices:
@@ -178,7 +178,7 @@ class EventProcessor:
         if not on_battery:
             return events
 
-        floor = config.SHUTDOWN_BATTERY_FLOOR_PCT
+        floor = runtime_config.get_threshold_config()["shutdown_battery_floor_pct"]
         if curr.battery_percent is not None and curr.battery_percent <= floor:
             self._shutdown_fired.add(curr.device_id)
             events.append(
@@ -207,7 +207,7 @@ class EventProcessor:
         events: list[PowerEvent] = []
         now = datetime.now(timezone.utc)
 
-        load_limit = config.THRESHOLD_LOAD_PERCENT
+        load_limit = runtime_config.get_threshold_config()["threshold_load_percent"]
         if (
             curr.load_percent is not None
             and prev.load_percent is not None
@@ -233,7 +233,7 @@ class EventProcessor:
                 curr.load_percent,
             )
 
-        temp_limit = config.THRESHOLD_TEMP_CELSIUS
+        temp_limit = runtime_config.get_threshold_config()["threshold_temp_celsius"]
         if (
             curr.temperature_c is not None
             and prev.temperature_c is not None

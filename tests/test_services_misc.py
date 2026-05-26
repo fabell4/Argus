@@ -1,10 +1,11 @@
 """Tests for device_registry, shared_state, alert_provider_factory, and exporter_registry."""
 
+# pylint: disable=missing-function-docstring,missing-class-docstring
+
 from __future__ import annotations
 
 from pathlib import Path
 from unittest.mock import patch
-
 
 from src import shared_state
 from src.services.alert_manager import AlertManager
@@ -223,7 +224,7 @@ class TestAlertProviderFactory:
         mgr = AlertManager()
         with patch(
             "src.services.alert_provider_factory._get_config_value",
-            side_effect=["https://gotify.example.com", "mytoken"],
+            side_effect=["https://gotify.example.com", "mytoken", "0"],
         ):
             register_gotify_provider(mgr)
         assert len(mgr._providers) == 1
@@ -245,7 +246,7 @@ class TestAlertProviderFactory:
         mgr = AlertManager()
         with patch(
             "src.services.alert_provider_factory._get_config_value",
-            side_effect=["https://ntfy.sh", "argus"],
+            side_effect=["https://ntfy.sh", "argus", "", "", ""],
         ):
             register_ntfy_provider(mgr)
         assert len(mgr._providers) == 1

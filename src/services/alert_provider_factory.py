@@ -51,8 +51,12 @@ def register_gotify_provider(manager: AlertManager) -> None:
     url = _get_config_value("gotify_url", config.GOTIFY_URL)
     token = _get_config_value("gotify_token", config.GOTIFY_TOKEN)
     if url and token:
+        priority_str = _get_config_value("gotify_priority", str(config.GOTIFY_PRIORITY))
+        priority = int(priority_str) if priority_str else 0
         min_sev = _get_provider_min_severity(AlertProviderType.GOTIFY)
-        manager.add_provider(GotifyProvider(url=url, token=token, min_severity=min_sev))
+        manager.add_provider(
+            GotifyProvider(url=url, token=token, priority=priority, min_severity=min_sev)
+        )
         _LOG.info("Registered GotifyProvider.")
 
 
@@ -61,8 +65,20 @@ def register_ntfy_provider(manager: AlertManager) -> None:
     url = _get_config_value("ntfy_url", config.NTFY_URL)
     topic = _get_config_value("ntfy_topic", config.NTFY_TOPIC)
     if url and topic:
+        token = _get_config_value("ntfy_token", config.NTFY_TOKEN)
+        priority = _get_config_value("ntfy_priority", config.NTFY_PRIORITY)
+        tags = _get_config_value("ntfy_tags", config.NTFY_TAGS)
         min_sev = _get_provider_min_severity(AlertProviderType.NTFY)
-        manager.add_provider(NtfyProvider(url=url, topic=topic, min_severity=min_sev))
+        manager.add_provider(
+            NtfyProvider(
+                url=url,
+                topic=topic,
+                token=token,
+                priority=priority,
+                tags=tags,
+                min_severity=min_sev,
+            )
+        )
         _LOG.info("Registered NtfyProvider.")
 
 

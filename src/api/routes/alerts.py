@@ -39,6 +39,7 @@ class GotifyProviderConfig(BaseModel):
     enabled: bool = True
     url: _HttpsUrl
     token: str
+    priority: int = 0
     min_severity: AlertSeverity = AlertSeverity.LOW
 
 
@@ -49,6 +50,9 @@ class NtfyProviderConfig(BaseModel):
     enabled: bool = True
     url: _HttpsUrl
     topic: str
+    token: str = ""
+    priority: str = ""
+    tags: str = ""
     min_severity: AlertSeverity = AlertSeverity.LOW
 
 

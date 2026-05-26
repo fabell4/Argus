@@ -34,6 +34,10 @@ const makeDevice = () => ({
 const makeConfig = () => ({
   poll_interval_minutes: 1, enabled_exporters: ['sqlite'],
   scanning_disabled: false, scheduler_paused: false,
+  nut_host: 'localhost', nut_port: 3493, nut_username: '', nut_password: '',
+  nut_ups_name: 'ups', nut_auto_discover: true,
+  device_offline_missed_polls: 3, shutdown_battery_floor_pct: 5,
+  threshold_load_percent: 90, threshold_temp_celsius: 50,
 })
 
 const makeHealth = () => ({

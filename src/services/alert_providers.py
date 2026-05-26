@@ -179,12 +179,14 @@ class GotifyProvider(AlertProvider):
         self,
         url: str,
         token: str,
+        priority: int = 0,
         timeout: int = _DEFAULT_TIMEOUT,
         min_severity: str = "low",
     ) -> None:
         super().__init__(min_severity)
         self._url = _validate_provider_url(url).rstrip("/")
         self._token = token
+        self._priority = priority
         self._timeout = timeout
         self._session = _build_session()
 
@@ -196,7 +198,7 @@ class GotifyProvider(AlertProvider):
             json={
                 "title": f"Argus: {failure_count} consecutive poll failures",
                 "message": f"{last_error}\n\n{timestamp.isoformat()}",
-                "priority": 8,
+                "priority": self._priority or 8,
             },
             headers={"X-Gotify-Key": self._token},
             timeout=self._timeout,
@@ -211,7 +213,7 @@ class GotifyProvider(AlertProvider):
         severity: str,
         timestamp: datetime,
     ) -> None:
-        priority = _GOTIFY_PRIORITY.get(severity, 5)
+        priority = self._priority or _GOTIFY_PRIORITY.get(severity, 5)
         resp = self._session.post(
             f"{self._url}/message",
             json={
@@ -232,14 +234,30 @@ class NtfyProvider(AlertProvider):
         self,
         url: str,
         topic: str,
+        token: str = "",
+        priority: str = "",
+        tags: str = "",
         timeout: int = _DEFAULT_TIMEOUT,
         min_severity: str = "low",
     ) -> None:
         super().__init__(min_severity)
         self._url = _validate_provider_url(url).rstrip("/")
         self._topic = topic
+        self._token = token
+        self._priority = priority
+        self._tags = tags
         self._timeout = timeout
         self._session = _build_session()
+
+    def _build_headers(self, title: str, priority: str, tags: str) -> dict[str, str]:
+        headers: dict[str, str] = {
+            "Title": title,
+            "Priority": self._priority or priority,
+            "Tags": self._tags or tags,
+        }
+        if self._token:
+            headers["Authorization"] = f"Bearer {self._token}"
+        return headers
 
     def send_alert(
         self, failure_count: int, last_error: str, timestamp: datetime
@@ -247,11 +265,7 @@ class NtfyProvider(AlertProvider):
         resp = self._session.post(
             f"{self._url}/{self._topic}",
             data=f"Argus: {failure_count} consecutive poll failures\n{last_error}",
-            headers={
-                "Title": "Argus Alert",
-                "Priority": "high",
-                "Tags": "warning",
-            },
+            headers=self._build_headers("Argus Alert", "high", "warning"),
             timeout=self._timeout,
         )
         resp.raise_for_status()
@@ -268,11 +282,7 @@ class NtfyProvider(AlertProvider):
         resp = self._session.post(
             f"{self._url}/{self._topic}",
             data=message,
-            headers={
-                "Title": "Argus Power Alert",
-                "Priority": ntfy_priority,
-                "Tags": event_type,
-            },
+            headers=self._build_headers("Argus Power Alert", ntfy_priority, event_type),
             timeout=self._timeout,
         )
         resp.raise_for_status()

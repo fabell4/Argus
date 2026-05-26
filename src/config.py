@@ -110,8 +110,12 @@ ALERT_TEST_COOLDOWN_SECONDS: int = _get_int("ALERT_TEST_COOLDOWN_SECONDS", 10)
 WEBHOOK_URL: str = _get_str("WEBHOOK_URL", "")
 GOTIFY_URL: str = _get_str("GOTIFY_URL", "")
 GOTIFY_TOKEN: str = _get_str("GOTIFY_TOKEN", "")
+GOTIFY_PRIORITY: int = _get_int("GOTIFY_PRIORITY", 0)
 NTFY_URL: str = _get_str("NTFY_URL", "")
 NTFY_TOPIC: str = _get_str("NTFY_TOPIC", "")
+NTFY_TOKEN: str = _get_str("NTFY_TOKEN", "")
+NTFY_PRIORITY: str = _get_str("NTFY_PRIORITY", "")
+NTFY_TAGS: str = _get_str("NTFY_TAGS", "")
 APPRISE_URL: str = _get_str("APPRISE_URL", "")
 
 # --- Loki ---

@@ -53,6 +53,18 @@ export interface RuntimeConfig {
   enabled_exporters: string[]
   scanning_disabled: boolean
   scheduler_paused: boolean
+  // NUT connection
+  nut_host: string
+  nut_port: number
+  nut_username: string
+  nut_password: string  // always "" from GET; "" in PUT means keep existing
+  nut_ups_name: string
+  nut_auto_discover: boolean
+  // Event thresholds
+  device_offline_missed_polls: number
+  shutdown_battery_floor_pct: number
+  threshold_load_percent: number
+  threshold_temp_celsius: number
 }
 
 export interface SnapshotsPage {

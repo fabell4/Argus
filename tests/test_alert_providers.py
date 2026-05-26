@@ -225,6 +225,32 @@ class TestGotifyProvider:
             payload = mock_post.call_args.kwargs["json"]
             assert payload["priority"] == 8
 
+    def test_priority_override_used_in_send_event_alert(self) -> None:
+        """Configured priority overrides severity-based Gotify priority."""
+        provider = GotifyProvider(url="https://gotify.example.com", token="tok", priority=2)
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status = MagicMock()
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "battery_low", "dev-1", "Battery low", "critical", _ts()
+            )
+            payload = mock_post.call_args.kwargs["json"]
+            assert payload["priority"] == 2
+
+    def test_priority_override_used_in_send_alert(self) -> None:
+        """Configured priority overrides the default 8 in send_alert."""
+        provider = GotifyProvider(url="https://gotify.example.com", token="tok", priority=5)
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status = MagicMock()
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_alert(3, "timeout", _ts())
+            payload = mock_post.call_args.kwargs["json"]
+            assert payload["priority"] == 5
+
 
 # ---------------------------------------------------------------------------
 # NtfyProvider
@@ -287,6 +313,78 @@ class TestNtfyProvider:
             )
             headers = mock_post.call_args.kwargs["headers"]
             assert headers["Tags"] == "on_battery"
+
+    def test_token_adds_authorization_header(self) -> None:
+        """When token is set, Authorization: Bearer <token> is sent."""
+        provider = NtfyProvider(
+            url="https://ntfy.example.com", topic="argus", token="mytoken"
+        )
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status = MagicMock()
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_alert(1, "err", _ts())
+            headers = mock_post.call_args.kwargs["headers"]
+            assert headers.get("Authorization") == "Bearer mytoken"
+
+    def test_no_token_omits_authorization_header(self) -> None:
+        """When no token is set, Authorization header is absent."""
+        provider = NtfyProvider(url="https://ntfy.sh", topic="argus")
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status = MagicMock()
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_alert(1, "err", _ts())
+            headers = mock_post.call_args.kwargs["headers"]
+            assert "Authorization" not in headers
+
+    def test_priority_override_used_instead_of_severity_mapping(self) -> None:
+        """Configured priority overrides severity-based ntfy priority."""
+        provider = NtfyProvider(
+            url="https://ntfy.sh", topic="argus", priority="min"
+        )
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status = MagicMock()
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "battery_low", "dev-1", "Battery low", "critical", _ts()
+            )
+            headers = mock_post.call_args.kwargs["headers"]
+            assert headers["Priority"] == "min"
+
+    def test_tags_override_replaces_event_type_tag(self) -> None:
+        """Configured tags replace the default event_type tag."""
+        provider = NtfyProvider(
+            url="https://ntfy.sh", topic="argus", tags="warning,rotating_light"
+        )
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status = MagicMock()
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_event_alert(
+                "on_battery", "dev-1", "On battery", "high", _ts()
+            )
+            headers = mock_post.call_args.kwargs["headers"]
+            assert headers["Tags"] == "warning,rotating_light"
+
+    def test_tags_override_used_in_send_alert(self) -> None:
+        """Configured tags replace the default 'warning' tag in send_alert."""
+        provider = NtfyProvider(
+            url="https://ntfy.sh", topic="argus", tags="ups,critical"
+        )
+        mock_resp = MagicMock()
+        mock_resp.raise_for_status = MagicMock()
+        with patch.object(
+            provider._session, "post", return_value=mock_resp
+        ) as mock_post:
+            provider.send_alert(3, "timeout", _ts())
+            headers = mock_post.call_args.kwargs["headers"]
+            assert headers["Tags"] == "ups,critical"
 
 
 # ---------------------------------------------------------------------------

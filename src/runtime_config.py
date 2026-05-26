@@ -30,6 +30,18 @@ _DEFAULTS: dict[str, Any] = {
     "next_poll_at": None,
     "last_poll_at": None,
     "alert_config": {},
+    # NUT connection
+    "nut_host": config.NUT_HOST,
+    "nut_port": config.NUT_PORT,
+    "nut_username": config.NUT_USERNAME,
+    "nut_password": config.NUT_PASSWORD,
+    "nut_ups_name": config.NUT_UPS_NAME,
+    "nut_auto_discover": config.NUT_AUTO_DISCOVER,
+    # Event thresholds
+    "device_offline_missed_polls": config.DEVICE_OFFLINE_MISSED_POLLS,
+    "shutdown_battery_floor_pct": config.SHUTDOWN_BATTERY_FLOOR_PCT,
+    "threshold_load_percent": config.THRESHOLD_LOAD_PERCENT,
+    "threshold_temp_celsius": config.THRESHOLD_TEMP_CELSIUS,
 }
 
 
@@ -101,6 +113,47 @@ def _sanitize(data: dict[str, Any]) -> None:
     # alert_config: must be a dict
     if not isinstance(data.get("alert_config"), dict):
         data["alert_config"] = {}
+
+    # nut_host: non-empty string
+    if not isinstance(data.get("nut_host"), str) or not data["nut_host"].strip():
+        data["nut_host"] = config.NUT_HOST
+
+    # nut_port: int in [1, 65535]
+    try:
+        data["nut_port"] = max(1, min(65535, int(data.get("nut_port", config.NUT_PORT))))
+    except (TypeError, ValueError):
+        data["nut_port"] = config.NUT_PORT
+
+    # nut string fields
+    for _key, _default in (
+        ("nut_username", config.NUT_USERNAME),
+        ("nut_password", config.NUT_PASSWORD),
+        ("nut_ups_name", config.NUT_UPS_NAME),
+    ):
+        if not isinstance(data.get(_key), str):
+            data[_key] = _default
+
+    # nut_auto_discover: bool
+    data["nut_auto_discover"] = bool(data.get("nut_auto_discover", config.NUT_AUTO_DISCOVER))
+
+    # device_offline_missed_polls: int >= 1
+    try:
+        data["device_offline_missed_polls"] = max(
+            1, int(data.get("device_offline_missed_polls", config.DEVICE_OFFLINE_MISSED_POLLS))
+        )
+    except (TypeError, ValueError):
+        data["device_offline_missed_polls"] = config.DEVICE_OFFLINE_MISSED_POLLS
+
+    # float thresholds
+    for _key, _default, _lo, _hi in (
+        ("shutdown_battery_floor_pct", config.SHUTDOWN_BATTERY_FLOOR_PCT, 0.0, 99.0),
+        ("threshold_load_percent", config.THRESHOLD_LOAD_PERCENT, 0.0, 100.0),
+        ("threshold_temp_celsius", config.THRESHOLD_TEMP_CELSIUS, 0.0, 200.0),
+    ):
+        try:
+            data[_key] = max(_lo, min(_hi, float(data.get(_key, _default))))
+        except (TypeError, ValueError):
+            data[_key] = _default
 
 
 def save(data: dict[str, Any]) -> None:
@@ -266,6 +319,48 @@ def _validate_interval_minutes(value: int) -> None:
 
 
 _VALID_EXPORTERS: frozenset[str] = frozenset(ExporterType)
+
+
+# ---------------------------------------------------------------------------
+# NUT config
+# ---------------------------------------------------------------------------
+
+
+def get_nut_config() -> dict[str, Any]:
+    """Return the effective NUT connection config (runtime file → env fallback)."""
+    data = load()
+    return {
+        "host": str(data.get("nut_host") or config.NUT_HOST),
+        "port": int(data.get("nut_port") or config.NUT_PORT),
+        "username": str(data.get("nut_username", config.NUT_USERNAME)),
+        "password": str(data.get("nut_password", config.NUT_PASSWORD)),
+        "ups_name": str(data.get("nut_ups_name") or config.NUT_UPS_NAME),
+        "auto_discover": bool(data.get("nut_auto_discover", config.NUT_AUTO_DISCOVER)),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Event threshold config
+# ---------------------------------------------------------------------------
+
+
+def get_threshold_config() -> dict[str, Any]:
+    """Return the effective event threshold config (runtime file → env fallback)."""
+    data = load()
+    return {
+        "device_offline_missed_polls": int(
+            data.get("device_offline_missed_polls", config.DEVICE_OFFLINE_MISSED_POLLS)
+        ),
+        "shutdown_battery_floor_pct": float(
+            data.get("shutdown_battery_floor_pct", config.SHUTDOWN_BATTERY_FLOOR_PCT)
+        ),
+        "threshold_load_percent": float(
+            data.get("threshold_load_percent", config.THRESHOLD_LOAD_PERCENT)
+        ),
+        "threshold_temp_celsius": float(
+            data.get("threshold_temp_celsius", config.THRESHOLD_TEMP_CELSIUS)
+        ),
+    }
 
 
 def _validate_enabled_exporters(value: list[str]) -> None:
