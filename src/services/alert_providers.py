@@ -234,7 +234,7 @@ class NtfyProvider(AlertProvider):
         self,
         url: str,
         topic: str,
-        token: str = "",
+        token: str | None = None,
         priority: str = "",
         tags: str = "",
         timeout: int = _DEFAULT_TIMEOUT,
