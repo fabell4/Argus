@@ -6,6 +6,8 @@ from enum import StrEnum
 
 
 class DeviceType(StrEnum):
+    """Device categories used across telemetry and API payloads."""
+
     UPS = "ups"
     PDU = "pdu"
     SENSOR = "sensor"
@@ -13,12 +15,16 @@ class DeviceType(StrEnum):
 
 
 class PollerType(StrEnum):
+    """Polling backends supported by Argus."""
+
     NUT = "nut"
     SNMP = "snmp"
     HTTP = "http"
 
 
 class ExporterType(StrEnum):
+    """Snapshot exporter backends available at runtime."""
+
     SQLITE = "sqlite"
     PROMETHEUS = "prometheus"
     INFLUXDB = "influxdb"
@@ -28,6 +34,8 @@ class ExporterType(StrEnum):
 
 
 class AlertProviderType(StrEnum):
+    """Notification provider types supported by the alert manager."""
+
     WEBHOOK = "webhook"
     GOTIFY = "gotify"
     NTFY = "ntfy"
@@ -35,6 +43,8 @@ class AlertProviderType(StrEnum):
 
 
 class EventType(StrEnum):
+    """Event kinds emitted by event processing and state transitions."""
+
     ON_BATTERY = "on_battery"
     POWER_RESTORED = "power_restored"
     BATTERY_LOW = "battery_low"
@@ -45,6 +55,8 @@ class EventType(StrEnum):
 
 
 class UPSStatus(StrEnum):
+    """Canonical UPS status flags normalized from NUT telemetry."""
+
     ONLINE = "OL"
     ON_BATTERY = "OB"
     LOW_BATTERY = "LB"
@@ -55,6 +67,8 @@ class UPSStatus(StrEnum):
 
 
 class AlertSeverity(StrEnum):
+    """Severity levels used to classify alert notifications."""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"

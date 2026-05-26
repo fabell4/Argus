@@ -299,7 +299,7 @@ def test_validate_environment_warns_on_unreachable_url() -> None:
     """_validate_environment logs a warning but does not raise on unreachable URL."""
     import src.main as main_mod
 
-    with patch("src.main.config.WEBHOOK_URL", "http://unreachable.example.com"):
+    with patch("src.main.config.WEBHOOK_URL", "https://unreachable.example.com"):
         with patch("src.main.config.GOTIFY_URL", ""):
             with patch("src.main.config.NTFY_URL", ""):
                 with patch("src.main.config.APPRISE_URL", ""):
@@ -317,9 +317,10 @@ def test_validate_environment_warns_on_unreachable_url() -> None:
 
 def test_exporter_registry_csv_factory() -> None:
     """The csv factory in EXPORTER_REGISTRY returns a non-None exporter."""
+    from src.constants import ExporterType
     from src.exporter_registry import EXPORTER_REGISTRY
 
-    factory = EXPORTER_REGISTRY.get("csv")
+    factory = EXPORTER_REGISTRY.get(ExporterType.CSV)
     assert factory is not None
     result = factory()
     assert result is not None
@@ -327,12 +328,13 @@ def test_exporter_registry_csv_factory() -> None:
 
 def test_exporter_registry_energy_factory() -> None:
     """The energy factory in EXPORTER_REGISTRY returns a non-None exporter."""
+    from src.constants import ExporterType
     from src.exporter_registry import EXPORTER_REGISTRY
 
     with patch(
         "src.exporters.energy_accumulator.EnergyAccumulatorExporter._init_prometheus"
     ):
-        factory = EXPORTER_REGISTRY.get("energy")
+        factory = EXPORTER_REGISTRY.get(ExporterType.ENERGY)
         assert factory is not None
         result = factory()
     assert result is not None
@@ -340,22 +342,24 @@ def test_exporter_registry_energy_factory() -> None:
 
 def test_exporter_registry_loki_factory_when_url_set() -> None:
     """The loki factory is present in EXPORTER_REGISTRY when a URL is configured."""
+    from src.constants import ExporterType
     from src.exporter_registry import EXPORTER_REGISTRY
 
-    with patch("src.config.LOKI_URL", "http://loki.example.com"):
-        factory = EXPORTER_REGISTRY.get("loki")
+    with patch("src.config.LOKI_URL", "https://loki.example.com"):
+        factory = EXPORTER_REGISTRY.get(ExporterType.LOKI)
         assert factory is not None
 
 
 def test_exporter_registry_influxdb_factory_when_url_set() -> None:
     """The influxdb factory is present in EXPORTER_REGISTRY when credentials are configured."""
+    from src.constants import ExporterType
     from src.exporter_registry import EXPORTER_REGISTRY
 
-    with patch("src.config.INFLUXDB_URL", "http://influxdb:8086"):
+    with patch("src.config.INFLUXDB_URL", "https://influxdb:8086"):
         with patch("src.config.INFLUXDB_TOKEN", "tok"):
             with patch("src.config.INFLUXDB_ORG", "org"):
                 with patch("src.config.INFLUXDB_BUCKET", "bkt"):
-                    factory = EXPORTER_REGISTRY.get("influxdb")
+                    factory = EXPORTER_REGISTRY.get(ExporterType.INFLUXDB)
                     assert factory is not None
 
 
