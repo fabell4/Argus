@@ -120,7 +120,9 @@ def _sanitize(data: dict[str, Any]) -> None:
 
     # nut_port: int in [1, 65535]
     try:
-        data["nut_port"] = max(1, min(65535, int(data.get("nut_port", config.NUT_PORT))))
+        data["nut_port"] = max(
+            1, min(65535, int(data.get("nut_port", config.NUT_PORT)))
+        )
     except (TypeError, ValueError):
         data["nut_port"] = config.NUT_PORT
 
@@ -134,12 +136,19 @@ def _sanitize(data: dict[str, Any]) -> None:
             data[_key] = _default
 
     # nut_auto_discover: bool
-    data["nut_auto_discover"] = bool(data.get("nut_auto_discover", config.NUT_AUTO_DISCOVER))
+    data["nut_auto_discover"] = bool(
+        data.get("nut_auto_discover", config.NUT_AUTO_DISCOVER)
+    )
 
     # device_offline_missed_polls: int >= 1
     try:
         data["device_offline_missed_polls"] = max(
-            1, int(data.get("device_offline_missed_polls", config.DEVICE_OFFLINE_MISSED_POLLS))
+            1,
+            int(
+                data.get(
+                    "device_offline_missed_polls", config.DEVICE_OFFLINE_MISSED_POLLS
+                )
+            ),
         )
     except (TypeError, ValueError):
         data["device_offline_missed_polls"] = config.DEVICE_OFFLINE_MISSED_POLLS

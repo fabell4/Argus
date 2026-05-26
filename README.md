@@ -97,11 +97,19 @@ docker compose up --build -d
 - App (API + frontend): <http://localhost:8000>
 - API health: <http://localhost:8000/api/health>
 
-If Argus runs in Docker, `NUT_HOST=localhost` points to the scheduler container itself, not to your UPS/NUT daemon. Set `NUT_HOST` to the NUT container or service name on the same Compose network, or to a reachable hostname such as `host.docker.internal`.
+If Argus runs in Docker, `NUT_HOST=localhost` points to the scheduler
+container itself, not to your UPS/NUT daemon. Set `NUT_HOST` to the NUT
+container or service name on the same Compose network, or to a reachable
+hostname such as `host.docker.internal`.
 
-To pin specific UPS devices instead of using discovery, set `NUT_AUTO_DISCOVER=false` and provide a comma-separated `NUT_UPS_NAME` such as `ups1,ups2`.
+To pin specific UPS devices instead of using discovery, set
+`NUT_AUTO_DISCOVER=false` and provide a comma-separated `NUT_UPS_NAME` such as
+`ups1,ups2`.
 
-Starting an InfluxDB container is not enough to enable exporting. You must also include `influxdb` in `ENABLED_EXPORTERS` and set `INFLUXDB_URL`, `INFLUXDB_TOKEN`, and `INFLUXDB_ORG`. The `DOCKER_INFLUXDB_INIT_*` variables only initialize the optional InfluxDB container.
+Starting an InfluxDB container is not enough to enable exporting. You must also
+include `influxdb` in `ENABLED_EXPORTERS` and set `INFLUXDB_URL`,
+`INFLUXDB_TOKEN`, and `INFLUXDB_ORG`. The `DOCKER_INFLUXDB_INIT_*` variables
+only initialize the optional InfluxDB container.
 
 The backend CORS policy is configured with `ALLOWED_ORIGINS` (comma-separated).
 

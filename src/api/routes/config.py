@@ -22,20 +22,35 @@ class RuntimeConfigSchema(BaseModel):
     scanning_disabled: bool
     scheduler_paused: bool
     # NUT connection
-    nut_host: str = Field(default="localhost", description="NUT daemon hostname.")
-    nut_port: int = Field(default=3493, description="NUT daemon TCP port.")
-    nut_username: str = Field(default="", description="Optional NUT username.")
+    nut_host: str = Field(
+        default="localhost",
+        description="NUT daemon hostname.",
+    )
+    nut_port: int = Field(
+        default=3493,
+        description="NUT daemon TCP port.",
+    )
+    nut_username: str = Field(
+        default="",
+        description="Optional NUT username.",
+    )
     nut_password: str = Field(
         default="",
         description="Optional NUT password. Send an empty string to keep the existing stored password.",
     )
     nut_ups_name: str = Field(
         default="ups",
-        description="UPS name, or a comma-separated list of UPS names when auto-discover is disabled.",
+        description=(
+            "UPS name, or a comma-separated list of UPS names when "
+            "auto-discover is disabled."
+        ),
     )
     nut_auto_discover: bool = Field(
         default=True,
-        description="When true, poll all devices returned by LIST UPS instead of nut_ups_name.",
+        description=(
+            "When true, poll all devices returned by LIST UPS instead of "
+            "nut_ups_name."
+        ),
     )
     # Event thresholds
     device_offline_missed_polls: int = 3
@@ -144,6 +159,4 @@ def update_config(body: RuntimeConfigSchema) -> RuntimeConfigSchema:
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
         ) from exc
     # Return with masked password
-    return RuntimeConfigSchema(
-        **{**body.model_dump(), "nut_password": ""}
-    )
+    return RuntimeConfigSchema(**{**body.model_dump(), "nut_password": ""})
