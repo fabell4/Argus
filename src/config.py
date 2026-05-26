@@ -50,7 +50,7 @@ POLL_ON_STARTUP: bool = _get_bool("POLL_ON_STARTUP", True)
 NUT_HOST: str = _get_str("NUT_HOST", "localhost")
 NUT_PORT: int = _get_int("NUT_PORT", 3493)
 NUT_USERNAME: str = _get_str("NUT_USERNAME", "")
-NUT_PASSWORD: str = _get_str("NUT_PASSWORD", "")
+NUT_PASSWORD: str = _get_str("NUT_PASSWORD", "")  # nosec B105
 NUT_UPS_NAME: str = _get_str("NUT_UPS_NAME", "ups")
 NUT_AUTO_DISCOVER: bool = _get_bool("NUT_AUTO_DISCOVER", True)
 
