@@ -46,7 +46,7 @@ class NUTPoller:
         host: str = "localhost",
         port: int = 3493,
         username: str = "",
-        password: str = "",
+        password: str = "",  # nosec B107 — empty default is intentional; NUT auth is optional
         ups_name: str = "ups",
         timeout: int = 10,
         max_retries: int = 1,
@@ -59,7 +59,9 @@ class NUTPoller:
         self._timeout = timeout
         self._max_retries = max_retries
 
-    def _with_retry(self, func: Callable[[], _T], operation: str) -> _T:
+    def _with_retry(
+        self, func: Callable[[], _T], operation: str
+    ) -> _T:  # NOSONAR python:S6796 — PEP 695 syntax requires Python 3.12+; CI runner uses 3.11
         """Run *func*, retrying up to ``max_retries`` times on :class:`OSError`."""
         last_exc: OSError | None = None
         for attempt in range(self._max_retries + 1):
@@ -75,7 +77,8 @@ class NUTPoller:
                         self._max_retries + 1,
                         exc,
                     )
-        assert last_exc is not None
+        if last_exc is None:  # pragma: no cover — loop always executes at least once
+            raise RuntimeError(f"{operation} failed with no recorded exception")
         raise last_exc
 
     def poll(self) -> PowerSnapshot:
