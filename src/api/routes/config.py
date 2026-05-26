@@ -51,8 +51,7 @@ class RuntimeConfigSchema(BaseModel):
     nut_auto_discover: bool = Field(
         default=True,
         description=(
-            "When true, poll all devices returned by LIST UPS instead of "
-            "nut_ups_name."
+            "When true, poll all devices returned by LIST UPS instead of nut_ups_name."
         ),
     )
     # Event thresholds
