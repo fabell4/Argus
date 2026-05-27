@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Bell, Send, CheckCircle, AlertCircle } from 'lucide-react'
+import { Bell, Plus, Trash2, Send, CheckCircle, AlertCircle } from 'lucide-react'
 import { getAlerts, updateAlerts, testAlert } from '@/lib/api'
 import type {
   AlertConfig,
@@ -19,16 +19,16 @@ const inputCls =
 const labelCls = 'text-xs text-slate-500 mb-1'
 
 // ─── per-type provider state ──────────────────────────────────────────────────
+// Webhooks support multiple instances; the other three are single-instance.
 
 interface ProviderStates {
-  webhook: WebhookProvider
-  gotify: GotifyProvider
-  ntfy: NtfyProvider
-  apprise: AppriseProvider
+  webhooks: WebhookProvider[]
+  gotify:   GotifyProvider
+  ntfy:     NtfyProvider
+  apprise:  AppriseProvider
 }
 
-const DEFAULT_PROVIDERS: ProviderStates = {
-  webhook: { type: 'webhook', enabled: false, url: '' },
+const DEFAULT_SINGLE: Omit<ProviderStates, 'webhooks'> = {
   gotify:  { type: 'gotify',  enabled: false, url: '', token: '', priority: 5 },
   ntfy:    { type: 'ntfy',    enabled: false, url: '', topic: '', token: '', priority: '', tags: '' },
   apprise: { type: 'apprise', enabled: false, url: '' },
@@ -36,22 +36,30 @@ const DEFAULT_PROVIDERS: ProviderStates = {
 
 function toStates(providers: AlertProvider[]): ProviderStates {
   const s: ProviderStates = {
-    webhook: { ...DEFAULT_PROVIDERS.webhook },
-    gotify:  { ...DEFAULT_PROVIDERS.gotify },
-    ntfy:    { ...DEFAULT_PROVIDERS.ntfy },
-    apprise: { ...DEFAULT_PROVIDERS.apprise },
+    webhooks: [],
+    gotify:   { ...DEFAULT_SINGLE.gotify },
+    ntfy:     { ...DEFAULT_SINGLE.ntfy },
+    apprise:  { ...DEFAULT_SINGLE.apprise },
   }
   for (const p of providers) {
-    if (p.type === 'webhook') s.webhook = { ...p }
-    else if (p.type === 'gotify') s.gotify = { ...p }
-    else if (p.type === 'ntfy') s.ntfy = { ...p }
+    if (p.type === 'webhook') s.webhooks.push({ ...p })
+    else if (p.type === 'gotify')  s.gotify  = { ...p }
+    else if (p.type === 'ntfy')    s.ntfy    = { ...p }
     else if (p.type === 'apprise') s.apprise = { ...p }
   }
   return s
 }
 
+// Only send providers with a non-empty URL to avoid backend validation errors.
 function fromStates(s: ProviderStates): AlertProvider[] {
-  return [s.webhook, s.gotify, s.ntfy, s.apprise]
+  const result: AlertProvider[] = []
+  for (const w of s.webhooks) {
+    if (w.url) result.push(w)
+  }
+  if (s.gotify.url)  result.push(s.gotify)
+  if (s.ntfy.url)    result.push(s.ntfy)
+  if (s.apprise.url) result.push(s.apprise)
+  return result
 }
 
 // ─── toggle switch ────────────────────────────────────────────────────────────
@@ -127,7 +135,12 @@ export function Alerts() {
     alert_recovery_notifications: true,
     recovery_cooldown_seconds: 300,
   })
-  const [providers, setProviders] = useState<ProviderStates>({ ...DEFAULT_PROVIDERS })
+  const [providers, setProviders] = useState<ProviderStates>({
+    webhooks: [],
+    gotify:   { ...DEFAULT_SINGLE.gotify },
+    ntfy:     { ...DEFAULT_SINGLE.ntfy },
+    apprise:  { ...DEFAULT_SINGLE.apprise },
+  })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
@@ -176,13 +189,24 @@ export function Alerts() {
     }
   }
 
-  const patchWebhook  = (patch: Partial<WebhookProvider>)  => setProviders((s) => ({ ...s, webhook:  { ...s.webhook,  ...patch } }))
+  const patchWebhook  = (i: number, patch: Partial<WebhookProvider>) =>
+    setProviders((s) => {
+      const webhooks = [...s.webhooks]
+      webhooks[i] = { ...webhooks[i], ...patch }
+      return { ...s, webhooks }
+    })
+  const addWebhook    = () => setProviders((s) => ({ ...s, webhooks: [...s.webhooks, { type: 'webhook', enabled: true, url: '' }] }))
+  const removeWebhook = (i: number) => setProviders((s) => ({ ...s, webhooks: s.webhooks.filter((_, j) => j !== i) }))
+
   const patchGotify   = (patch: Partial<GotifyProvider>)   => setProviders((s) => ({ ...s, gotify:   { ...s.gotify,   ...patch } }))
   const patchNtfy     = (patch: Partial<NtfyProvider>)     => setProviders((s) => ({ ...s, ntfy:     { ...s.ntfy,     ...patch } }))
   const patchApprise  = (patch: Partial<AppriseProvider>)  => setProviders((s) => ({ ...s, apprise:  { ...s.apprise,  ...patch } }))
 
-  const enabledCount = [providers.webhook, providers.gotify, providers.ntfy, providers.apprise]
-    .filter((p) => p.enabled).length
+  const enabledCount =
+    providers.webhooks.filter((w) => w.enabled && w.url).length +
+    (providers.gotify.enabled  && providers.gotify.url  ? 1 : 0) +
+    (providers.ntfy.enabled    && providers.ntfy.url    ? 1 : 0) +
+    (providers.apprise.enabled && providers.apprise.url ? 1 : 0)
 
   if (loading) return <p className="text-slate-500 text-sm p-4">Loading alert config…</p>
 
@@ -292,25 +316,56 @@ export function Alerts() {
         </div>
 
         <div className="space-y-3">
-          {/* Webhook */}
-          <ProviderSection
-            title="Webhook"
-            description="POST a JSON payload to any HTTP endpoint"
-            enabled={providers.webhook.enabled}
-            onToggle={(v) => patchWebhook({ enabled: v })}
-          >
-            <div>
-              <label htmlFor="webhook-url" className={labelCls}>URL</label>
-              <input
-                id="webhook-url"
-                type="url"
-                placeholder="https://hooks.example.com/..."
-                value={providers.webhook.url}
-                onChange={(e) => patchWebhook({ url: e.target.value })}
-                className={inputCls}
-              />
+          {/* Webhooks — multiple instances supported */}
+          <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-800/60">
+              <div>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Webhook</p>
+                <p className="text-xs text-slate-400 mt-0.5">POST a JSON payload to any HTTP endpoint</p>
+              </div>
+              <button
+                type="button"
+                onClick={addWebhook}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 text-violet-400 text-xs font-medium border border-violet-500/30 transition-colors"
+              >
+                <Plus size={12} />
+                Add
+              </button>
             </div>
-          </ProviderSection>
+
+            {providers.webhooks.length === 0 && (
+              <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-700">
+                <p className="text-xs text-slate-400">No webhooks configured. Click Add to create one.</p>
+              </div>
+            )}
+
+            {providers.webhooks.map((w, i) => (
+              // eslint-disable-next-line react/no-array-index-key
+              <div key={`webhook-${i}`} className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Webhook #{i + 1}</span>
+                  <div className="flex items-center gap-2">
+                    <Toggle checked={w.enabled} onChange={(v) => patchWebhook(i, { enabled: v })} />
+                    <button
+                      type="button"
+                      onClick={() => removeWebhook(i)}
+                      className="text-slate-400 hover:text-red-400 transition-colors"
+                      aria-label="Remove webhook"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                </div>
+                <input
+                  type="url"
+                  placeholder="https://hooks.example.com/..."
+                  value={w.url}
+                  onChange={(e) => patchWebhook(i, { url: e.target.value })}
+                  className={inputCls}
+                />
+              </div>
+            ))}
+          </div>
 
           {/* Gotify */}
           <ProviderSection

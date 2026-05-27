@@ -208,18 +208,20 @@ describe('Alerts page', () => {
     vi.mocked(apiModule.getAlerts).mockResolvedValue(makeAlertConfig())
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
-    expect(screen.getAllByRole('switch').length).toBe(4)
+    // Gotify, ntfy, Apprise each have a toggle; webhooks are dynamic (none by default)
+    expect(screen.getAllByRole('switch').length).toBe(3)
   })
 
-  it('enables a webhook provider via toggle', async () => {
+  it('enables a gotify provider via toggle', async () => {
     vi.mocked(apiModule.getAlerts).mockResolvedValue(makeAlertConfig())
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
-    const webhookSwitch = screen.getAllByRole('switch')[0]
-    expect(webhookSwitch.getAttribute('aria-checked')).toBe('false')
-    fireEvent.click(webhookSwitch)
-    expect(webhookSwitch.getAttribute('aria-checked')).toBe('true')
-    expect(screen.getByPlaceholderText(/hooks\.example\.com/i)).toBeDefined()
+    // With no webhooks, first switch is Gotify
+    const gotifySwitch = screen.getAllByRole('switch')[0]
+    expect(gotifySwitch.getAttribute('aria-checked')).toBe('false')
+    fireEvent.click(gotifySwitch)
+    expect(gotifySwitch.getAttribute('aria-checked')).toBe('true')
+    expect(screen.getByText(/server url/i)).toBeDefined()
   })
 
   it('handles API load error', async () => {
@@ -291,10 +293,11 @@ describe('Alerts page', () => {
 
   it('disables a provider via toggle', async () => {
     vi.mocked(apiModule.getAlerts).mockResolvedValue(makeAlertConfig({
-      providers: [{ type: 'webhook', enabled: true, url: '' }],
+      providers: [{ type: 'webhook', enabled: true, url: 'https://example.com' }],
     }))
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
+    // Webhook entry toggle is the first switch in the DOM
     const webhookSwitch = screen.getAllByRole('switch')[0]
     expect(webhookSwitch.getAttribute('aria-checked')).toBe('true')
     fireEvent.click(webhookSwitch)
