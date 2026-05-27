@@ -57,8 +57,8 @@ function toStates(providers: AlertProvider[]): ProviderStates {
 // Only send providers with a non-empty URL to avoid backend validation errors.
 function fromStates(s: ProviderStates): AlertProvider[] {
   const result: AlertProvider[] = []
-  for (const { _key: _, ...w } of s.webhooks) {
-    if (w.url) result.push(w)
+  for (const entry of s.webhooks) {
+    if (entry.url) result.push({ type: entry.type, enabled: entry.enabled, url: entry.url })
   }
   if (s.gotify.url)  result.push(s.gotify)
   if (s.ntfy.url)    result.push(s.ntfy)
