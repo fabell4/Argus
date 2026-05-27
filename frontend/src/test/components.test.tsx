@@ -63,6 +63,11 @@ const makeAlertConfig = (overrides = {}) => ({
   providers: [],
   failure_threshold: 3,
   cooldown_seconds: 3600,
+  alert_on_battery: true,
+  alert_on_battery_low: true,
+  alert_on_device_offline: true,
+  alert_recovery_notifications: true,
+  recovery_cooldown_seconds: 300,
   ...overrides,
 })
 

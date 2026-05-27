@@ -9,8 +9,8 @@ import type { AlertConfig, AlertProvider } from '@/types'
 function emptyProvider(type: AlertProvider['type']): AlertProvider {
   switch (type) {
     case 'webhook': return { type: 'webhook', enabled: true, url: '' }
-    case 'gotify':  return { type: 'gotify',  enabled: true, url: '', token: '' }
-    case 'ntfy':    return { type: 'ntfy',    enabled: true, url: '', topic: '' }
+    case 'gotify':  return { type: 'gotify',  enabled: true, url: '', token: '', priority: 0 }
+    case 'ntfy':    return { type: 'ntfy',    enabled: true, url: '', topic: '', token: '', priority: '', tags: '' }
     case 'apprise': return { type: 'apprise', enabled: true, url: '' }
   }
 }
@@ -88,34 +88,86 @@ function ProviderForm({
             />
           </div>
 
-          {/* Gotify token */}
+          {/* Gotify token + priority */}
           {provider.type === 'gotify' && (
-            <div>
-              <label htmlFor={`token-${index}`} className={labelCls}>Token</label>
-              <input
-                id={`token-${index}`}
-                type="password"
-                placeholder="Gotify app token"
-                value={provider.token}
-                onChange={(e) => onChange({ ...provider, token: e.target.value })}
-                className={inputCls}
-              />
-            </div>
+            <>
+              <div>
+                <label htmlFor={`token-${index}`} className={labelCls}>Token</label>
+                <input
+                  id={`token-${index}`}
+                  type="password"
+                  placeholder="Gotify app token"
+                  value={provider.token}
+                  onChange={(e) => onChange({ ...provider, token: e.target.value })}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label htmlFor={`priority-${index}`} className={labelCls}>Priority (0 = default)</label>
+                <input
+                  id={`priority-${index}`}
+                  type="number"
+                  min={0}
+                  max={10}
+                  placeholder="0"
+                  value={provider.priority ?? 0}
+                  onChange={(e) => onChange({ ...provider, priority: Number(e.target.value) })}
+                  className={`${inputCls} w-24`}
+                />
+              </div>
+            </>
           )}
 
-          {/* ntfy topic */}
+          {/* ntfy topic / token / priority / tags */}
           {provider.type === 'ntfy' && (
-            <div>
-              <label htmlFor={`topic-${index}`} className={labelCls}>Topic</label>
-              <input
-                id={`topic-${index}`}
-                type="text"
-                placeholder="my-argus-alerts"
-                value={provider.topic}
-                onChange={(e) => onChange({ ...provider, topic: e.target.value })}
-                className={inputCls}
-              />
-            </div>
+            <>
+              <div>
+                <label htmlFor={`topic-${index}`} className={labelCls}>Topic</label>
+                <input
+                  id={`topic-${index}`}
+                  type="text"
+                  placeholder="my-argus-alerts"
+                  value={provider.topic}
+                  onChange={(e) => onChange({ ...provider, topic: e.target.value })}
+                  className={inputCls}
+                />
+              </div>
+              <div>
+                <label htmlFor={`ntfy-token-${index}`} className={labelCls}>Token (optional)</label>
+                <input
+                  id={`ntfy-token-${index}`}
+                  type="password"
+                  placeholder="tk_..."
+                  value={provider.token ?? ''}
+                  onChange={(e) => onChange({ ...provider, token: e.target.value })}
+                  className={inputCls}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label htmlFor={`ntfy-priority-${index}`} className={labelCls}>Priority (optional)</label>
+                  <input
+                    id={`ntfy-priority-${index}`}
+                    type="text"
+                    placeholder="default"
+                    value={provider.priority ?? ''}
+                    onChange={(e) => onChange({ ...provider, priority: e.target.value })}
+                    className={inputCls}
+                  />
+                </div>
+                <div>
+                  <label htmlFor={`ntfy-tags-${index}`} className={labelCls}>Tags (optional)</label>
+                  <input
+                    id={`ntfy-tags-${index}`}
+                    type="text"
+                    placeholder="warning,rotating_light"
+                    value={provider.tags ?? ''}
+                    onChange={(e) => onChange({ ...provider, tags: e.target.value })}
+                    className={inputCls}
+                  />
+                </div>
+              </div>
+            </>
           )}
         </div>
       )}
@@ -130,6 +182,11 @@ export function Alerts() {
     providers: [],
     failure_threshold: 3,
     cooldown_seconds: 3600,
+    alert_on_battery: true,
+    alert_on_battery_low: true,
+    alert_on_device_offline: true,
+    alert_recovery_notifications: true,
+    recovery_cooldown_seconds: 300,
   })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -250,7 +307,40 @@ export function Alerts() {
               className={`${inputCls} w-28`}
             />
           </label>
+          <label className="flex flex-col gap-1.5">
+            <span className={labelCls}>Recovery cooldown (seconds before re-alerting after recovery)</span>
+            <input
+              type="number"
+              min={60}
+              max={86400}
+              value={config.recovery_cooldown_seconds}
+              onChange={(e) => setConfig((c) => ({ ...c, recovery_cooldown_seconds: Number(e.target.value) }))}
+              className={`${inputCls} w-28`}
+            />
+          </label>
         </div>
+      </div>
+
+      {/* Alert events */}
+      <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
+        <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Alert events</h2>
+        <p className="text-xs text-slate-500">Choose which conditions trigger notifications.</p>
+        {([
+          ['alert_on_battery',           'UPS on battery (power failure)'],
+          ['alert_on_battery_low',       'Battery low'],
+          ['alert_on_device_offline',    'Device offline / unreachable'],
+          ['alert_recovery_notifications', 'Recovery notifications (when condition clears)'],
+        ] as [keyof AlertConfig, string][]).map(([key, label]) => (
+          <label key={key} className="flex items-center gap-2 cursor-pointer text-sm text-slate-700 dark:text-slate-300">
+            <input
+              type="checkbox"
+              checked={Boolean(config[key])}
+              onChange={(e) => setConfig((c) => ({ ...c, [key]: e.target.checked }))}
+              className="accent-violet-500"
+            />
+            {label}
+          </label>
+        ))}
       </div>
 
       {/* Providers */}

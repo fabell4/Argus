@@ -134,7 +134,11 @@ def create_app() -> FastAPI:
 
         @application.get("/{full_path:path}", include_in_schema=False)
         def spa_fallback(full_path: str) -> FileResponse:
-            """Serve the SPA for all unmatched routes."""
+            """Serve root-level static files when they exist; fall back to SPA index."""
+            candidate = os.path.normpath(os.path.join(_STATIC_DIR, full_path))
+            base = os.path.normpath(_STATIC_DIR)
+            if candidate.startswith(base + os.sep) and os.path.isfile(candidate):
+                return FileResponse(candidate)
             _LOG.debug("SPA fallback serving index.html for path: /%s", full_path)
             return FileResponse(f"{_STATIC_DIR}/index.html")
 

@@ -87,15 +87,67 @@ class AlertConfigSchema(BaseModel):
     recovery_cooldown_seconds: int = Field(default=300, ge=60, le=86400)
 
 
+def _providers_from_env() -> list[AlertProviderConfig]:
+    """Build alert providers from environment variables for first-run seeding."""
+    from src import config as _cfg
+
+    providers: list[AlertProviderConfig] = []
+    try:
+        if _cfg.WEBHOOK_URL:
+            providers.append(WebhookProviderConfig(url=_cfg.WEBHOOK_URL))
+    except (ValueError, TypeError):
+        pass
+    try:
+        if _cfg.GOTIFY_URL and _cfg.GOTIFY_TOKEN:
+            providers.append(
+                GotifyProviderConfig(
+                    url=_cfg.GOTIFY_URL,
+                    token=_cfg.GOTIFY_TOKEN,
+                    priority=_cfg.GOTIFY_PRIORITY,
+                )
+            )
+    except (ValueError, TypeError):
+        pass
+    try:
+        if _cfg.NTFY_URL and _cfg.NTFY_TOPIC:
+            providers.append(
+                NtfyProviderConfig(
+                    url=_cfg.NTFY_URL,
+                    topic=_cfg.NTFY_TOPIC,
+                    token=_cfg.NTFY_TOKEN,
+                    priority=_cfg.NTFY_PRIORITY,
+                    tags=_cfg.NTFY_TAGS,
+                )
+            )
+    except (ValueError, TypeError):
+        pass
+    try:
+        if _cfg.APPRISE_URL:
+            providers.append(AppriseProviderConfig(url=_cfg.APPRISE_URL))
+    except (ValueError, TypeError):
+        pass
+    return providers
+
+
 @router.get("/alerts")
 def get_alerts() -> AlertConfigSchema:
-    """Return the current alert configuration."""
+    """Return the current alert configuration.
+
+    When no alert config has been saved yet, providers are seeded from
+    environment variables so the form is pre-filled on first use.
+    """
     data = runtime_config.load()
     alert_cfg: dict[str, Any] = data.get("alert_config", {})
     try:
-        return AlertConfigSchema(**alert_cfg) if alert_cfg else AlertConfigSchema()
+        schema = AlertConfigSchema(**alert_cfg) if alert_cfg else AlertConfigSchema()
     except (TypeError, ValueError):
-        return AlertConfigSchema()
+        schema = AlertConfigSchema()
+    # Seed from env vars only on first use (alert_config never saved → empty dict).
+    if not alert_cfg:
+        env_providers = _providers_from_env()
+        if env_providers:
+            schema = schema.model_copy(update={"providers": env_providers})
+    return schema
 
 
 @router.put("/alerts", dependencies=[Depends(require_api_key)])

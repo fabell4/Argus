@@ -97,6 +97,7 @@ export interface GotifyProvider {
   enabled: boolean
   url: string
   token: string
+  priority?: number
 }
 
 export interface NtfyProvider {
@@ -104,6 +105,9 @@ export interface NtfyProvider {
   enabled: boolean
   url: string
   topic: string
+  token?: string
+  priority?: string
+  tags?: string
 }
 
 export interface AppriseProvider {
@@ -118,4 +122,9 @@ export interface AlertConfig {
   providers: AlertProvider[]
   failure_threshold: number
   cooldown_seconds: number
+  alert_on_battery: boolean
+  alert_on_battery_low: boolean
+  alert_on_device_offline: boolean
+  alert_recovery_notifications: boolean
+  recovery_cooldown_seconds: number
 }
