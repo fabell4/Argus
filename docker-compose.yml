@@ -86,6 +86,11 @@ services:
       APPRISE_URL: "${APPRISE_URL:-}"
       # --- Health server ---
       HEALTH_PORT: "${HEALTH_PORT:-9100}"
+    # Allow the scheduler container to reach services on the Docker host
+    # (e.g. a locally-installed NUT daemon). On Linux, Docker does not
+    # resolve host.docker.internal by default — this mapping fixes that.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     env_file:
       - path: .env
         required: false

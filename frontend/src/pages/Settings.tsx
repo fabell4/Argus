@@ -4,20 +4,28 @@ import { useArgus } from '@/hooks/useArgus'
 import type { RuntimeConfig } from '@/types'
 
 export function Settings() {
-  const { config, updateConfig } = useArgus()
+  const { config, updateConfig, refresh } = useArgus()
   const [form, setForm] = useState<RuntimeConfig | null>(null)
   const [saved, setSaved] = useState(false)
+  const [apiKey, setApiKey] = useState(() => localStorage.getItem('argus_api_key') ?? '')
+  const [apiKeySaved, setApiKeySaved] = useState(false)
 
   useEffect(() => {
     if (config) setForm(config)
   }, [config])
 
-  if (!form) return <p className="text-slate-500 text-sm">Loading settings…</p>
-
   const handleSave = async () => {
+    if (!form) return
     await updateConfig(form)
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
+  }
+
+  const handleSaveApiKey = () => {
+    localStorage.setItem('argus_api_key', apiKey)
+    setApiKeySaved(true)
+    setTimeout(() => setApiKeySaved(false), 2000)
+    refresh()
   }
 
   return (
@@ -28,6 +36,32 @@ export function Settings() {
     >
       <h1 className="text-2xl font-bold text-slate-100">Settings</h1>
 
+      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
+        <h2 className="text-lg font-semibold text-slate-200">API Access</h2>
+        <p className="text-xs text-slate-500">
+          Enter your Argus API key to authenticate requests. The key is stored only in your
+          browser's local storage.
+        </p>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-sm text-slate-400">API Key</span>
+          <input
+            type="password"
+            value={apiKey}
+            placeholder="Paste your API key here"
+            onChange={(e) => setApiKey(e.target.value)}
+            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+          />
+        </label>
+        <button
+          onClick={handleSaveApiKey}
+          className="px-4 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-medium transition-colors"
+        >
+          {apiKeySaved ? 'Saved!' : 'Save API Key'}
+        </button>
+      </div>
+
+      {form ? (
+        <>
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
         <h2 className="text-lg font-semibold text-slate-200">Scheduler</h2>
 
@@ -220,6 +254,10 @@ export function Settings() {
           {saved ? 'Saved!' : 'Save Changes'}
         </button>
       </div>
+        </>
+      ) : (
+        <p className="text-slate-500 text-sm">Loading settings… (set your API key above to connect)</p>
+      )}
     </motion.div>
   )
 }

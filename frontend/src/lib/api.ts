@@ -11,14 +11,13 @@ import type {
   TriggerResponse,
 } from '@/types'
 
-const API_KEY = localStorage.getItem('argus_api_key') ?? ''
-
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const apiKey = localStorage.getItem('argus_api_key') ?? ''
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(init?.headers as Record<string, string> | undefined),
   }
-  if (API_KEY) headers['X-Api-Key'] = API_KEY
+  if (apiKey) headers['X-Api-Key'] = apiKey
 
   const resp = await fetch(path, { ...init, headers })
   if (!resp.ok) {

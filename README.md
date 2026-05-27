@@ -58,7 +58,7 @@ Copy `.env.example` to `.env` and adjust as needed. Key variables:
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `NUT_HOST` | `localhost` | NUT daemon hostname |
+| `NUT_HOST` | `host.docker.internal` | NUT daemon hostname (see [Docker note](#self-hosting-with-docker) below) |
 | `NUT_PORT` | `3493` | NUT daemon port |
 | `NUT_UPS_NAME` | `ups` | UPS name, or comma-separated UPS names if `NUT_AUTO_DISCOVER=false` |
 | `NUT_AUTO_DISCOVER` | `true` | Auto-discover all UPS devices via `LIST UPS` |
@@ -97,10 +97,22 @@ docker compose up --build -d
 - App (API + frontend): <http://localhost:8000>
 - API health: <http://localhost:8000/api/health>
 
-If Argus runs in Docker, `NUT_HOST=localhost` points to the scheduler
-container itself, not to your UPS/NUT daemon. Set `NUT_HOST` to the NUT
-container or service name on the same Compose network, or to a reachable
-hostname such as `host.docker.internal`.
+**NUT host when running in Docker**
+
+When Argus runs in a Docker container, `NUT_HOST=localhost` resolves to the
+*scheduler container itself*, not to the machine that runs NUT. Use one of
+these values instead:
+
+| Scenario | `NUT_HOST` value |
+| --- | --- |
+| NUT installed directly on the host (most common) | `host.docker.internal` (literal — do not replace) |
+| NUT running as another container in the same Compose stack | The service name, e.g. `nut-upsd` |
+| NUT on a separate machine | The IP address or hostname of that machine |
+
+`host.docker.internal` is a special DNS alias provided by Docker. The
+provided `docker-compose.yml` already adds the `extra_hosts` mapping needed
+for this alias to resolve on Linux hosts, so the literal string
+`host.docker.internal` is all that is required in your `.env` file.
 
 To pin specific UPS devices instead of using discovery, set
 `NUT_AUTO_DISCOVER=false` and provide a comma-separated `NUT_UPS_NAME` such as
