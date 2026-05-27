@@ -21,8 +21,12 @@ const labelCls = 'text-xs text-slate-500 mb-1'
 // ─── per-type provider state ──────────────────────────────────────────────────
 // Webhooks support multiple instances; the other three are single-instance.
 
+// Stable render key for webhook entries — never serialised to the API.
+let _webhookKey = 0
+type WebhookEntry = WebhookProvider & { _key: number }
+
 interface ProviderStates {
-  webhooks: WebhookProvider[]
+  webhooks: WebhookEntry[]
   gotify:   GotifyProvider
   ntfy:     NtfyProvider
   apprise:  AppriseProvider
@@ -42,7 +46,7 @@ function toStates(providers: AlertProvider[]): ProviderStates {
     apprise:  { ...DEFAULT_SINGLE.apprise },
   }
   for (const p of providers) {
-    if (p.type === 'webhook') s.webhooks.push({ ...p })
+    if (p.type === 'webhook') s.webhooks.push({ ...p, _key: _webhookKey++ })
     else if (p.type === 'gotify')  s.gotify  = { ...p }
     else if (p.type === 'ntfy')    s.ntfy    = { ...p }
     else if (p.type === 'apprise') s.apprise = { ...p }
@@ -53,7 +57,7 @@ function toStates(providers: AlertProvider[]): ProviderStates {
 // Only send providers with a non-empty URL to avoid backend validation errors.
 function fromStates(s: ProviderStates): AlertProvider[] {
   const result: AlertProvider[] = []
-  for (const w of s.webhooks) {
+  for (const { _key: _, ...w } of s.webhooks) {
     if (w.url) result.push(w)
   }
   if (s.gotify.url)  result.push(s.gotify)
@@ -195,7 +199,7 @@ export function Alerts() {
       webhooks[i] = { ...webhooks[i], ...patch }
       return { ...s, webhooks }
     })
-  const addWebhook    = () => setProviders((s) => ({ ...s, webhooks: [...s.webhooks, { type: 'webhook', enabled: true, url: '' }] }))
+  const addWebhook    = () => setProviders((s) => ({ ...s, webhooks: [...s.webhooks, { type: 'webhook', enabled: true, url: '', _key: _webhookKey++ }] }))
   const removeWebhook = (i: number) => setProviders((s) => ({ ...s, webhooks: s.webhooks.filter((_, j) => j !== i) }))
 
   const patchGotify   = (patch: Partial<GotifyProvider>)   => setProviders((s) => ({ ...s, gotify:   { ...s.gotify,   ...patch } }))
@@ -340,7 +344,7 @@ export function Alerts() {
             )}
 
             {providers.webhooks.map((w, i) => (
-              <div key={`webhook-${i}`} className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 space-y-2">
+              <div key={w._key} className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-500">Webhook #{i + 1}</span>
                   <div className="flex items-center gap-2">
