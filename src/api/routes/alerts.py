@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import logging
+from collections.abc import Callable
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -12,6 +14,7 @@ from src.api.auth import require_api_key
 from src.constants import AlertSeverity
 
 router = APIRouter(tags=["alerts"])
+_LOG = logging.getLogger(__name__)
 
 
 def _require_https(v: str) -> str:
@@ -87,46 +90,58 @@ class AlertConfigSchema(BaseModel):
     recovery_cooldown_seconds: int = Field(default=300, ge=60, le=86400)
 
 
+def _safe_build(
+    factory: Callable[[], AlertProviderConfig | None],
+) -> AlertProviderConfig | None:
+    """Call *factory* and return its result; log and return None on validation error."""
+    try:
+        return factory()
+    except (ValueError, TypeError):
+        _LOG.debug(
+            "Skipping env-configured alert provider: invalid value.", exc_info=True
+        )
+        return None
+
+
 def _providers_from_env() -> list[AlertProviderConfig]:
     """Build alert providers from environment variables for first-run seeding."""
     from src import config as _cfg
 
-    providers: list[AlertProviderConfig] = []
-    try:
-        if _cfg.WEBHOOK_URL:
-            providers.append(WebhookProviderConfig(url=_cfg.WEBHOOK_URL))
-    except (ValueError, TypeError):
-        pass
-    try:
-        if _cfg.GOTIFY_URL and _cfg.GOTIFY_TOKEN:
-            providers.append(
-                GotifyProviderConfig(
-                    url=_cfg.GOTIFY_URL,
-                    token=_cfg.GOTIFY_TOKEN,
-                    priority=_cfg.GOTIFY_PRIORITY,
-                )
-            )
-    except (ValueError, TypeError):
-        pass
-    try:
-        if _cfg.NTFY_URL and _cfg.NTFY_TOPIC:
-            providers.append(
-                NtfyProviderConfig(
-                    url=_cfg.NTFY_URL,
-                    topic=_cfg.NTFY_TOPIC,
-                    token=_cfg.NTFY_TOKEN,
-                    priority=_cfg.NTFY_PRIORITY,
-                    tags=_cfg.NTFY_TAGS,
-                )
-            )
-    except (ValueError, TypeError):
-        pass
-    try:
-        if _cfg.APPRISE_URL:
-            providers.append(AppriseProviderConfig(url=_cfg.APPRISE_URL))
-    except (ValueError, TypeError):
-        pass
-    return providers
+    def _webhook() -> WebhookProviderConfig | None:
+        if not _cfg.WEBHOOK_URL:
+            return None
+        return WebhookProviderConfig(url=_cfg.WEBHOOK_URL)
+
+    def _gotify() -> GotifyProviderConfig | None:
+        if not (_cfg.GOTIFY_URL and _cfg.GOTIFY_TOKEN):
+            return None
+        return GotifyProviderConfig(
+            url=_cfg.GOTIFY_URL,
+            token=_cfg.GOTIFY_TOKEN,
+            priority=_cfg.GOTIFY_PRIORITY,
+        )
+
+    def _ntfy() -> NtfyProviderConfig | None:
+        if not (_cfg.NTFY_URL and _cfg.NTFY_TOPIC):
+            return None
+        return NtfyProviderConfig(
+            url=_cfg.NTFY_URL,
+            topic=_cfg.NTFY_TOPIC,
+            token=_cfg.NTFY_TOKEN,
+            priority=_cfg.NTFY_PRIORITY,
+            tags=_cfg.NTFY_TAGS,
+        )
+
+    def _apprise() -> AppriseProviderConfig | None:
+        if not _cfg.APPRISE_URL:
+            return None
+        return AppriseProviderConfig(url=_cfg.APPRISE_URL)
+
+    return [
+        p
+        for factory in (_webhook, _gotify, _ntfy, _apprise)
+        if (p := _safe_build(factory)) is not None
+    ]
 
 
 @router.get("/alerts")

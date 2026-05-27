@@ -7,6 +7,14 @@ from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
 
 from src.api.main import app
+from src.api.routes.alerts import (
+    AppriseProviderConfig,
+    GotifyProviderConfig,
+    NtfyProviderConfig,
+    WebhookProviderConfig,
+    _providers_from_env,
+    _safe_build,
+)
 
 client = TestClient(app, raise_server_exceptions=False)
 
@@ -280,3 +288,183 @@ def test_cors_headers_present_for_allowed_origin() -> None:
     # preflight or regular response; CORS headers should be present when origin matches
     # (may vary by client config; just check it doesn't 500)
     assert resp.status_code in (200, 204, 400)
+
+
+# ---------------------------------------------------------------------------
+# _safe_build
+# ---------------------------------------------------------------------------
+
+
+class TestSafeBuild:
+    """Unit tests for the _safe_build helper."""
+
+    def test_returns_result_of_factory(self) -> None:
+        """Returns the provider built by the factory callable."""
+        provider = WebhookProviderConfig(url="https://hooks.example.com/webhook")
+        assert _safe_build(lambda: provider) is provider
+
+    def test_returns_none_from_factory_returning_none(self) -> None:
+        """Returns None when the factory returns None."""
+        assert _safe_build(lambda: None) is None
+
+    def test_swallows_value_error_and_returns_none(self) -> None:
+        """Returns None (and logs) when the factory raises ValueError."""
+
+        def _bad() -> None:
+            raise ValueError("bad url")
+
+        assert _safe_build(_bad) is None
+
+    def test_swallows_type_error_and_returns_none(self) -> None:
+        """Returns None (and logs) when the factory raises TypeError."""
+
+        def _bad() -> None:
+            raise TypeError("wrong type")
+
+        assert _safe_build(_bad) is None
+
+    def test_logs_debug_on_value_error(self) -> None:
+        """A debug log entry with exc_info=True is emitted when ValueError is caught."""
+
+        def _bad() -> None:
+            raise ValueError("oops")
+
+        with patch("src.api.routes.alerts._LOG") as mock_log:
+            _safe_build(_bad)
+
+        mock_log.debug.assert_called_once()
+        assert mock_log.debug.call_args.kwargs.get("exc_info") is True
+
+
+# ---------------------------------------------------------------------------
+# _providers_from_env
+# ---------------------------------------------------------------------------
+
+_EMPTY_CFG: dict[str, object] = dict(
+    WEBHOOK_URL="",
+    GOTIFY_URL="",
+    GOTIFY_TOKEN="",
+    GOTIFY_PRIORITY=0,
+    NTFY_URL="",
+    NTFY_TOPIC="",
+    NTFY_TOKEN="",
+    NTFY_PRIORITY="",
+    NTFY_TAGS="",
+    APPRISE_URL="",
+)
+
+
+class TestProvidersFromEnv:
+    """Unit tests for the _providers_from_env env-var seeding function."""
+
+    def test_returns_empty_when_no_env_vars(self) -> None:
+        """Returns an empty list when no provider env vars are configured."""
+        with patch.multiple("src.config", **_EMPTY_CFG):
+            result = _providers_from_env()
+        assert result == []
+
+    def test_returns_webhook_provider_when_url_set(self) -> None:
+        """Returns a WebhookProviderConfig when WEBHOOK_URL is set."""
+        with patch.multiple(
+            "src.config",
+            **{**_EMPTY_CFG, "WEBHOOK_URL": "https://hooks.example.com/argus"},
+        ):
+            result = _providers_from_env()
+        assert len(result) == 1
+        assert isinstance(result[0], WebhookProviderConfig)
+        assert result[0].url == "https://hooks.example.com/argus"
+
+    def test_returns_gotify_provider_when_url_and_token_set(self) -> None:
+        """Returns a GotifyProviderConfig when GOTIFY_URL and GOTIFY_TOKEN are set."""
+        with patch.multiple(
+            "src.config",
+            **{
+                **_EMPTY_CFG,
+                "GOTIFY_URL": "https://gotify.example.com",
+                "GOTIFY_TOKEN": "secret-token",
+                "GOTIFY_PRIORITY": 5,
+            },
+        ):
+            result = _providers_from_env()
+        assert len(result) == 1
+        assert isinstance(result[0], GotifyProviderConfig)
+        assert result[0].token == "secret-token"
+
+    def test_gotify_skipped_when_token_missing(self) -> None:
+        """GotifyProvider is skipped when GOTIFY_TOKEN is empty."""
+        with patch.multiple(
+            "src.config",
+            **{**_EMPTY_CFG, "GOTIFY_URL": "https://gotify.example.com", "GOTIFY_TOKEN": ""},
+        ):
+            result = _providers_from_env()
+        assert result == []
+
+    def test_returns_ntfy_provider_when_url_and_topic_set(self) -> None:
+        """Returns a NtfyProviderConfig when NTFY_URL and NTFY_TOPIC are set."""
+        with patch.multiple(
+            "src.config",
+            **{**_EMPTY_CFG, "NTFY_URL": "https://ntfy.sh", "NTFY_TOPIC": "argus-alerts"},
+        ):
+            result = _providers_from_env()
+        assert len(result) == 1
+        assert isinstance(result[0], NtfyProviderConfig)
+        assert result[0].topic == "argus-alerts"
+
+    def test_ntfy_skipped_when_topic_missing(self) -> None:
+        """NtfyProvider is skipped when NTFY_TOPIC is empty."""
+        with patch.multiple(
+            "src.config",
+            **{**_EMPTY_CFG, "NTFY_URL": "https://ntfy.sh", "NTFY_TOPIC": ""},
+        ):
+            result = _providers_from_env()
+        assert result == []
+
+    def test_returns_apprise_provider_when_url_set(self) -> None:
+        """Returns an AppriseProviderConfig when APPRISE_URL is set."""
+        with patch.multiple(
+            "src.config",
+            **{**_EMPTY_CFG, "APPRISE_URL": "https://apprise.example.com/notify"},
+        ):
+            result = _providers_from_env()
+        assert len(result) == 1
+        assert isinstance(result[0], AppriseProviderConfig)
+
+    def test_returns_multiple_providers(self) -> None:
+        """Returns multiple providers when several env vars are configured."""
+        with patch.multiple(
+            "src.config",
+            **{
+                **_EMPTY_CFG,
+                "WEBHOOK_URL": "https://hooks.example.com/argus",
+                "APPRISE_URL": "https://apprise.example.com/notify",
+            },
+        ):
+            result = _providers_from_env()
+        assert len(result) == 2
+        types = {type(p) for p in result}
+        assert WebhookProviderConfig in types
+        assert AppriseProviderConfig in types
+
+    def test_skips_provider_with_invalid_http_url(self) -> None:
+        """A provider with an http:// URL is skipped (validation error logged)."""
+        with patch.multiple(
+            "src.config",
+            **{**_EMPTY_CFG, "WEBHOOK_URL": "http://hooks.example.com/argus"},
+        ):
+            result = _providers_from_env()
+        assert result == []
+
+    def test_get_alerts_seeds_from_env_on_first_use(self) -> None:
+        """GET /api/alerts pre-fills providers from env vars when no config is saved."""
+        with (
+            patch("src.runtime_config.load", return_value={}),
+            patch.multiple(
+                "src.config",
+                **{**_EMPTY_CFG, "WEBHOOK_URL": "https://hooks.example.com/argus"},
+            ),
+        ):
+            resp = client.get("/api/alerts")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert any(p.get("type") == "webhook" for p in body["providers"])
+
