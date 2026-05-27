@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
-import { Clock, Database, PauseCircle, ScanLine } from 'lucide-react'
+import { Clock, Database, KeyRound, PauseCircle, ScanLine, Server, SlidersHorizontal } from 'lucide-react'
 import { useArgus } from '@/hooks/useArgus'
 import type { RuntimeConfig } from '@/types'
 
@@ -79,7 +79,10 @@ export function Settings() {
       <h1 className="text-2xl font-bold text-slate-100">Settings</h1>
 
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-200">API Access</h2>
+        <div className="flex items-center gap-2">
+          <KeyRound className="w-4 h-4 text-violet-400" />
+          <h2 className="text-lg font-semibold text-slate-200">API Access</h2>
+        </div>
         <p className="text-xs text-slate-500">
           Enter your Argus API key to authenticate requests. The key is stored only in your
           browser's local storage.
@@ -176,7 +179,10 @@ export function Settings() {
       </div>
 
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-200">NUT Connection</h2>
+        <div className="flex items-center gap-2">
+          <Server className="w-4 h-4 text-violet-400" />
+          <h2 className="text-lg font-semibold text-slate-200">NUT Connection</h2>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
@@ -247,7 +253,10 @@ export function Settings() {
       </div>
 
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-200">Event Thresholds</h2>
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal className="w-4 h-4 text-violet-400" />
+          <h2 className="text-lg font-semibold text-slate-200">Event Thresholds</h2>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
