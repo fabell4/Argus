@@ -194,7 +194,7 @@ describe('Alerts page', () => {
     vi.mocked(apiModule.getAlerts).mockResolvedValue(makeAlertConfig())
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
-    expect(screen.getByText(/no providers configured/i)).toBeDefined()
+    expect(screen.getByText(/toggle a provider on/i)).toBeDefined()
   })
 
   it('shows Save button', async () => {
@@ -204,19 +204,22 @@ describe('Alerts page', () => {
     expect(screen.getByRole('button', { name: /save changes/i })).toBeDefined()
   })
 
-  it('shows Add provider button', async () => {
+  it('shows provider toggle switches', async () => {
     vi.mocked(apiModule.getAlerts).mockResolvedValue(makeAlertConfig())
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
-    expect(screen.getByRole('button', { name: /add provider/i })).toBeDefined()
+    expect(screen.getAllByRole('switch').length).toBe(4)
   })
 
-  it('adds a webhook provider', async () => {
+  it('enables a webhook provider via toggle', async () => {
     vi.mocked(apiModule.getAlerts).mockResolvedValue(makeAlertConfig())
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
-    fireEvent.click(screen.getByRole('button', { name: /add provider/i }))
-    expect(screen.getByText(/webhook #1/i)).toBeDefined()
+    const webhookSwitch = screen.getAllByRole('switch')[0]
+    expect(webhookSwitch.getAttribute('aria-checked')).toBe('false')
+    fireEvent.click(webhookSwitch)
+    expect(webhookSwitch.getAttribute('aria-checked')).toBe('true')
+    expect(screen.getByPlaceholderText(/hooks\.example\.com/i)).toBeDefined()
   })
 
   it('handles API load error', async () => {
@@ -262,7 +265,8 @@ describe('Alerts page', () => {
     }))
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
-    expect(screen.getByText(/webhook #1/i)).toBeDefined()
+    expect(screen.getByText('Webhook')).toBeDefined()
+    expect(screen.getByDisplayValue('https://example.com/hook')).toBeDefined()
   })
 
   it('renders a gotify provider form', async () => {
@@ -271,8 +275,8 @@ describe('Alerts page', () => {
     }))
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
-    expect(screen.getByText(/gotify #1/i)).toBeDefined()
-    expect(screen.getByText('Token')).toBeDefined()
+    expect(screen.getByText('Gotify')).toBeDefined()
+    expect(screen.getByText(/app token/i)).toBeDefined()
   })
 
   it('renders an ntfy provider form', async () => {
@@ -281,21 +285,20 @@ describe('Alerts page', () => {
     }))
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
-    expect(screen.getByText(/ntfy #1/i)).toBeDefined()
+    expect(screen.getByText('ntfy')).toBeDefined()
     expect(screen.getByText('Topic')).toBeDefined()
   })
 
-  it('removes a provider', async () => {
+  it('disables a provider via toggle', async () => {
     vi.mocked(apiModule.getAlerts).mockResolvedValue(makeAlertConfig({
       providers: [{ type: 'webhook', enabled: true, url: '' }],
     }))
     renderWithContext(<Alerts />)
-    await waitFor(() => expect(screen.queryByText(/webhook #1/i)).toBeDefined())
-    const trashBtn = screen.getAllByRole('button').find((b) =>
-      b.querySelector('svg') && !b.textContent?.includes('#')
-    )
-    if (trashBtn) fireEvent.click(trashBtn)
-    // No error means state update worked
+    await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
+    const webhookSwitch = screen.getAllByRole('switch')[0]
+    expect(webhookSwitch.getAttribute('aria-checked')).toBe('true')
+    fireEvent.click(webhookSwitch)
+    expect(webhookSwitch.getAttribute('aria-checked')).toBe('false')
   })
 })
 
