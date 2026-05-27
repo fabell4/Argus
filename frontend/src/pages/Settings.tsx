@@ -112,8 +112,9 @@ export function Settings() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <span className="text-sm text-slate-400">Poll interval (minutes)</span>
+          <label htmlFor="poll-interval" className="text-sm text-slate-400">Poll interval (minutes)</label>
           <input
+            id="poll-interval"
             type="number"
             min={1}
             max={10080}

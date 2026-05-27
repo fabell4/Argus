@@ -222,12 +222,12 @@ describe('Settings', () => {
     expect(screen.getByText('Settings')).toBeDefined()
   })
 
-  it('shows exporter checkboxes', () => {
+  it('shows exporter toggles', () => {
     renderWithContext(<Settings />)
-    expect(screen.getByText('sqlite')).toBeDefined()
-    expect(screen.getByText('prometheus')).toBeDefined()
-    expect(screen.getByText('influxdb')).toBeDefined()
-    expect(screen.getByText('loki')).toBeDefined()
+    expect(screen.getByText('SQLite')).toBeDefined()
+    expect(screen.getByText('Prometheus')).toBeDefined()
+    expect(screen.getByText('InfluxDB')).toBeDefined()
+    expect(screen.getByText('Loki')).toBeDefined()
   })
 
   it('shows Save Changes button', () => {
@@ -262,20 +262,19 @@ describe('Settings', () => {
     await waitFor(() => expect(screen.queryByText(/saved!/i)).toBeDefined())
   })
 
-  it('toggles pause scheduler checkbox', () => {
+  it('toggles pause scheduler switch', () => {
     renderWithContext(<Settings />, { config: makeConfig({ scheduler_paused: false }) })
-    const checkboxes = screen.getAllByRole('checkbox')
-    // First checkbox is "Pause scheduler"
-    fireEvent.click(checkboxes[0])
+    const switches = screen.getAllByRole('switch')
+    // First switch is "Pause scheduler"
+    fireEvent.click(switches[0])
     // No error means state update worked
   })
 
-  it('toggles exporter checkbox', () => {
+  it('toggles exporter switch', () => {
     renderWithContext(<Settings />, { config: makeConfig({ enabled_exporters: ['sqlite'] }) })
-    const checkboxes = screen.getAllByRole('checkbox')
-    // sqlite is checked; toggle it off
-    const sqliteBox = checkboxes.find((cb) => (cb as HTMLInputElement).value !== 'on') ?? checkboxes[2]
-    fireEvent.click(sqliteBox)
+    const switches = screen.getAllByRole('switch')
+    // First exporter switch (index 2, after pause/disable) is SQLite
+    fireEvent.click(switches[2])
   })
 })
 
