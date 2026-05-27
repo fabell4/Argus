@@ -97,7 +97,7 @@ docker compose up --build -d
 - App (API + frontend): <http://localhost:8000>
 - API health: <http://localhost:8000/api/health>
 
-**NUT host when running in Docker**
+### NUT host when running in Docker
 
 When Argus runs in a Docker container, `NUT_HOST=localhost` resolves to the
 *scheduler container itself*, not to the machine that runs NUT. Use one of
