@@ -1,7 +1,49 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { Clock, Database, PauseCircle, ScanLine } from 'lucide-react'
 import { useArgus } from '@/hooks/useArgus'
 import type { RuntimeConfig } from '@/types'
+
+// ---------------------------------------------------------------------------
+// Toggle switch
+// ---------------------------------------------------------------------------
+function Toggle({
+  checked,
+  onChange,
+}: Readonly<{
+  checked: boolean
+  onChange: (value: boolean) => void
+}>) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onChange(!checked)}
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/50 ${
+        checked ? 'bg-violet-600' : 'bg-slate-700'
+      }`}
+    >
+      <span
+        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+          checked ? 'translate-x-6' : 'translate-x-1'
+        }`}
+      />
+    </button>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Exporter definitions
+// ---------------------------------------------------------------------------
+const EXPORTERS = [
+  { key: 'sqlite',     label: 'SQLite',      desc: 'Persist snapshots in a local SQLite database' },
+  { key: 'prometheus', label: 'Prometheus',  desc: 'Expose metrics at /metrics for Prometheus scraping' },
+  { key: 'influxdb',   label: 'InfluxDB',    desc: 'Write time-series data to an InfluxDB v2 instance' },
+  { key: 'loki',       label: 'Loki',        desc: 'Ship structured logs to a Grafana Loki endpoint' },
+  { key: 'csv',        label: 'CSV',         desc: 'Append snapshots to a local CSV file' },
+  { key: 'energy',     label: 'Energy',      desc: 'Accumulate energy usage and estimated cost' },
+] as const
 
 export function Settings() {
   const { config, updateConfig, refresh } = useArgus()
@@ -62,10 +104,14 @@ export function Settings() {
 
       {form ? (
         <>
-      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-200">Scheduler</h2>
+      {/* Scheduler */}
+      <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-5">
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-violet-400" />
+          <h2 className="text-lg font-semibold text-slate-200">Scheduler</h2>
+        </div>
 
-        <label className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1.5">
           <span className="text-sm text-slate-400">Poll interval (minutes)</span>
           <input
             type="number"
@@ -75,47 +121,57 @@ export function Settings() {
             onChange={(e) => setForm({ ...form, poll_interval_minutes: Number(e.target.value) })}
             className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
           />
-        </label>
+          <span className="text-xs text-slate-500">Minimum 1 minute.</span>
+        </div>
 
-        <label className="flex items-center gap-2.5 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.scheduler_paused}
-            onChange={(e) => setForm({ ...form, scheduler_paused: e.target.checked })}
-            className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-violet-500"
-          />
-          <span className="text-sm text-slate-300">Pause scheduler</span>
-        </label>
-
-        <label className="flex items-center gap-2.5 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={form.scanning_disabled}
-            onChange={(e) => setForm({ ...form, scanning_disabled: e.target.checked })}
-            className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-violet-500"
-          />
-          <span className="text-sm text-slate-300">Disable scanning</span>
-        </label>
+        <div className="space-y-3">
+          {([
+            { key: 'scheduler_paused',  icon: PauseCircle, label: 'Pause scheduler', desc: 'Stop all scheduled polling jobs without restarting the service' },
+            { key: 'scanning_disabled', icon: ScanLine,    label: 'Disable scanning', desc: 'Skip device discovery and data collection on each poll cycle' },
+          ] as const).map(({ key, icon: Icon, label, desc }) => (
+            <div key={key} className="flex items-center justify-between gap-4 bg-slate-800/50 rounded-xl px-4 py-3 border border-slate-700/50">
+              <div className="flex items-start gap-3 min-w-0">
+                <Icon className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-slate-200">{label}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+                </div>
+              </div>
+              <Toggle
+                checked={form[key]}
+                onChange={(v) => setForm({ ...form, [key]: v })}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
+      {/* Exporters */}
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
-        <h2 className="text-lg font-semibold text-slate-200">Exporters</h2>
-        {(['sqlite', 'prometheus', 'influxdb', 'loki'] as const).map((exporter) => (
-          <label key={exporter} className="flex items-center gap-2.5 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={form.enabled_exporters.includes(exporter)}
-              onChange={(e) => {
-                const updated = e.target.checked
-                  ? [...form.enabled_exporters, exporter]
-                  : form.enabled_exporters.filter((ex) => ex !== exporter)
-                setForm({ ...form, enabled_exporters: updated })
-              }}
-              className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-violet-500"
-            />
-            <span className="text-sm text-slate-300">{exporter}</span>
-          </label>
-        ))}
+        <div className="flex items-center gap-2">
+          <Database className="w-4 h-4 text-violet-400" />
+          <h2 className="text-lg font-semibold text-slate-200">Exporters</h2>
+        </div>
+
+        <div className="space-y-3">
+          {EXPORTERS.map(({ key, label, desc }) => (
+            <div key={key} className="flex items-center justify-between gap-4 bg-slate-800/50 rounded-xl px-4 py-3 border border-slate-700/50">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-slate-200">{label}</p>
+                <p className="text-xs text-slate-500 mt-0.5">{desc}</p>
+              </div>
+              <Toggle
+                checked={form.enabled_exporters.includes(key)}
+                onChange={(enabled) => {
+                  const updated = enabled
+                    ? [...form.enabled_exporters, key]
+                    : form.enabled_exporters.filter((ex) => ex !== key)
+                  setForm({ ...form, enabled_exporters: updated })
+                }}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">

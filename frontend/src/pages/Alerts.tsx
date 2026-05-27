@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { Bell, Plus, Trash2, Send, CheckCircle, AlertCircle } from 'lucide-react'
+import { Bell, Plus, Trash2, Send, CheckCircle, AlertCircle, SlidersHorizontal, Zap } from 'lucide-react'
 import { getAlerts, updateAlerts, testAlert } from '@/lib/api'
 import type {
   AlertConfig,
@@ -247,7 +247,10 @@ export function Alerts() {
 
       {/* Thresholds */}
       <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
-        <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Thresholds</h2>
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal className="w-4 h-4 text-violet-400" />
+          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Thresholds</h2>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <label className="flex flex-col gap-1.5">
             <span className={labelCls}>Failure threshold (consecutive failures before alert)</span>
@@ -287,7 +290,10 @@ export function Alerts() {
 
       {/* Alert events */}
       <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
-        <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Alert events</h2>
+        <div className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-violet-400" />
+          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Alert events</h2>
+        </div>
         <p className="text-xs text-slate-500">Choose which conditions trigger notifications.</p>
         {([
           ['alert_on_battery',             'UPS on battery (power failure)'],
@@ -310,10 +316,13 @@ export function Alerts() {
       {/* Notification providers */}
       <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
         <div>
-          <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
-            {'Notification providers '}
-            <span className="text-sm font-normal text-slate-500">({enabledCount} enabled)</span>
-          </h2>
+          <div className="flex items-center gap-2">
+            <Send className="w-4 h-4 text-violet-400" />
+            <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
+              {'Notification providers '}
+              <span className="text-sm font-normal text-slate-500">({enabledCount} enabled)</span>
+            </h2>
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">
             Toggle a provider on to configure it. At least one must be enabled to receive alerts.
           </p>

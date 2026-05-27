@@ -128,6 +128,17 @@ services:
       ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:5173}"
       RATE_LIMIT_PER_MINUTE: "${RATE_LIMIT_PER_MINUTE:-60}"
       GITHUB_REPO: "${GITHUB_REPO:-}"
+      # --- Alerting ---
+      WEBHOOK_URL: "${WEBHOOK_URL:-}"
+      GOTIFY_URL: "${GOTIFY_URL:-}"
+      GOTIFY_TOKEN: "${GOTIFY_TOKEN:-}"
+      GOTIFY_PRIORITY: "${GOTIFY_PRIORITY:-0}"
+      NTFY_URL: "${NTFY_URL:-}"
+      NTFY_TOPIC: "${NTFY_TOPIC:-}"
+      NTFY_TOKEN: "${NTFY_TOKEN:-}"
+      NTFY_PRIORITY: "${NTFY_PRIORITY:-}"
+      NTFY_TAGS: "${NTFY_TAGS:-}"
+      APPRISE_URL: "${APPRISE_URL:-}"
     env_file:
       - path: .env
         required: false
