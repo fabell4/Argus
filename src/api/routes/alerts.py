@@ -157,12 +157,19 @@ def get_alerts() -> AlertConfigSchema:
         schema = AlertConfigSchema(**alert_cfg) if alert_cfg else AlertConfigSchema()
     except (TypeError, ValueError):
         schema = AlertConfigSchema()
-    # Seed from env vars whenever no providers are configured (covers both
-    # first-ever use and the case where the user saved an empty provider list).
-    if not schema.providers:
-        env_providers = _providers_from_env()
-        if env_providers:
-            schema = schema.model_copy(update={"providers": env_providers})
+    # Seed from env vars for any provider *type* not already present in the
+    # saved config.  This means:
+    #   • First use (empty providers): all env providers are added.
+    #   • Partial config: env fills in only the missing types.
+    #   • User's own saved entry for a type always wins; env never overwrites it.
+    env_providers = _providers_from_env()
+    if env_providers:
+        existing_types = {p.type for p in schema.providers}
+        to_add = [p for p in env_providers if p.type not in existing_types]
+        if to_add:
+            schema = schema.model_copy(
+                update={"providers": [*schema.providers, *to_add]}
+            )
     return schema
 
 
