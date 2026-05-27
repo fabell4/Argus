@@ -157,8 +157,9 @@ def get_alerts() -> AlertConfigSchema:
         schema = AlertConfigSchema(**alert_cfg) if alert_cfg else AlertConfigSchema()
     except (TypeError, ValueError):
         schema = AlertConfigSchema()
-    # Seed from env vars only on first use (alert_config never saved → empty dict).
-    if not alert_cfg:
+    # Seed from env vars whenever no providers are configured (covers both
+    # first-ever use and the case where the user saved an empty provider list).
+    if not schema.providers:
         env_providers = _providers_from_env()
         if env_providers:
             schema = schema.model_copy(update={"providers": env_providers})
