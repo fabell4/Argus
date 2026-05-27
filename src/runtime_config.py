@@ -178,18 +178,18 @@ def _apply_env_overrides(data: dict[str, Any]) -> None:
     UI/API changes for those fields continue to persist across restarts.
     """
     _overrides: list[tuple[str, Any, Any]] = [
-        ("nut_host",                    config.NUT_HOST,                    "localhost"),
-        ("nut_port",                    config.NUT_PORT,                    3493),
-        ("nut_username",                config.NUT_USERNAME,                ""),
-        ("nut_password",                config.NUT_PASSWORD,                ""),
-        ("nut_ups_name",                config.NUT_UPS_NAME,                "ups"),
-        ("nut_auto_discover",           config.NUT_AUTO_DISCOVER,           True),
-        ("poll_interval_minutes",       config.POLL_INTERVAL_MINUTES,       5),
-        ("enabled_exporters",           config.ENABLED_EXPORTERS,           ["sqlite"]),
+        ("nut_host", config.NUT_HOST, "localhost"),
+        ("nut_port", config.NUT_PORT, 3493),
+        ("nut_username", config.NUT_USERNAME, ""),
+        ("nut_password", config.NUT_PASSWORD, ""),
+        ("nut_ups_name", config.NUT_UPS_NAME, "ups"),
+        ("nut_auto_discover", config.NUT_AUTO_DISCOVER, True),
+        ("poll_interval_minutes", config.POLL_INTERVAL_MINUTES, 5),
+        ("enabled_exporters", config.ENABLED_EXPORTERS, ["sqlite"]),
         ("device_offline_missed_polls", config.DEVICE_OFFLINE_MISSED_POLLS, 3),
-        ("shutdown_battery_floor_pct",  config.SHUTDOWN_BATTERY_FLOOR_PCT,  5.0),
-        ("threshold_load_percent",      config.THRESHOLD_LOAD_PERCENT,      90.0),
-        ("threshold_temp_celsius",      config.THRESHOLD_TEMP_CELSIUS,      50.0),
+        ("shutdown_battery_floor_pct", config.SHUTDOWN_BATTERY_FLOOR_PCT, 5.0),
+        ("threshold_load_percent", config.THRESHOLD_LOAD_PERCENT, 90.0),
+        ("threshold_temp_celsius", config.THRESHOLD_TEMP_CELSIUS, 50.0),
     ]
     for key, env_val, hard_default in _overrides:
         if env_val != hard_default:
