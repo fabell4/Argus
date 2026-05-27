@@ -161,19 +161,4 @@ def update_config(body: RuntimeConfigSchema) -> RuntimeConfigSchema:
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
         ) from exc
     # Return with masked password
-    return RuntimeConfigSchema(
-        poll_interval_minutes=body.poll_interval_minutes,
-        enabled_exporters=body.enabled_exporters,
-        scanning_disabled=body.scanning_disabled,
-        scheduler_paused=body.scheduler_paused,
-        nut_host=body.nut_host,
-        nut_port=body.nut_port,
-        nut_username=body.nut_username,
-        nut_password=None,  # never expose stored password
-        nut_ups_name=body.nut_ups_name,
-        nut_auto_discover=body.nut_auto_discover,
-        device_offline_missed_polls=body.device_offline_missed_polls,
-        shutdown_battery_floor_pct=body.shutdown_battery_floor_pct,
-        threshold_load_percent=body.threshold_load_percent,
-        threshold_temp_celsius=body.threshold_temp_celsius,
-    )
+    return body.model_copy(update={"nut_password": None})
