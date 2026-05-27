@@ -340,7 +340,6 @@ export function Alerts() {
             )}
 
             {providers.webhooks.map((w, i) => (
-              // eslint-disable-next-line react/no-array-index-key
               <div key={`webhook-${i}`} className="px-4 py-3 border-t border-slate-200 dark:border-slate-700 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-slate-500">Webhook #{i + 1}</span>
