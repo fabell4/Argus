@@ -253,7 +253,7 @@ describe('Alerts page', () => {
     renderWithContext(<Alerts />)
     await waitFor(() => expect(screen.queryByText(/loading/i)).toBeNull())
     expect(screen.getByText(/failure threshold/i)).toBeDefined()
-    expect(screen.getByText(/cooldown/i)).toBeDefined()
+    expect(screen.getAllByText(/cooldown/i).length).toBeGreaterThanOrEqual(1)
   })
 
   it('renders a webhook provider form', async () => {
