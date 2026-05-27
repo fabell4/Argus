@@ -81,6 +81,7 @@ def load() -> dict[str, Any]:
     data = _DEFAULTS.copy()
     data.update(_load_raw())
     _sanitize(data)
+    _apply_env_overrides(data)
     return data
 
 
@@ -163,6 +164,37 @@ def _sanitize(data: dict[str, Any]) -> None:
             data[_fkey] = max(_lo, min(_hi, float(data.get(_fkey, _fdefault))))
         except (TypeError, ValueError):
             data[_fkey] = _fdefault
+
+
+def _apply_env_overrides(data: dict[str, Any]) -> None:
+    """Override persisted runtime config values with env vars that were explicitly set.
+
+    An env var is considered explicitly set when its resolved value differs from the
+    hard-coded fallback default (the value used when the env var is absent).  This
+    ensures that settings in a docker-compose ``env_file`` always take effect, even
+    when a stale ``runtime_config.json`` already exists on a persistent volume.
+
+    Settings whose env var matches the fallback default are left unchanged so that
+    UI/API changes for those fields continue to persist across restarts.
+    """
+    _overrides: list[tuple[str, Any, Any]] = [
+        ("nut_host",                    config.NUT_HOST,                    "localhost"),
+        ("nut_port",                    config.NUT_PORT,                    3493),
+        ("nut_username",                config.NUT_USERNAME,                ""),
+        ("nut_password",                config.NUT_PASSWORD,                ""),
+        ("nut_ups_name",                config.NUT_UPS_NAME,                "ups"),
+        ("nut_auto_discover",           config.NUT_AUTO_DISCOVER,           True),
+        ("poll_interval_minutes",       config.POLL_INTERVAL_MINUTES,       5),
+        ("enabled_exporters",           config.ENABLED_EXPORTERS,           ["sqlite"]),
+        ("device_offline_missed_polls", config.DEVICE_OFFLINE_MISSED_POLLS, 3),
+        ("shutdown_battery_floor_pct",  config.SHUTDOWN_BATTERY_FLOOR_PCT,  5.0),
+        ("threshold_load_percent",      config.THRESHOLD_LOAD_PERCENT,      90.0),
+        ("threshold_temp_celsius",      config.THRESHOLD_TEMP_CELSIUS,      50.0),
+    ]
+    for key, env_val, hard_default in _overrides:
+        if env_val != hard_default:
+            data[key] = env_val
+            _LOG.debug("Env override applied: %s = %r", key, env_val)
 
 
 def save(data: dict[str, Any]) -> None:

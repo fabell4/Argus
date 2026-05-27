@@ -70,6 +70,13 @@ Copy `.env.example` to `.env` and adjust as needed. Key variables:
 
 See `.env.example` for the full list of supported variables.
 
+> **API key and the UI:** `API_KEY` is the *server-side* secret used to validate
+> incoming requests. It is not automatically forwarded to your browser. After
+> setting it in your `.env`, open the Argus UI, navigate to **Settings**, paste
+> the same key into the **API Key** field, and click **Save API Key**. The
+> browser stores it in `localStorage` and attaches it as the `X-Api-Key` header
+> on every subsequent request. You only need to do this once per browser/device.
+
 ## API
 
 Interactive docs available at <http://localhost:8000/api/docs>.
