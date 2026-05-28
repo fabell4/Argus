@@ -162,7 +162,7 @@ describe('Dashboard', () => {
   })
 
   it('renders with null latest snapshot', () => {
-    renderWithContext(<Dashboard />, { latest: null })
+    renderWithContext(<Dashboard />, { latest: null, snapshots: [] })
     // Should render dashes for null values
     const dashes = screen.getAllByText('—')
     expect(dashes.length).toBeGreaterThan(0)
