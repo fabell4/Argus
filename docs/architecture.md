@@ -206,10 +206,17 @@ reconfiguration of:
 
 ## Grafana Dashboard
 
-A pre-built Grafana dashboard is included at `grafana/argus-power-monitoring.json`.
+**Import pre-built dashboard:**
 
-Import it via **Dashboards → Import → Upload JSON file** in Grafana.
-The dashboard requires Prometheus as a data source with Argus metrics scraping configured.
+1. Download `docs/grafana-dashboard.json`
+2. In Grafana: **+ → Import → Upload JSON file**
+3. Select Prometheus as the datasource
+4. Dashboard includes:
+
+   - Per-device power draw and load percentage charts
+   - Battery charge and runtime remaining panels
+   - UPS status and event timeline
+   - Input/output voltage and temperature gauges
 
 ---
 
