@@ -85,20 +85,15 @@ def load() -> dict[str, Any]:
     return data
 
 
-def _sanitize(data: dict[str, Any]) -> None:
-    """Coerce and clamp values loaded from disk to valid types and ranges.
-
-    Prevents malformed data in runtime_config.json from propagating into the
-    application when the file is manually edited or written by an older version.
-    """
-    # poll_interval_minutes: must be an int in [1, 10080]
+def _sanitize_poll_interval(data: dict[str, Any]) -> None:
     try:
         minutes = int(data["poll_interval_minutes"])
         data["poll_interval_minutes"] = max(1, min(10080, minutes))
     except (TypeError, ValueError, KeyError):
         data["poll_interval_minutes"] = _DEFAULTS["poll_interval_minutes"]
 
-    # enabled_exporters: must be a list of known exporter strings
+
+def _sanitize_exporters(data: dict[str, Any]) -> None:
     exporters = data.get("enabled_exporters")
     if not isinstance(exporters, list):
         data["enabled_exporters"] = list(_DEFAULTS["enabled_exporters"])
@@ -107,14 +102,18 @@ def _sanitize(data: dict[str, Any]) -> None:
             e for e in exporters if isinstance(e, str) and e in _VALID_EXPORTERS
         ]
 
-    # boolean flags
+
+def _sanitize_flags(data: dict[str, Any]) -> None:
     data["scheduler_paused"] = bool(data.get("scheduler_paused", False))
     data["scanning_disabled"] = bool(data.get("scanning_disabled", False))
-
-    # alert_config: must be a dict
+    data["nut_auto_discover"] = bool(
+        data.get("nut_auto_discover", config.NUT_AUTO_DISCOVER)
+    )
     if not isinstance(data.get("alert_config"), dict):
         data["alert_config"] = {}
 
+
+def _sanitize_nut_connection(data: dict[str, Any]) -> None:
     # nut_host: non-empty string
     if not isinstance(data.get("nut_host"), str) or not data["nut_host"].strip():
         data["nut_host"] = config.NUT_HOST
@@ -136,11 +135,8 @@ def _sanitize(data: dict[str, Any]) -> None:
         if not isinstance(data.get(_key), str):
             data[_key] = _default
 
-    # nut_auto_discover: bool
-    data["nut_auto_discover"] = bool(
-        data.get("nut_auto_discover", config.NUT_AUTO_DISCOVER)
-    )
 
+def _sanitize_thresholds(data: dict[str, Any]) -> None:
     # device_offline_missed_polls: int >= 1
     try:
         data["device_offline_missed_polls"] = max(
@@ -164,6 +160,19 @@ def _sanitize(data: dict[str, Any]) -> None:
             data[_fkey] = max(_lo, min(_hi, float(data.get(_fkey, _fdefault))))
         except (TypeError, ValueError):
             data[_fkey] = _fdefault
+
+
+def _sanitize(data: dict[str, Any]) -> None:
+    """Coerce and clamp values loaded from disk to valid types and ranges.
+
+    Prevents malformed data in runtime_config.json from propagating into the
+    application when the file is manually edited or written by an older version.
+    """
+    _sanitize_poll_interval(data)
+    _sanitize_exporters(data)
+    _sanitize_flags(data)
+    _sanitize_nut_connection(data)
+    _sanitize_thresholds(data)
 
 
 def _apply_env_overrides(data: dict[str, Any]) -> None:

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import {
   CartesianGrid,
   Legend,
@@ -36,6 +37,44 @@ const DEVICE_COLORS = [
   '#6366f1', '#06b6d4', '#ec4899', '#84cc16',
 ]
 
+type ChartDataPoint = Record<string, string | number | null>
+
+// ---------------------------------------------------------------------------
+// Shared chart constants
+// ---------------------------------------------------------------------------
+
+const GRID_STROKE = '#1e293b'
+const TICK_STYLE = { fontSize: 11, fill: '#94a3b8' }
+const TOOLTIP_CONTENT_STYLE = {
+  background: '#0f172a',
+  border: '1px solid #1e293b',
+  borderRadius: '8px',
+}
+const TOOLTIP_LABEL_STYLE = { color: '#94a3b8' }
+const LEGEND_STYLE = { fontSize: '12px', color: '#94a3b8' }
+
+// Wraps the shared Recharts boilerplate so it isn't duplicated across branches.
+function SharedLineChart({
+  data,
+  children,
+}: {
+  readonly data: ChartDataPoint[]
+  readonly children: ReactNode
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={280}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
+        <XAxis dataKey="time" tick={TICK_STYLE} />
+        <YAxis tick={TICK_STYLE} />
+        <Tooltip contentStyle={TOOLTIP_CONTENT_STYLE} labelStyle={TOOLTIP_LABEL_STYLE} />
+        <Legend wrapperStyle={LEGEND_STYLE} />
+        {children}
+      </LineChart>
+    </ResponsiveContainer>
+  )
+}
+
 export function PowerChart({ snapshots, devices }: PowerChartProps) {
   const [metric, setMetric] = useState<MetricKey>('power')
   const chronological = [...snapshots].reverse()
@@ -47,7 +86,7 @@ export function PowerChart({ snapshots, devices }: PowerChartProps) {
     const field = METRIC_FIELD[metric]
 
     // Merge snapshots into time-keyed data points — one column per device
-    const byTime = new Map<string, Record<string, string | number | null>>()
+    const byTime = new Map<string, ChartDataPoint>()
     for (const snap of chronological) {
       const time = new Date(snap.timestamp).toLocaleTimeString()
       if (!byTime.has(time)) byTime.set(time, { time })
@@ -80,31 +119,21 @@ export function PowerChart({ snapshots, devices }: PowerChartProps) {
         {data.length === 0 ? (
           <p className="text-slate-500 text-sm py-8 text-center">No snapshot data yet.</p>
         ) : (
-          <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-              <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} />
-              <Tooltip
-                contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-                labelStyle={{ color: '#94a3b8' }}
-              />
-              <Legend wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }} />
-              {deviceIds.map((deviceId, i) => {
-                const name = deviceNames.get(deviceId) ?? deviceId
-                return (
-                  <Line
-                    key={deviceId}
-                    type="monotone"
-                    dataKey={`${name} ${suffix}`}
-                    stroke={DEVICE_COLORS[i % DEVICE_COLORS.length]}
-                    dot={false}
-                    strokeWidth={1.5}
-                  />
-                )
-              })}
-            </LineChart>
-          </ResponsiveContainer>
+          <SharedLineChart data={data}>
+            {deviceIds.map((deviceId, i) => {
+              const name = deviceNames.get(deviceId) ?? deviceId
+              return (
+                <Line
+                  key={deviceId}
+                  type="monotone"
+                  dataKey={`${name} ${suffix}`}
+                  stroke={DEVICE_COLORS[i % DEVICE_COLORS.length]}
+                  dot={false}
+                  strokeWidth={1.5}
+                />
+              )
+            })}
+          </SharedLineChart>
         )}
       </div>
     )
@@ -123,20 +152,10 @@ export function PowerChart({ snapshots, devices }: PowerChartProps) {
   }
 
   return (
-    <ResponsiveContainer width="100%" height={280}>
-      <LineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-        <XAxis dataKey="time" tick={{ fontSize: 11, fill: '#94a3b8' }} />
-        <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} />
-        <Tooltip
-          contentStyle={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px' }}
-          labelStyle={{ color: '#94a3b8' }}
-        />
-        <Legend wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }} />
-        <Line type="monotone" dataKey="Power (W)" stroke="#f59e0b" dot={false} strokeWidth={1.5} />
-        <Line type="monotone" dataKey="Load (%)" stroke="#3b82f6" dot={false} strokeWidth={1.5} />
-        <Line type="monotone" dataKey="Battery (%)" stroke="#10b981" dot={false} strokeWidth={1.5} />
-      </LineChart>
-    </ResponsiveContainer>
+    <SharedLineChart data={data}>
+      <Line type="monotone" dataKey="Power (W)" stroke="#f59e0b" dot={false} strokeWidth={1.5} />
+      <Line type="monotone" dataKey="Load (%)" stroke="#3b82f6" dot={false} strokeWidth={1.5} />
+      <Line type="monotone" dataKey="Battery (%)" stroke="#10b981" dot={false} strokeWidth={1.5} />
+    </SharedLineChart>
   )
 }
