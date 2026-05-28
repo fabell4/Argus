@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight, Filter, ListChecks } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Download, Filter, ListChecks } from 'lucide-react'
 import { getEventsFiltered } from '@/lib/api'
 import { useArgus } from '@/hooks/useArgus'
 import type { PowerEvent } from '@/types'
@@ -27,6 +27,29 @@ const EVENT_TYPES = [
 
 const PAGE_SIZE = 25
 
+function buildCSV(events: PowerEvent[]): string {
+  const headers = ['Time', 'Device', 'Event Type', 'Details']
+  const rows = events.map((ev) => [
+    new Date(ev.timestamp).toLocaleString(),
+    ev.device_id,
+    ev.event_type,
+    Object.entries(ev.metadata)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join('; '),
+  ])
+  return [headers, ...rows]
+    .map((r) =>
+      r
+        .map((cell) =>
+          cell.includes(',') || cell.includes('"')
+            ? `"${cell.replace(/"/g, '""')}"`
+            : cell
+        )
+        .join(',')
+    )
+    .join('\n')
+}
+
 export function Events() {
   const { devices } = useArgus()
   const [events, setEvents] = useState<PowerEvent[]>([])
@@ -35,6 +58,7 @@ export function Events() {
   const [loading, setLoading] = useState(true)
   const [filterDevice, setFilterDevice] = useState('')
   const [filterType, setFilterType] = useState('')
+  const [exporting, setExporting] = useState(false)
 
   const fetchEvents = useCallback(async (p: number, devId: string, evType: string) => {
     setLoading(true)
@@ -57,6 +81,35 @@ export function Events() {
     setFilterDevice(dev)
     setFilterType(type)
     setPage(1)
+  }
+
+  const handleExport = async () => {
+    setExporting(true)
+    try {
+      const allEvents: PowerEvent[] = []
+      let p = 1
+      while (true) {
+        const result = await getEventsFiltered(
+          p,
+          100,
+          filterDevice || undefined,
+          filterType || undefined,
+        )
+        allEvents.push(...result.items)
+        if (allEvents.length >= result.total) break
+        p++
+      }
+      const csv = buildCSV(allEvents)
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `argus-events-${new Date().toISOString().split('T')[0]}.csv`
+      a.click()
+      URL.revokeObjectURL(url)
+    } finally {
+      setExporting(false)
+    }
   }
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
@@ -123,11 +176,26 @@ export function Events() {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Events</h1>
-        <p className="text-slate-500 text-sm mt-0.5">
-          Power event history across all devices
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Events</h1>
+          <p className="text-slate-500 text-sm mt-0.5">
+            Power event history across all devices
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => void handleExport()}
+          disabled={exporting || total === 0}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all self-start sm:self-auto ${
+            exporting || total === 0
+              ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
+              : 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+          }`}
+        >
+          <Download size={15} />
+          {exporting ? 'Exporting…' : 'Export CSV'}
+        </button>
       </div>
 
       {/* Filters */}

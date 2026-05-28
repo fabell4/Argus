@@ -1,6 +1,37 @@
 import { useEffect, useState } from 'react'
+import { Download } from 'lucide-react'
 import { getEvents } from '@/lib/api'
 import type { PowerEvent } from '@/types'
+
+function downloadEventsCSV(events: PowerEvent[], filename = 'argus-events') {
+  const headers = ['Time', 'Device', 'Event Type', 'Details']
+  const rows = events.map((ev) => [
+    new Date(ev.timestamp).toLocaleString(),
+    ev.device_id,
+    ev.event_type,
+    Object.entries(ev.metadata)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join('; '),
+  ])
+  const csv = [headers, ...rows]
+    .map((r) =>
+      r
+        .map((cell) =>
+          cell.includes(',') || cell.includes('"')
+            ? `"${cell.replace(/"/g, '""')}"`
+            : cell
+        )
+        .join(',')
+    )
+    .join('\n')
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `${filename}-${new Date().toISOString().split('T')[0]}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 const EVENT_BADGE: Record<string, string> = {
   on_battery: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
@@ -26,6 +57,17 @@ export function EventsTable() {
   if (events.length === 0) return <p className="text-slate-500 text-sm">No events recorded yet.</p>
 
   return (
+    <div>
+      <div className="flex justify-end mb-2">
+        <button
+          type="button"
+          onClick={() => downloadEventsCSV(events, 'argus-recent-events')}
+          className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-colors"
+        >
+          <Download size={13} />
+          Export CSV
+        </button>
+      </div>
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
@@ -49,6 +91,7 @@ export function EventsTable() {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   )
 }
