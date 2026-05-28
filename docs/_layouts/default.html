@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="{{ site.lang | default: "en-US" }}">
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page.title | default: site.title }}</title>
+    <link rel="icon" type="image/png" href="{{ '/assets/argus.png' | relative_url }}">
+    <link rel="stylesheet" href="{{ '/assets/css/style.css?v=' | append: site.github.build_revision | relative_url }}">
+    <style>
+      /* Constrain header content to match body width */
+      header .inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      #sidebar nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+      }
+      #sidebar nav ul li {
+        display: block;
+        margin-bottom: 6px;
+        margin-right: 0;
+      }
+      #sidebar nav ul li a {
+        color: #9ddcff;
+        text-decoration: none;
+        font-size: 0.9em;
+      }
+      #sidebar nav ul li a:hover {
+        color: #fff;
+        text-decoration: underline;
+      }
+      #sidebar nav ul li a.active {
+        color: #fff;
+        font-weight: bold;
+      }
+      #sidebar hr {
+        border-color: #3a3a3a;
+        margin: 12px 0;
+      }
+      #sidebar .sidebar-section-title {
+        font-size: 0.75em;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #666;
+        margin-bottom: 6px;
+      }
+
+      /* ── Two-column layout ── */
+      #content-wrapper {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 20px 24px;
+      }
+      #content-wrapper .inner {
+        display: flex;
+        flex-direction: row;
+        gap: 2rem;
+        align-items: flex-start;
+      }
+      aside#sidebar {
+        width: 220px;
+        flex-shrink: 0;
+        order: -1;
+        position: sticky;
+        top: 20px;
+      }
+      section#main-content {
+        flex: 1;
+        min-width: 0;
+      }
+      @media (max-width: 768px) {
+        #content-wrapper .inner {
+          flex-direction: column;
+        }
+        aside#sidebar {
+          width: 100%;
+          position: static;
+          order: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="inner">
+        <a href="{{ '/' | relative_url }}">
+          <h1>{{ site.title | default: site.github.repository_name }}</h1>
+        </a>
+        <h2>{{ site.description | default: site.github.project_tagline }}</h2>
+        {% if site.github.is_project_page %}
+          <a href="{{ site.github.repository_url }}" class="button"><small>View project on</small> GitHub</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          {{ content }}
+        </section>
+
+        <aside id="sidebar">
+          <nav>
+            <p class="sidebar-section-title">Navigation</p>
+            <ul>
+              {% for item in site.navigation %}
+                <li>
+                  <a href="{{ item.url | relative_url }}"
+                     {% if page.url == item.url or page.url == item.url | append: '.html' %}class="active"{% endif %}>
+                    {{ item.title }}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </nav>
+          <hr>
+          <p class="sidebar-section-title">Project</p>
+          <a href="{{ site.github.repository_url }}" class="button">
+            <small>View on</small> GitHub
+          </a>
+        </aside>
+      </div>
+    </div>
+
+    <script src="{{ '/assets/js/scale.fix.js' | relative_url }}"></script>
+  </body>
+</html>

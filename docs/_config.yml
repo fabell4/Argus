@@ -1,0 +1,40 @@
+# Jekyll configuration for GitHub Pages
+
+title: Argus Documentation
+description: Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration
+url: https://argus-docs.greenflametech.com
+baseurl: ""
+
+theme: jekyll-theme-hacker
+
+# Navigation
+navigation:
+  - title: Home
+    url: /
+  - title: Getting Started
+    url: /getting-started
+  - title: Architecture
+    url: /architecture
+  - title: API Reference
+    url: /api-reference
+  - title: Alerts
+    url: /alerts
+  - title: Security Guide
+    url: /security
+  - title: Runbook
+    url: /runbook
+
+# GitHub metadata
+repository: fabell4/argus
+github:
+  repository_url: https://github.com/fabell4/argus
+
+# Build settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+# Plugins
+plugins:
+  - jekyll-github-metadata
