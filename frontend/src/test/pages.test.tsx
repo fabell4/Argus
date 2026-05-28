@@ -92,10 +92,12 @@ const baseContext: ArgusContextType = {
   isPolling: false,
   error: null,
   theme: 'dark',
+  needsApiKey: false,
   toggleTheme: vi.fn(),
   runPoll: vi.fn(),
   updateConfig: vi.fn(),
   refresh: vi.fn(),
+  saveApiKey: vi.fn(),
 }
 
 function renderWithContext(
