@@ -20,8 +20,8 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-violet-500/50 ${
-        checked ? 'bg-violet-600' : 'bg-slate-700'
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/50 ${
+        checked ? 'bg-cyan-500' : 'bg-slate-700'
       }`}
     >
       <span
@@ -80,7 +80,7 @@ export function Settings() {
 
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <KeyRound className="w-4 h-4 text-violet-400" />
+          <KeyRound className="w-4 h-4 text-amber-400" />
           <h2 className="text-lg font-semibold text-slate-200">API Access</h2>
         </div>
         <p className="text-xs text-slate-500">
@@ -94,12 +94,12 @@ export function Settings() {
             value={apiKey}
             placeholder="Paste your API key here"
             onChange={(e) => setApiKey(e.target.value)}
-            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+            className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
           />
         </label>
         <button
           onClick={handleSaveApiKey}
-          className="px-4 py-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-medium transition-colors"
+          className="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-sm font-medium transition-colors"
         >
           {apiKeySaved ? 'Saved!' : 'Save API Key'}
         </button>
@@ -110,7 +110,7 @@ export function Settings() {
       {/* Scheduler */}
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-5">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-violet-400" />
+          <Clock className="w-4 h-4 text-cyan-400" />
           <h2 className="text-lg font-semibold text-slate-200">Scheduler</h2>
         </div>
 
@@ -123,7 +123,7 @@ export function Settings() {
             max={10080}
             value={form.poll_interval_minutes}
             onChange={(e) => setForm({ ...form, poll_interval_minutes: Number(e.target.value) })}
-            className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+            className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
           />
           <span className="text-xs text-slate-500">Minimum 1 minute.</span>
         </div>
@@ -153,7 +153,7 @@ export function Settings() {
       {/* Exporters */}
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Database className="w-4 h-4 text-violet-400" />
+          <Database className="w-4 h-4 text-blue-400" />
           <h2 className="text-lg font-semibold text-slate-200">Exporters</h2>
         </div>
 
@@ -180,7 +180,7 @@ export function Settings() {
 
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <Server className="w-4 h-4 text-violet-400" />
+          <Server className="w-4 h-4 text-teal-400" />
           <h2 className="text-lg font-semibold text-slate-200">NUT Connection</h2>
         </div>
 
@@ -191,7 +191,7 @@ export function Settings() {
               type="text"
               value={form.nut_host}
               onChange={(e) => setForm({ ...form, nut_host: e.target.value })}
-              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             />
           </label>
 
@@ -203,7 +203,7 @@ export function Settings() {
               max={65535}
               value={form.nut_port}
               onChange={(e) => setForm({ ...form, nut_port: Number(e.target.value) })}
-              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             />
           </label>
 
@@ -213,7 +213,7 @@ export function Settings() {
               type="text"
               value={form.nut_username}
               onChange={(e) => setForm({ ...form, nut_username: e.target.value })}
-              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             />
           </label>
 
@@ -224,7 +224,7 @@ export function Settings() {
               value={form.nut_password}
               placeholder="Leave blank to keep existing"
               onChange={(e) => setForm({ ...form, nut_password: e.target.value })}
-              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             />
           </label>
 
@@ -235,7 +235,7 @@ export function Settings() {
               value={form.nut_ups_name}
               placeholder="ups1,ups2"
               onChange={(e) => setForm({ ...form, nut_ups_name: e.target.value })}
-              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
             />
             <span className="text-xs text-slate-500">Used when auto-discover is off. Enter a single UPS name or a comma-separated list such as ups1,ups2.</span>
           </label>
@@ -246,7 +246,7 @@ export function Settings() {
             type="checkbox"
             checked={form.nut_auto_discover}
             onChange={(e) => setForm({ ...form, nut_auto_discover: e.target.checked })}
-            className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-violet-500"
+            className="w-4 h-4 rounded border-slate-600 bg-slate-800 accent-cyan-500"
           />
           <span className="text-sm text-slate-300">Auto-discover UPS devices</span>
         </label>
@@ -254,7 +254,7 @@ export function Settings() {
 
       <div className="bg-slate-900/40 border border-slate-800 rounded-2xl p-4 md:p-6 space-y-4">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="w-4 h-4 text-violet-400" />
+          <SlidersHorizontal className="w-4 h-4 text-amber-400" />
           <h2 className="text-lg font-semibold text-slate-200">Event Thresholds</h2>
         </div>
 
@@ -266,7 +266,7 @@ export function Settings() {
               min={1}
               value={form.device_offline_missed_polls}
               onChange={(e) => setForm({ ...form, device_offline_missed_polls: Number(e.target.value) })}
-              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
             />
           </label>
 
@@ -279,7 +279,7 @@ export function Settings() {
               step={1}
               value={form.shutdown_battery_floor_pct}
               onChange={(e) => setForm({ ...form, shutdown_battery_floor_pct: Number(e.target.value) })}
-              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
             />
             <span className="text-xs text-slate-500">Battery % that triggers shutdown alert</span>
           </label>
@@ -293,7 +293,7 @@ export function Settings() {
               step={1}
               value={form.threshold_load_percent}
               onChange={(e) => setForm({ ...form, threshold_load_percent: Number(e.target.value) })}
-              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
             />
           </label>
 
@@ -306,7 +306,7 @@ export function Settings() {
               step={0.5}
               value={form.threshold_temp_celsius}
               onChange={(e) => setForm({ ...form, threshold_temp_celsius: Number(e.target.value) })}
-              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50"
+              className="w-32 bg-slate-800 border border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
             />
           </label>
         </div>
@@ -315,7 +315,7 @@ export function Settings() {
       <div className="pt-1">
         <button
           onClick={handleSave}
-          className="px-5 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg text-sm font-medium transition-colors shadow-lg shadow-violet-500/20"
+          className="px-5 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-cyan-500/20"
         >
           {saved ? 'Saved!' : 'Save Changes'}
         </button>

@@ -65,7 +65,7 @@ export function Events() {
     if (loading) {
       return (
         <div className="p-8 text-center">
-          <div className="inline-block w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+          <div className="inline-block w-5 h-5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
         </div>
       )
     }
@@ -143,7 +143,7 @@ export function Events() {
               id="filter-device"
               value={filterDevice}
               onChange={(e) => handleFilterChange(e.target.value, filterType)}
-              className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50 min-w-[160px]"
+              className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/50 min-w-[160px]"
             >
               <option value="">All devices</option>
               {devices.map((d) => (
@@ -158,7 +158,7 @@ export function Events() {
               id="filter-type"
               value={filterType}
               onChange={(e) => handleFilterChange(filterDevice, e.target.value)}
-              className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50 min-w-[160px]"
+              className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-amber-500/50 min-w-[160px]"
             >
               <option value="">All types</option>
               {EVENT_TYPES.map((t) => (

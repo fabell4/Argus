@@ -1,5 +1,7 @@
 # Argus
 
+<img src="docs/assets/argus.png" width="80" alt="Argus logo">
+
 Argus is a self-hostable power use reporting platform with:
 
 - **Backend:** Python (FastAPI)

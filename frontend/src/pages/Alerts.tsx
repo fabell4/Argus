@@ -15,7 +15,7 @@ import type {
 // ─── styling constants ────────────────────────────────────────────────────────
 
 const inputCls =
-  'w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-violet-500/50'
+  'w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 text-sm text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500/50'
 const labelCls = 'text-xs text-slate-500 mb-1'
 
 // ─── per-type provider state ──────────────────────────────────────────────────
@@ -78,8 +78,8 @@ function Toggle({
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-violet-500/50 ${
-        checked ? 'bg-violet-500' : 'bg-slate-300 dark:bg-slate-600'
+      className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/50 ${
+        checked ? 'bg-orange-500' : 'bg-slate-300 dark:bg-slate-600'
       }`}
     >
       <span
@@ -248,7 +248,7 @@ export function Alerts() {
       {/* Thresholds */}
       <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
         <div className="flex items-center gap-2">
-          <SlidersHorizontal className="w-4 h-4 text-violet-400" />
+          <SlidersHorizontal className="w-4 h-4 text-orange-400" />
           <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Thresholds</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -291,7 +291,7 @@ export function Alerts() {
       {/* Alert events */}
       <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-3">
         <div className="flex items-center gap-2">
-          <Zap className="w-4 h-4 text-violet-400" />
+          <Zap className="w-4 h-4 text-orange-400" />
           <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Alert events</h2>
         </div>
         <p className="text-xs text-slate-500">Choose which conditions trigger notifications.</p>
@@ -306,7 +306,7 @@ export function Alerts() {
               type="checkbox"
               checked={Boolean(config[key])}
               onChange={(e) => setConfig((c) => ({ ...c, [key]: e.target.checked }))}
-              className="accent-violet-500"
+              className="accent-orange-500"
             />
             {label}
           </label>
@@ -317,7 +317,7 @@ export function Alerts() {
       <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 space-y-4">
         <div>
           <div className="flex items-center gap-2">
-            <Send className="w-4 h-4 text-violet-400" />
+            <Send className="w-4 h-4 text-orange-400" />
             <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">
               {'Notification providers '}
               <span className="text-sm font-normal text-slate-500">({enabledCount} enabled)</span>
@@ -339,7 +339,7 @@ export function Alerts() {
               <button
                 type="button"
                 onClick={addWebhook}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-violet-600/20 hover:bg-violet-600/30 text-violet-400 text-xs font-medium border border-violet-500/30 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 text-xs font-medium border border-orange-500/30 transition-colors"
               >
                 <Plus size={12} />
                 Add
@@ -518,7 +518,7 @@ export function Alerts() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-violet-600 hover:bg-violet-500 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors shadow-lg shadow-violet-500/20"
+          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-orange-500 hover:bg-orange-400 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium transition-colors shadow-lg shadow-orange-500/20"
         >
           {saved ? <CheckCircle size={14} /> : null}
           {saveLabel}

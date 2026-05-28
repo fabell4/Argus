@@ -37,6 +37,9 @@ export function ArgusProvider({ children }: Readonly<{ children: React.ReactNode
   const [error, setError] = useState<string | null>(null)
   const [theme, setTheme] = useState<'dark' | 'light'>(getInitialTheme)
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  // Tracks device count across fetches so snapshot page size scales without
+  // creating a dependency cycle on the devices state array.
+  const deviceCountRef = useRef(0)
 
   // Apply theme on mount and changes
   useEffect(() => {
@@ -50,13 +53,16 @@ export function ArgusProvider({ children }: Readonly<{ children: React.ReactNode
 
   const fetchAll = useCallback(async () => {
     try {
+      // Scale snapshot page so each device gets ~50 data points in the chart.
+      const pageSize = Math.max(50, deviceCountRef.current * 50)
       const [snapshotsPage, latestSnap, healthData, configData, devicesData] = await Promise.all([
-        getSnapshots(),
+        getSnapshots(1, pageSize),
         getLatestSnapshot(),
         getHealth(),
         getConfig(),
         getDevices(),
       ])
+      deviceCountRef.current = devicesData.length
       setSnapshots(snapshotsPage.items)
       setLatest(latestSnap)
       setHealth(healthData)
