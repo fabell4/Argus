@@ -11,10 +11,12 @@ export interface ArgusContextType {
   isPolling: boolean
   error: string | null
   theme: 'dark' | 'light'
+  needsApiKey: boolean
   toggleTheme: () => void
   runPoll: () => Promise<void>
   updateConfig: (patch: Partial<RuntimeConfig>) => Promise<void>
   refresh: () => void
+  saveApiKey: (key: string) => void
 }
 
 export const ArgusContext = createContext<ArgusContextType | null>(null)

@@ -21,6 +21,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
   const resp = await fetch(path, { ...init, headers })
   if (!resp.ok) {
+    if (resp.status === 401) {
+      globalThis.dispatchEvent(new CustomEvent('argus:unauthorized'))
+    }
     const text = await resp.text()
     throw new Error(`API ${resp.status}: ${text}`)
   }

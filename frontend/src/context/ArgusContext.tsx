@@ -36,6 +36,7 @@ export function ArgusProvider({ children }: Readonly<{ children: React.ReactNode
   const [isPolling, setIsPolling] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [theme, setTheme] = useState<'dark' | 'light'>(getInitialTheme)
+  const [needsApiKey, setNeedsApiKey] = useState(() => !localStorage.getItem('argus_api_key'))
   const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   // Tracks device count across fetches so snapshot page size scales without
   // creating a dependency cycle on the devices state array.
@@ -46,6 +47,13 @@ export function ArgusProvider({ children }: Readonly<{ children: React.ReactNode
     applyTheme(theme)
     localStorage.setItem('argus_theme', theme)
   }, [theme])
+
+  // Show setup screen whenever a 401 is received from any API call
+  useEffect(() => {
+    const handler = () => setNeedsApiKey(true)
+    globalThis.addEventListener('argus:unauthorized', handler)
+    return () => globalThis.removeEventListener('argus:unauthorized', handler)
+  }, [])
 
   const toggleTheme = useCallback(() => {
     setTheme((t) => (t === 'dark' ? 'light' : 'dark'))
@@ -117,6 +125,12 @@ export function ArgusProvider({ children }: Readonly<{ children: React.ReactNode
     [config]
   )
 
+  const saveApiKey = useCallback((key: string) => {
+    localStorage.setItem('argus_api_key', key)
+    setNeedsApiKey(false)
+    fetchAll()
+  }, [fetchAll])
+
   const value: ArgusContextType = useMemo(
     () => ({
       snapshots,
@@ -128,12 +142,14 @@ export function ArgusProvider({ children }: Readonly<{ children: React.ReactNode
       isPolling,
       error,
       theme,
+      needsApiKey,
       toggleTheme,
       runPoll,
       updateConfig,
       refresh: fetchAll,
+      saveApiKey,
     }),
-    [snapshots, latest, health, config, devices, loading, isPolling, error, theme, toggleTheme, runPoll, updateConfig, fetchAll]
+    [snapshots, latest, health, config, devices, loading, isPolling, error, theme, needsApiKey, toggleTheme, runPoll, updateConfig, fetchAll, saveApiKey]
   )
 
   return <ArgusContext.Provider value={value}>{children}</ArgusContext.Provider>
