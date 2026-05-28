@@ -232,14 +232,14 @@ export function Alerts() {
       </div>
 
       {error && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-sm">
           <AlertCircle size={16} className="shrink-0" />
           {error}
         </div>
       )}
 
       {testMsg && (
-        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
+        <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm">
           <CheckCircle size={16} className="shrink-0" />
           {testMsg}
         </div>
@@ -339,7 +339,7 @@ export function Alerts() {
               <button
                 type="button"
                 onClick={addWebhook}
-                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 text-xs font-medium border border-orange-500/30 transition-colors"
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-600 dark:text-orange-400 text-xs font-medium border border-orange-500/30 transition-colors"
               >
                 <Plus size={12} />
                 Add
@@ -527,7 +527,7 @@ export function Alerts() {
         <button
           onClick={handleTest}
           disabled={testing || enabledCount === 0}
-          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-200 text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-5 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-700 dark:text-slate-200 text-sm font-medium transition-colors"
         >
           <Send size={14} className={testing ? 'animate-pulse' : ''} />
           {testing ? 'Sending…' : 'Send test alert'}

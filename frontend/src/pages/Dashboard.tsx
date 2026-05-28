@@ -88,14 +88,14 @@ export function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-violet-500/10 border border-violet-500/30 text-sm"
         >
-          <span className="text-violet-300">
+          <span className="text-violet-700 dark:text-violet-300">
             Update available: <span className="font-semibold">{latestRelease.tag_name}</span>
           </span>
           <a
             href={latestRelease.html_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-violet-400 hover:text-violet-300 transition-colors font-medium"
+            className="flex items-center gap-1 text-violet-700 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 transition-colors font-medium"
           >
             View release <ExternalLink size={12} />
           </a>
@@ -116,8 +116,8 @@ export function Dashboard() {
           {health && (
             <span className={`text-xs px-2 py-1 rounded-full font-medium ${
               health.status === 'ok'
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                : 'bg-red-500/20 text-red-300 border border-red-500/30'
+                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30'
+                : 'bg-red-500/20 text-red-700 dark:text-red-300 border border-red-500/30'
             }`}>
               {health.status}
             </span>

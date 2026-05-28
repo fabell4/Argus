@@ -32,18 +32,18 @@ export function PowerGauge({ label, value, unit, metric }: PowerGaugeProps) {
   const Icon = ICONS[metric]
 
   return (
-    <div className={`bg-slate-900/40 rounded-2xl p-4 border border-slate-800 border-t-2 ${BORDER_COLORS[metric]}`}>
+    <div className={`bg-white dark:bg-slate-900/40 rounded-2xl p-4 border border-slate-200 dark:border-slate-800 border-t-2 ${BORDER_COLORS[metric]}`}>
       <div className="flex items-center gap-2 mb-3">
         <Icon size={16} className={ICON_COLORS[metric]} />
-        <span className="text-sm text-slate-400">{label}</span>
+        <span className="text-sm text-slate-500 dark:text-slate-400">{label}</span>
       </div>
-      <div className="text-2xl font-semibold text-slate-100">
+      <div className="text-2xl font-semibold text-slate-900 dark:text-slate-100">
         {value === null ? (
-          <span className="text-slate-600">—</span>
+          <span className="text-slate-400 dark:text-slate-600">—</span>
         ) : (
           <>
             <span>{value.toFixed(1)}</span>
-            <span className="text-base text-slate-400 ml-1">{unit}</span>
+            <span className="text-base text-slate-500 dark:text-slate-400 ml-1">{unit}</span>
           </>
         )}
       </div>

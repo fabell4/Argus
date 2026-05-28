@@ -6,13 +6,13 @@ import { useArgus } from '@/hooks/useArgus'
 import type { PowerEvent } from '@/types'
 
 const EVENT_BADGE: Record<string, string> = {
-  on_battery: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
-  power_restored: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
-  battery_low: 'bg-red-500/20 text-red-300 border border-red-500/30',
-  threshold_crossed: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
-  device_offline: 'bg-red-500/20 text-red-300 border border-red-500/30',
-  device_online: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
-  shutdown_initiated: 'bg-red-500/20 text-red-300 border border-red-500/30',
+  on_battery: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
+  power_restored: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30',
+  battery_low: 'bg-red-500/20 text-red-700 dark:text-red-300 border border-red-500/30',
+  threshold_crossed: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
+  device_offline: 'bg-red-500/20 text-red-700 dark:text-red-300 border border-red-500/30',
+  device_online: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30',
+  shutdown_initiated: 'bg-red-500/20 text-red-700 dark:text-red-300 border border-red-500/30',
 }
 
 const EVENT_TYPES = [
@@ -192,17 +192,17 @@ export function Events() {
               <button
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 disabled={page === 1}
-                className="p-1.5 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronLeft size={16} />
               </button>
-              <span className="text-xs text-slate-400 px-2">
+              <span className="text-xs text-slate-500 dark:text-slate-400 px-2">
                 {page} / {totalPages}
               </span>
               <button
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
-                className="p-1.5 rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-700/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-md text-slate-500 hover:text-slate-700 hover:bg-slate-200/70 dark:text-slate-400 dark:hover:text-slate-200 dark:hover:bg-slate-700/50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 <ChevronRight size={16} />
               </button>

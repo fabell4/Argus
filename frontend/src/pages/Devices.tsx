@@ -13,8 +13,8 @@ const DEVICE_TYPE_LABEL: Record<string, string> = {
 }
 
 const POLLER_BADGE: Record<string, string> = {
-  nut: 'bg-violet-500/20 text-violet-300 border border-violet-500/30',
-  snmp: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+  nut: 'bg-violet-500/20 text-violet-700 dark:text-violet-300 border border-violet-500/30',
+  snmp: 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30',
 }
 
 function getStatusFromSnapshot(snap: PowerSnapshot | null, lastSeen: string | null): 'online' | 'on_battery' | 'offline' {
@@ -30,28 +30,28 @@ const STATUS_CONFIG = {
   online: {
     label: 'Online',
     dot: 'bg-emerald-400',
-    badge: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+    badge: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30',
     icon: Wifi,
   },
   on_battery: {
     label: 'On Battery',
     dot: 'bg-amber-400',
-    badge: 'bg-amber-500/20 text-amber-300 border border-amber-500/30',
+    badge: 'bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30',
     icon: Battery,
   },
   offline: {
     label: 'Offline',
     dot: 'bg-red-400',
-    badge: 'bg-red-500/20 text-red-300 border border-red-500/30',
+    badge: 'bg-red-500/20 text-red-700 dark:text-red-300 border border-red-500/30',
     icon: WifiOff,
   },
 }
 
 function MetricPill({ label, value, unit }: Readonly<{ label: string; value: number | null | undefined; unit: string }>) {
   return (
-    <div className="flex flex-col items-center px-3 py-2 rounded-lg bg-slate-800/60 dark:bg-slate-800/60 border border-slate-700/50">
-      <span className="text-xs text-slate-400 mb-0.5">{label}</span>
-      <span className="text-sm font-semibold text-slate-200 dark:text-slate-200">
+    <div className="flex flex-col items-center px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50">
+      <span className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">{label}</span>
+      <span className="text-sm font-semibold text-slate-800 dark:text-slate-200">
         {value == null ? '—' : `${value.toFixed(1)}${unit}`}
       </span>
     </div>
@@ -153,7 +153,7 @@ function DeviceCard({ device }: Readonly<{ device: Device }>) {
       <button
         type="button"
         onClick={() => setShowChart((v) => !v)}
-        className="flex items-center gap-1.5 text-xs text-violet-400 hover:text-violet-300 transition-colors"
+        className="flex items-center gap-1.5 text-xs text-violet-700 hover:text-violet-600 dark:text-violet-400 dark:hover:text-violet-300 transition-colors"
       >
         <BarChart2 size={13} />
         {showChart ? 'Hide history' : 'Show history'}
