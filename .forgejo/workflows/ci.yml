@@ -835,10 +835,35 @@ jobs:
             zap-output.log
           retention-days: 7
 
+  # ---------------------------------------------------------------------------
+  # publish-docs: copies the docs/ folder into the shared mkdocs volume so the
+  # Argus tab on the hub is always up to date. Depends only on sonarqube so it
+  # runs as soon as quality gates pass, independently of docker-publish.
+  # ---------------------------------------------------------------------------
+  publish-docs:
+    runs-on: docker
+    timeout-minutes: 15
+    if: github.ref == 'refs/heads/main'
+    needs: [sonarqube]
+    continue-on-error: true
+    container:
+      image: registry.greenflametech.net/gft-ci-runner:latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Publish docs to hub
+        run: |
+          CID=$(docker run -d -v marion_mkdocs_content:/docs registry.greenflametech.net/alpine sleep 30)
+          docker exec "$CID" mkdir -p /docs/docs/argus/assets
+          docker cp docs/. "$CID:/docs/docs/argus/"
+          docker cp docs/zeniscal.yml "$CID:/docs/docs/argus/zeniscal.yml"
+          docker rm -f "$CID"
+
   notify:
     runs-on: docker
     if: always()
-    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-config, trivy-deps, sonarqube, docker-publish, trivy-image]
+    needs: [gitleaks, test, ruff, mypy, bandit, semgrep, safety, hadolint, radon, vulture, trivy-config, trivy-deps, sonarqube, docker-publish, trivy-image, publish-docs]
     container:
       image: registry.greenflametech.net/gft-ci-runner:latest
     steps:

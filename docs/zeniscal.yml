@@ -1,0 +1,17 @@
+site_name: Argus
+site_description: Argus Power Monitoring Documentation
+docs_dir: .
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Architecture: architecture.md
+  - API Reference: api-reference.md
+  - Security: security.md
+  - Alerts: alerts.md
+  - Runbook: runbook.md
+  - Code Review Policy: CODE-REVIEW-POLICY.md
+
+plugins:
+  - search
+  - kroki:
+      server_url: https://kroki.greenflametech.net
