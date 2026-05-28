@@ -1,10 +1,11 @@
 import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { RefreshCw, AlertCircle, Clock, ExternalLink } from 'lucide-react'
 import { PowerChart } from '@/components/PowerChart'
 import { PowerGauge } from '@/components/PowerGauge'
 import { EventsTable } from '@/components/EventsTable'
 import { useArgus } from '@/hooks/useArgus'
+import type { PowerSnapshot } from '@/types'
 
 // ─── countdown timer ─────────────────────────────────────────────────────────
 
@@ -60,10 +61,19 @@ function useVersionCheck(currentVersion: string | undefined, githubRepo: string 
 // ─── dashboard ────────────────────────────────────────────────────────────────
 
 export function Dashboard() {
-  const { snapshots, latest, health, isPolling, error, runPoll } = useArgus()
+  const { snapshots, latest, health, isPolling, error, runPoll, devices } = useArgus()
 
   const countdown = useCountdown(health?.next_poll_at)
   const latestRelease = useVersionCheck(health?.version, health?.github_repo)
+
+  // Derive the latest snapshot per device from the shared snapshots pool (newest-first)
+  const latestByDevice = useMemo(() => {
+    const map = new Map<string, PowerSnapshot>()
+    for (const snap of snapshots) {
+      if (!map.has(snap.device_id)) map.set(snap.device_id, snap)
+    }
+    return map
+  }, [snapshots])
 
   return (
     <motion.div
@@ -140,12 +150,33 @@ export function Dashboard() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <PowerGauge label="Power" value={latest?.power_watts ?? null} unit="W" metric="power" />
-        <PowerGauge label="Load" value={latest?.load_percent ?? null} unit="%" metric="load" />
-        <PowerGauge label="Battery" value={latest?.battery_percent ?? null} unit="%" metric="battery" />
-        <PowerGauge label="Temperature" value={latest?.temperature_c ?? null} unit="°C" metric="temperature" />
-      </div>
+      {devices.length > 0 ? (
+        <div className="space-y-5">
+          {devices.map((device) => {
+            const snap = latestByDevice.get(device.id) ?? null
+            return (
+              <div key={device.id}>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-2">
+                  {device.name || device.id}
+                </p>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <PowerGauge label="Power" value={snap?.power_watts ?? null} unit="W" metric="power" />
+                  <PowerGauge label="Load" value={snap?.load_percent ?? null} unit="%" metric="load" />
+                  <PowerGauge label="Battery" value={snap?.battery_percent ?? null} unit="%" metric="battery" />
+                  <PowerGauge label="Temperature" value={snap?.temperature_c ?? null} unit="°C" metric="temperature" />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <PowerGauge label="Power" value={latest?.power_watts ?? null} unit="W" metric="power" />
+          <PowerGauge label="Load" value={latest?.load_percent ?? null} unit="%" metric="load" />
+          <PowerGauge label="Battery" value={latest?.battery_percent ?? null} unit="%" metric="battery" />
+          <PowerGauge label="Temperature" value={latest?.temperature_c ?? null} unit="°C" metric="temperature" />
+        </div>
+      )}
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -154,7 +185,7 @@ export function Dashboard() {
         className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6"
       >
         <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">Power History</h2>
-        <PowerChart snapshots={snapshots} />
+        <PowerChart snapshots={snapshots} devices={devices} />
       </motion.div>
 
       <motion.div
