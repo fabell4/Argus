@@ -194,8 +194,7 @@ export function Dashboard() {
         transition={{ delay: 0.2 }}
         className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-6"
       >
-        <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">Recent Events</h2>
-        <EventsTable />
+        <EventsTable title="Recent Events" />
       </motion.div>
 
       {health && (health.last_poll_at || health.next_poll_at) && (

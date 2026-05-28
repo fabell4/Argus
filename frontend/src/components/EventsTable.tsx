@@ -42,7 +42,11 @@ const EVENT_BADGE: Record<string, string> = {
   device_online: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30',
 }
 
-export function EventsTable() {
+interface EventsTableProps {
+  readonly title?: string
+}
+
+export function EventsTable({ title }: EventsTableProps = {}) {
   const [events, setEvents] = useState<PowerEvent[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -53,21 +57,56 @@ export function EventsTable() {
       .finally(() => setLoading(false))
   }, [])
 
-  if (loading) return <p className="text-slate-500 text-sm">Loading events…</p>
-  if (events.length === 0) return <p className="text-slate-500 text-sm">No events recorded yet.</p>
+  const exportButton = (
+    <button
+      type="button"
+      onClick={() => downloadEventsCSV(events, 'argus-recent-events')}
+      disabled={events.length === 0}
+      className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      <Download size={13} />
+      Export CSV
+    </button>
+  )
+
+  if (loading) {
+    return (
+      <div>
+        {title && (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">{title}</h2>
+            {exportButton}
+          </div>
+        )}
+        <p className="text-slate-500 text-sm">Loading events…</p>
+      </div>
+    )
+  }
+
+  if (events.length === 0) {
+    return (
+      <div>
+        {title && (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">{title}</h2>
+            {exportButton}
+          </div>
+        )}
+        <p className="text-slate-500 text-sm">No events recorded yet.</p>
+      </div>
+    )
+  }
 
   return (
     <div>
-      <div className="flex justify-end mb-2">
-        <button
-          type="button"
-          onClick={() => downloadEventsCSV(events, 'argus-recent-events')}
-          className="flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg text-amber-600 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 transition-colors"
-        >
-          <Download size={13} />
-          Export CSV
-        </button>
-      </div>
+      {title ? (
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-200">{title}</h2>
+          {exportButton}
+        </div>
+      ) : (
+        <div className="flex justify-end mb-2">{exportButton}</div>
+      )}
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
         <thead>
