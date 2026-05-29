@@ -8,13 +8,13 @@ Argus is a self-hostable power use reporting platform with:
 - **Frontend:** React (Vite)
 - **Deployment:** Docker images via Docker Compose
 
-## Project structure
+## 📁 Project structure
 
 - `src/` — FastAPI scheduler and API service
 - `frontend/` — React UI
 - `docker-compose.yml` — self-hosted deployment
 
-## Local development
+## 🛠️ Local development
 
 ### Backend
 
@@ -39,7 +39,7 @@ npm run dev
 
 The Vite dev server proxies `/api/*` to `http://localhost:8000`.
 
-## Running tests
+## 🧪 Running tests
 
 ### Python (346 tests, ≥90% coverage)
 
@@ -54,13 +54,13 @@ cd frontend
 npm run test:coverage
 ```
 
-## Environment variables
+## ⚙️ Environment variables
 
 Copy `.env.example` to `.env` and adjust as needed. Key variables:
 
 | Variable | Default | Description |
 | --- | --- | --- |
-| `NUT_HOST` | `host.docker.internal` | NUT daemon hostname (see [Docker note](#self-hosting-with-docker) below) |
+| `NUT_HOST` | `host.docker.internal` | NUT daemon hostname (see [Docker note](#-self-hosting-with-docker) below) |
 | `NUT_PORT` | `3493` | NUT daemon port |
 | `NUT_UPS_NAME` | `ups` | UPS name, or comma-separated UPS names if `NUT_AUTO_DISCOVER=false` |
 | `NUT_AUTO_DISCOVER` | `true` | Auto-discover all UPS devices via `LIST UPS` |
@@ -79,7 +79,7 @@ See `.env.example` for the full list of supported variables.
 > browser stores it in `localStorage` and attaches it as the `X-Api-Key` header
 > on every subsequent request. You only need to do this once per browser/device.
 
-## API
+## 🔌 API
 
 Interactive docs available at <http://localhost:8000/api/docs>.
 
@@ -97,7 +97,7 @@ Interactive docs available at <http://localhost:8000/api/docs>.
 | `/api/alerts/test` | POST | Send a test alert |
 | `/api/energy` | GET | Cumulative energy (kWh) and cost estimate |
 
-## Self-hosting with Docker
+## 🐳 Self-hosting with Docker
 
 ```bash
 docker compose up --build -d
@@ -106,7 +106,7 @@ docker compose up --build -d
 - App (API + frontend): <http://localhost:8000>
 - API health: <http://localhost:8000/api/health>
 
-### NUT host when running in Docker
+### 🔌 NUT host when running in Docker
 
 When Argus runs in a Docker container, `NUT_HOST=localhost` resolves to the
 *scheduler container itself*, not to the machine that runs NUT. Use one of
@@ -134,7 +134,7 @@ only initialize the optional InfluxDB container.
 
 The backend CORS policy is configured with `ALLOWED_ORIGINS` (comma-separated).
 
-## Open source best practices
+## 📖 Open source best practices
 
 - MIT License (`LICENSE`)
 - Contribution guide (`CONTRIBUTING.md`)

@@ -10,11 +10,13 @@ title: "Argus Documentation"
 destinations, fires structured events on state transitions, and sends alert notifications through
 your preferred channels.
 
+![Argus dashboard](assets/Argus-home.png)
+
 ---
 
-## Features
+## ✨ Features
 
-### Core Capabilities
+### 🚀 Core Capabilities
 
 - **Multi-Device Polling** — NUT (UPS/battery) and SNMP (PDU/sensor) with configurable intervals
 - **Automatic Discovery** — Auto-discovers all UPS units from a NUT daemon
@@ -24,7 +26,7 @@ your preferred channels.
 - **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services)
 - **Production-Ready** — Docker deployment, health checks, data retention policies
 
-### Data Collection
+### 📊 Data Collection
 
 Each poll cycle captures per-device:
 
@@ -36,7 +38,7 @@ Each poll cycle captures per-device:
 - UPS status flags (`OL`, `OB`, `LB`, `CHRG`, …)
 - Temperature (°C, where available)
 
-### Event System
+### 🔔 Event System
 
 Argus detects and records state transitions as structured events:
 
@@ -50,7 +52,7 @@ Argus detects and records state transitions as structured events:
 | `device_offline` | Device missed consecutive poll attempts |
 | `device_online` | Device reachable again after offline period |
 
-### Alert System
+### 🚨 Alert System
 
 Send notifications on critical power events:
 
@@ -60,7 +62,7 @@ Send notifications on critical power events:
 - Multiple provider support (Webhook, Gotify, ntfy, Apprise)
 - Test notifications before deploying
 
-### Security
+### 🔒 Security
 
 - API key authentication with timing-attack prevention
 - Per-key rate limiting with sliding windows
@@ -71,7 +73,7 @@ Send notifications on critical power events:
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 # 1. Pull the compose file
@@ -92,7 +94,7 @@ open http://localhost:8000
 
 ---
 
-## Documentation
+## 📚 Documentation
 
 - [Getting Started](getting-started) — Docker deployment, configuration, first steps
 - [Architecture](architecture) — System design, data flow, deployment topology

@@ -3,16 +3,16 @@ layout: default
 title: "Security Guide"
 ---
 
-# Security Guide
+# 🔒 Security Guide
 
 Argus implements multiple layers of security for production deployments. This guide covers
 security features, configuration best practices, and hardening recommendations.
 
 ---
 
-## Security Features
+## 🛡️ Security Features
 
-### API Key Authentication
+### 🔑 API Key Authentication
 
 **Purpose:** Protect write endpoints from unauthorized access.
 
@@ -66,7 +66,7 @@ Suggestion: Generate a secure key with:
 
 ---
 
-### Rate Limiting
+### 🚦 Rate Limiting
 
 **Purpose:** Prevent abuse and DoS via request flooding.
 
@@ -79,7 +79,7 @@ Suggestion: Generate a secure key with:
 
 ---
 
-### SSRF Protection on Alert URLs
+### 🛡️ SSRF Protection on Alert URLs
 
 **Purpose:** Prevent Server-Side Request Forgery through alert provider URLs.
 
@@ -98,7 +98,7 @@ GOTIFY_URL=http://gotify.example.com      # rejected — not HTTPS
 
 ---
 
-### Security Headers
+### 🔐 Security Headers
 
 Every API response includes the following headers:
 
@@ -112,14 +112,14 @@ Every API response includes the following headers:
 
 ---
 
-### Request Size Limits
+### 📏 Request Size Limits
 
 All requests are limited to **1 MB**. Requests with a `Content-Length` exceeding this return
 `413 Request Entity Too Large` immediately, before the body is read.
 
 ---
 
-### CORS Restrictions
+### 🌐 CORS Restrictions
 
 The API restricts cross-origin requests to explicitly allowed origins configured via
 `ALLOWED_ORIGINS`. The default allows only local development origins.
@@ -132,7 +132,7 @@ ALLOWED_ORIGINS=https://argus.example.com
 
 ---
 
-## Production Hardening Checklist
+## ✅ Production Hardening Checklist
 
 - [ ] Set `API_KEY` to a randomly generated 32+ character secret
 - [ ] Set `ALLOWED_ORIGINS` to your actual UI domain (not `*`)
@@ -146,7 +146,7 @@ ALLOWED_ORIGINS=https://argus.example.com
 
 ---
 
-## Reverse Proxy with TLS (Nginx Example)
+## 🔐 Reverse Proxy with TLS (Nginx Example)
 
 ```nginx
 server {
@@ -174,7 +174,7 @@ server {
 
 ---
 
-## NUT Credential Security
+## 🔑 NUT Credential Security
 
 NUT username and password (`NUT_USERNAME`, `NUT_PASSWORD`) are transmitted in plaintext over
 the NUT TCP protocol. Mitigations:
@@ -193,7 +193,7 @@ the NUT TCP protocol. Mitigations:
 
 ---
 
-## SNMPv3 Security
+## 📡 SNMPv3 Security
 
 For SNMP devices, prefer SNMPv3 with authentication and privacy encryption over the
 default community-string-based v2c:
@@ -211,7 +211,7 @@ Do not store these values in version-controlled files — use Docker secrets or 
 
 ---
 
-## Reporting Vulnerabilities
+## 📢 Reporting Vulnerabilities
 
 Please report security vulnerabilities privately via the process described in
 [SECURITY.md](https://github.com/fabell4/argus/blob/main/SECURITY.md).

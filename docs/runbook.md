@@ -3,27 +3,27 @@ layout: default
 title: "Runbook"
 ---
 
-# Argus Runbook
+# 📖 Argus Runbook
 
 Operational guide for diagnosing and resolving production issues using logs and metrics.
 
 ## Table of Contents
 
-- [Log Interpretation](#log-interpretation)
-- [Metric Thresholds](#metric-thresholds)
-- [Alert Investigation](#alert-investigation)
-- [Event Investigation](#event-investigation)
-- [SQLite Health](#sqlite-health)
-- [Common Failure Scenarios](#common-failure-scenarios)
-- [Escalation](#escalation)
+- [Log Interpretation](#-log-interpretation)
+- [Metric Thresholds](#-metric-thresholds)
+- [Alert Investigation](#-alert-investigation)
+- [Event Investigation](#-event-investigation)
+- [SQLite Health](#-sqlite-health)
+- [Common Failure Scenarios](#-common-failure-scenarios)
+- [Escalation](#-escalation)
 
 ---
 
-## Log Interpretation
+## 📋 Log Interpretation
 
 Argus uses structured log lines at `INFO`, `WARNING`, and `ERROR` levels.
 
-### Key Log Patterns
+### 🔍 Key Log Patterns
 
 | Pattern | Level | Meaning |
 | --- | --- | --- |
@@ -40,7 +40,7 @@ Argus uses structured log lines at `INFO`, `WARNING`, and `ERROR` levels.
 | `EventProcessor: battery_low` | WARNING | UPS battery critically low |
 | `EventProcessor: shutdown_initiated` | CRITICAL | Battery floor reached — shutdown event fired |
 
-### Log Levels Summary
+### 📊 Log Levels Summary
 
 - **INFO** — Normal operational events; no action required.
 - **WARNING** — Degraded operation (e.g., exporter skipped, device briefly offline). Monitor for recurrence.
@@ -49,7 +49,7 @@ Argus uses structured log lines at `INFO`, `WARNING`, and `ERROR` levels.
 
 ---
 
-## Metric Thresholds
+## 📊 Metric Thresholds
 
 Prometheus metrics are exposed on `PROMETHEUS_PORT` (default `9090`). Suggested alert rules:
 
@@ -67,7 +67,7 @@ Prometheus metrics are exposed on `PROMETHEUS_PORT` (default `9090`). Suggested 
 
 ---
 
-## Alert Investigation
+## 🔍 Alert Investigation
 
 When an alert fires:
 
@@ -106,7 +106,9 @@ When an alert fires:
 
 ---
 
-## Event Investigation
+## 🔍 Event Investigation
+
+![Argus event log](assets/Argus-events.png)
 
 ### `on_battery`
 
@@ -145,7 +147,7 @@ Load % or temperature exceeded the configured limit.
 
 ---
 
-## SQLite Health
+## 💾 SQLite Health
 
 ### Checking Database Size
 
@@ -180,7 +182,7 @@ sqlite3 data/argus.db "PRAGMA wal_checkpoint(TRUNCATE);"
 
 ---
 
-## Common Failure Scenarios
+## 🚧 Common Failure Scenarios
 
 ### NUT Connection Refused in Docker
 
@@ -255,7 +257,7 @@ NUT_HOST=192.168.1.10
 
 ---
 
-## Escalation
+## 🆘 Escalation
 
 If the runbook steps do not resolve the issue:
 

@@ -3,13 +3,13 @@ layout: default
 title: "Getting Started"
 ---
 
-# Getting Started
+# 🚀 Getting Started
 
 This guide covers deployment, configuration, and first steps with Argus.
 
 ---
 
-## Quick Start with Docker Compose
+## 🐳 Quick Start with Docker Compose
 
 The fastest way to get Argus running:
 
@@ -34,9 +34,11 @@ open http://localhost:8000
 > not your host machine. Use your host's LAN IP, `host.docker.internal` (macOS/Windows),
 > or the Docker service name if NUT runs in the same compose stack.
 
+![Argus device list](assets/Argus-devices.png)
+
 ---
 
-## Self-Hosting Guide
+## 🐳 Self-Hosting Guide
 
 Argus runs as two containers from the same Docker image:
 
@@ -89,7 +91,7 @@ volumes:
 
 ---
 
-## Environment Variables
+## ⚙️ Environment Variables
 
 Copy `.env.example` to `.env` and adjust as needed.
 
@@ -108,7 +110,7 @@ Copy `.env.example` to `.env` and adjust as needed.
 | `POLL_INTERVAL_MINUTES` | `5` | How often to poll all devices |
 | `POLL_ON_STARTUP` | `true` | Run an immediate poll when the scheduler starts |
 
-### NUT (Network UPS Tools)
+### 🔌 NUT (Network UPS Tools)
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -119,7 +121,7 @@ Copy `.env.example` to `.env` and adjust as needed.
 | `NUT_UPS_NAME` | `ups` | UPS device name (ignored when `NUT_AUTO_DISCOVER=true`) |
 | `NUT_AUTO_DISCOVER` | `true` | Auto-discover all UPS units from the NUT daemon |
 
-### SNMP
+### 📡 SNMP
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -133,7 +135,7 @@ Copy `.env.example` to `.env` and adjust as needed.
 | `SNMP_V3_PRIV_PROTOCOL` | `DES` | SNMPv3 privacy protocol (`DES` / `AES`) |
 | `SNMP_V3_PRIV_KEY` | _(empty)_ | SNMPv3 privacy key |
 
-### Exporters
+### 📤 Exporters
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -154,7 +156,7 @@ Copy `.env.example` to `.env` and adjust as needed.
 | `CSV_RETENTION_DAYS` | `30` | Remove CSV rows older than this many days |
 | `ENERGY_RATE_PER_KWH` | `0` | Cost per kWh for energy cost calculations (0 = disabled) |
 
-### Event Thresholds
+### ⚡ Event Thresholds
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -173,13 +175,13 @@ Copy `.env.example` to `.env` and adjust as needed.
 | `ALLOWED_ORIGINS` | `http://localhost:3000,http://localhost:5173` | CORS allowed origins |
 | `RATE_LIMIT_PER_MINUTE` | `60` | Max requests per 60-second window per API key |
 
-### Health Server
+### 🩺 Health Server
 
 | Variable | Default | Description |
 | --- | --- | --- |
 | `HEALTH_PORT` | `9100` | Scheduler health-check HTTP port |
 
-### Alerting
+### 🔔 Alerting
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -200,13 +202,15 @@ Copy `.env.example` to `.env` and adjust as needed.
 | `NTFY_TAGS` | _(empty)_ | Comma-separated ntfy tags |
 | `APPRISE_URL` | _(empty)_ | Apprise API URL |
 
+![Argus settings](assets/Argus-settings.png)
+
 ---
 
-## NUT Prerequisites
+## 🔌 NUT Prerequisites
 
 Argus connects to an existing NUT daemon — it does not ship NUT itself.
 
-### Installing NUT
+### 📦 Installing NUT
 
 **Debian/Ubuntu:**
 
@@ -231,7 +235,7 @@ services:
       - "3493:3493"
 ```
 
-### Verifying NUT Connectivity
+### ✅ Verifying NUT Connectivity
 
 ```bash
 # List all UPS units on the NUT daemon
@@ -243,7 +247,7 @@ upsc ups@<nut-host>
 
 ---
 
-## Local Development
+## 🛠️ Local Development
 
 ### Backend
 
@@ -270,7 +274,7 @@ npm run dev   # Vite dev server proxies /api/* to http://localhost:8000
 
 ---
 
-## Running Tests
+## 🧪 Running Tests
 
 ### Python
 

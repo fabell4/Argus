@@ -3,7 +3,7 @@ layout: default
 title: "Alert Configuration"
 ---
 
-# Alert Configuration
+# 🔔 Alert Configuration
 
 Argus can send notifications when power events occur — UPS battery transitions, device going
 offline, load/temperature thresholds exceeded, and more. Alerts are configurable via the UI
@@ -11,7 +11,7 @@ Settings page or environment variables.
 
 ---
 
-## Supported Alert Providers
+## 📢 Supported Alert Providers
 
 | Provider | Description | Setup Complexity |
 | --- | --- | --- |
@@ -22,7 +22,7 @@ Settings page or environment variables.
 
 ---
 
-## Alert Triggers
+## ⚡ Alert Triggers
 
 Configure which events fire alerts via environment variables:
 
@@ -37,7 +37,7 @@ Configure which events fire alerts via environment variables:
 
 ---
 
-## Alert Severity Levels
+## ⚠️ Alert Severity Levels
 
 Each alert is classified with a severity level. Providers can be configured with a
 `min_severity` filter so high-noise providers only receive critical alerts.
@@ -51,16 +51,18 @@ Each alert is classified with a severity level. Providers can be configured with
 
 ---
 
-## Configuration Methods
+## ⚙️ Configuration Methods
 
-### Method 1: UI Settings (Recommended)
+### 🖥️ Method 1: UI Settings (Recommended)
 
 1. Navigate to **Settings → Alerts** in the web UI
 2. Enable desired providers and fill in their settings
 3. Use **"Send Test Notification"** to verify before saving
 4. Click **"Save Settings"** — changes are written to `runtime_config.json` immediately (no restart required)
 
-### Method 2: Environment Variables
+![Argus alert configuration](assets/Argus-alerts.png)
+
+### ⚙️ Method 2: Environment Variables
 
 Add to `.env` before the first container start:
 
@@ -80,9 +82,9 @@ Requires a container restart to take effect.
 
 ---
 
-## Provider Setup Guides
+## 📖 Provider Setup Guides
 
-### Webhook
+### 🪝 Webhook
 
 POST JSON payload to any HTTPS endpoint.
 
@@ -108,7 +110,7 @@ WEBHOOK_URL=https://hooks.example.com/argus-alerts
 
 ---
 
-### Gotify
+### 📨 Gotify
 
 Self-hosted push notification server.
 
@@ -134,7 +136,7 @@ GOTIFY_PRIORITY=5
 
 ---
 
-### ntfy
+### 📱 ntfy
 
 Simple HTTP-based pub/sub for push notifications.
 
@@ -163,7 +165,7 @@ NTFY_TAGS=warning,electric_plug
 
 ---
 
-### Apprise (Recommended for Multiple Recipients)
+### 🌐 Apprise (Recommended for Multiple Recipients)
 
 Apprise supports 100+ services: Discord, Telegram, Slack, Email, SMS, PagerDuty, and more.
 
@@ -192,7 +194,7 @@ APPRISE_URL=https://apprise.example.com/notify/argus-alerts
 
 ---
 
-## Testing Alert Configuration
+## 🧪 Testing Alert Configuration
 
 Send a test notification through all currently enabled providers:
 
@@ -209,7 +211,7 @@ A successful test logs `Alert sent successfully via <provider>` at INFO level.
 
 ---
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 | Symptom | Likely Cause | Fix |
 | --- | --- | --- |

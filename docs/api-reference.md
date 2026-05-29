@@ -3,13 +3,13 @@ layout: default
 title: "API Reference"
 ---
 
-# API Reference
+# 🔌 API Reference
 
 Complete REST API documentation for the Argus FastAPI backend.
 
 ---
 
-## Base URL
+## 🔗 Base URL
 
 ```text
 http://localhost:8000/api
@@ -19,7 +19,7 @@ Replace `localhost:8000` with your server address.
 
 ---
 
-## Authentication
+## 🔑 Authentication
 
 ### API Key Authentication
 
@@ -53,7 +53,7 @@ Leave `API_KEY` unset in `.env`. **Not recommended for production.**
 
 ---
 
-## Rate Limiting
+## 🚦 Rate Limiting
 
 Protected endpoints are rate-limited per API key:
 
@@ -71,9 +71,9 @@ Content-Type: application/json
 
 ---
 
-## Public Endpoints
+## 🌐 Public Endpoints
 
-### Health Check
+### 🩺 Health Check
 
 ```http
 GET /api/health
@@ -91,7 +91,7 @@ GET /api/health
 
 ---
 
-### Snapshots
+### 📊 Snapshots
 
 #### List Snapshots
 
@@ -142,7 +142,7 @@ Returns the most recent snapshot (all devices) or filtered by `?device_id=`.
 
 ---
 
-### Events
+### 🔔 Events
 
 #### List Events
 
@@ -192,7 +192,7 @@ GET /api/events
 
 ---
 
-### Devices
+### 🖥️ Devices
 
 #### List Devices
 
@@ -232,7 +232,7 @@ Returns `404` if the device does not exist.
 
 ---
 
-### Energy
+### ⚡ Energy
 
 ```http
 GET /api/energy
@@ -255,7 +255,7 @@ Returns cumulative kWh totals per device. Requires `energy` in `ENABLED_EXPORTER
 
 ---
 
-### Trigger Status
+### ▶️ Trigger Status
 
 ```http
 GET /api/trigger/status
@@ -269,7 +269,7 @@ GET /api/trigger/status
 
 ---
 
-### Diagnostics
+### 🔍 Diagnostics
 
 ```http
 GET /api/diagnostics
@@ -279,11 +279,11 @@ Returns last-poll diagnostics from the scheduler's shared state (device counts, 
 
 ---
 
-## Protected Endpoints
+## 🔒 Protected Endpoints
 
 All protected endpoints require `X-Api-Key` when `API_KEY` is set.
 
-### Trigger Manual Poll
+### ▶️ Trigger Manual Poll
 
 ```http
 POST /api/trigger
@@ -300,7 +300,7 @@ Returns `409 Conflict` if a poll is already in progress.
 
 ---
 
-### Configuration
+### ⚙️ Configuration
 
 #### Get Runtime Config
 
@@ -342,7 +342,7 @@ Changes take effect on the next poll cycle without a container restart.
 
 ---
 
-### Alerts
+### 🔔 Alerts
 
 #### Get Alert Configuration
 
@@ -380,7 +380,7 @@ Sends a test notification through all enabled providers.
 
 ---
 
-### Devices (write)
+### 🖥️ Devices (write)
 
 #### Add Device
 
@@ -432,7 +432,7 @@ Content-Type: application/json
 
 ---
 
-## Error Responses
+## ⚠️ Error Responses
 
 | Status | Meaning |
 | --- | --- |

@@ -3,7 +3,7 @@ layout: default
 title: "Architecture"
 ---
 
-# Architecture Overview
+# 🏗️ Architecture Overview
 
 Argus is designed as a two-container system that continuously monitors power infrastructure via NUT
 and SNMP, exports telemetry to multiple observability destinations, and serves a React frontend
@@ -11,7 +11,7 @@ through a FastAPI backend.
 
 ---
 
-## System Architecture
+## 🏗️ System Architecture
 
 ### Data Flow
 
@@ -86,7 +86,7 @@ flowchart TD
     style DEVICES fill:#0277bd,stroke:#81d4fa,color:#ffffff
 ```
 
-### Deployment Topology
+### 🌐 Deployment Topology
 
 ```mermaid
 flowchart LR
@@ -139,7 +139,7 @@ flowchart LR
 
 ---
 
-## Component Reference
+## 🔧 Component Reference
 
 ### argus-scheduler
 
@@ -175,7 +175,7 @@ The HTTP server that serves both the REST API and the React SPA.
 
 ---
 
-## Exporters
+## 📤 Exporters
 
 | Exporter | Key | Description |
 | --- | --- | --- |
@@ -190,7 +190,7 @@ Enable exporters via `ENABLED_EXPORTERS=sqlite,prometheus,influxdb` (comma-separ
 
 ---
 
-## Runtime Configuration
+## ⚙️ Runtime Configuration
 
 Both containers share the `argus-data` volume. The scheduler watches
 `data/runtime_config.json` for changes written by the API, enabling zero-restart
@@ -204,7 +204,7 @@ reconfiguration of:
 
 ---
 
-## Grafana Dashboard
+## 📊 Grafana Dashboard
 
 **Import pre-built dashboard:**
 
@@ -220,7 +220,7 @@ reconfiguration of:
 
 ---
 
-## Ports Summary
+## 🌐 Ports Summary
 
 | Container | Port | Protocol | Purpose |
 | --- | --- | --- | --- |
