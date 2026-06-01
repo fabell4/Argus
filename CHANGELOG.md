@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.2.2-beta] - 2026-06-01
+
+### Fixed
+
+- **CI workflow** — added `sha-check: 'false'` to the `forgejo-release@v2` step so
+  `workflow_dispatch` re-runs no longer fail the SHA guard (which only applies to
+  `push: tags:` triggers).
+
+---
+
 ## [0.2.1-beta] - 2026-06-01
 
 ### Fixed

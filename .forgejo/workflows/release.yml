@@ -352,3 +352,4 @@ jobs:
           token: ${{ secrets.FORGEJO_TOKEN }}
           tag: ${{ needs.validate.outputs.tag }}
           prerelease: ${{ contains(needs.validate.outputs.tag, 'alpha') || contains(needs.validate.outputs.tag, 'beta') || contains(needs.validate.outputs.tag, 'rc') }}
+          sha-check: 'false'
