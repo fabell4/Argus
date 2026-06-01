@@ -1,0 +1,153 @@
+// argus.alloy — Supplemental Grafana Alloy configuration for Argus
+//
+// Drop this file into your existing Alloy config directory (e.g. /etc/alloy/) and
+// include it via your Alloy --config.paths glob or by referencing it from your
+// primary config with:
+//
+//   import.file "argus" { filename = "/etc/alloy/argus.alloy" }
+//
+// ─── Usage modes ─────────────────────────────────────────────────────────────
+//
+//  A) Alloy relay (this file)
+//     Alloy scrapes Argus metrics and relays Argus log pushes onward to your
+//     Grafana stack.  Argus itself does NOT need direct access to Prometheus or
+//     Loki — it only needs to reach Alloy.
+//
+//     Argus .env / compose settings:
+//       ENABLED_EXPORTERS=sqlite,prometheus          # enable Prometheus scrape endpoint
+//       PROMETHEUS_ENABLED=true
+//       LOKI_URL=http://<alloy-host>:12345           # point at Alloy's log receiver
+//
+//  B) Direct mode (no Alloy)
+//     Keep LOKI_URL pointing at real Loki and configure a Prometheus scrape job
+//     directly.  This file is not needed.
+//
+// ─── Required environment variables ──────────────────────────────────────────
+//
+//   ARGUS_METRICS_ADDRESS    host:port of the Argus scheduler metrics endpoint
+//                            Default: argus-scheduler:9090
+//                            Override when Alloy runs outside the Compose network.
+//
+//   REMOTE_WRITE_URL         Prometheus-compatible remote write URL
+//                            e.g. https://prometheus-prod-xx.grafana.net/api/prom/push
+//                            or   http://mimir:9009/api/v1/push
+//
+//   REMOTE_WRITE_USERNAME    Basic-auth username (Grafana Cloud: numeric instance ID)
+//                            Leave blank for no authentication.
+//
+//   REMOTE_WRITE_PASSWORD    Basic-auth password / Grafana Cloud API key
+//
+//   LOKI_PUSH_URL            Outbound Loki push URL
+//                            e.g. https://logs-prod-xx.grafana.net/loki/api/v1/push
+//                            or   http://loki:3100/loki/api/v1/push
+//
+//   LOKI_USERNAME            Loki basic-auth username (Grafana Cloud: numeric instance ID)
+//                            Leave blank for no authentication.
+//
+//   LOKI_PASSWORD            Loki basic-auth password / Grafana Cloud API key
+//
+//   ALLOY_CLUSTER_LABEL      Value for the `cluster` external label added to all
+//                            metrics and log streams.  Default: argus
+
+// ─────────────────────────────────────────────────────────────────────────────
+// METRICS
+// Scrape Argus's Prometheus endpoint and remote-write to Prometheus / Mimir /
+// Grafana Cloud Metrics.
+// ─────────────────────────────────────────────────────────────────────────────
+
+prometheus.scrape "argus" {
+  // Argus exposes six gauges on /metrics:
+  //   argus_power_watts, argus_load_percent, argus_voltage_volts,
+  //   argus_battery_percent, argus_runtime_seconds, argus_temperature_celsius
+  // Each gauge carries device_id and device_type labels.
+  targets = [
+    {
+      "__address__" = coalesce(env("ARGUS_METRICS_ADDRESS"), "argus-scheduler:9090"),
+      "job"         = "argus",
+    },
+  ]
+
+  forward_to      = [prometheus.remote_write.grafana.receiver]
+  scrape_interval = "1m"
+  scrape_timeout  = "10s"
+  metrics_path    = "/metrics"
+
+  // Honour the instance label that Alloy injects automatically; drop it here
+  // to avoid high-cardinality churn on single-instance home-lab deployments.
+  relabel_config {
+    target_label = "instance"
+    replacement  = "argus"
+  }
+}
+
+prometheus.remote_write "grafana" {
+  endpoint {
+    url = env("REMOTE_WRITE_URL")
+
+    basic_auth {
+      username = env("REMOTE_WRITE_USERNAME")
+      password = env("REMOTE_WRITE_PASSWORD")
+    }
+
+    // Conservative queue settings suited to the low write rate of a power
+    // monitor (one batch per scrape interval).
+    queue_config {
+      capacity             = 2500
+      max_samples_per_send = 500
+      batch_send_deadline  = "5s"
+    }
+
+    write_relabel_config {
+      // Drop Go runtime / process metrics that Argus's prometheus_client
+      // library publishes by default — these are rarely useful here.
+      source_labels = ["__name__"]
+      regex         = "(go_|process_).*"
+      action        = "drop"
+    }
+  }
+
+  external_labels = {
+    "cluster" = coalesce(env("ALLOY_CLUSTER_LABEL"), "argus"),
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LOGS  (optional — remove this section to push logs directly from Argus to Loki)
+//
+// Alloy opens an HTTP listener on port 12345 that is API-compatible with
+// Loki's push endpoint.  The Argus LokiExporter sends to this address instead
+// of to real Loki; Alloy then forwards the streams onward.
+//
+// Point Argus at Alloy:
+//   LOKI_URL=http://<alloy-host>:12345
+//
+// Expose port 12345 in your docker-compose override if Alloy runs in a
+// separate container:
+//   ports:
+//     - "12345:12345"
+// ─────────────────────────────────────────────────────────────────────────────
+
+loki.source.api "argus_receiver" {
+  http {
+    listen_address = "0.0.0.0"
+    listen_port    = 12345
+  }
+
+  forward_to = [loki.write.grafana.receiver]
+}
+
+loki.write "grafana" {
+  endpoint {
+    url = env("LOKI_PUSH_URL")
+
+    basic_auth {
+      username = env("LOKI_USERNAME")
+      password = env("LOKI_PASSWORD")
+    }
+  }
+
+  external_labels = {
+    "cluster" = coalesce(env("ALLOY_CLUSTER_LABEL"), "argus"),
+    "source"  = "argus",
+  }
+}
