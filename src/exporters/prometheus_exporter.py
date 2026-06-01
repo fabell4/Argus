@@ -63,4 +63,6 @@ class PrometheusExporter(BaseExporter):
                 if self._disable_labels:
                     gauge.set(value)  # type: ignore[attr-defined]
                 else:
-                    gauge.labels(snapshot.device_id, snapshot.device_type).set(value)  # type: ignore[attr-defined]
+                    gauge.labels(  # type: ignore[attr-defined]
+                        snapshot.device_id, snapshot.device_type
+                    ).set(value)
