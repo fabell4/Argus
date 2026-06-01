@@ -1,24 +1,18 @@
 name: Link GHCR package to repository
 
 # Triggered by the Forgejo release pipeline after it pushes the image to GHCR.
-#
-# A simple docker pull+push re-uses the existing manifest unchanged, so GitHub
-# may keep the package linked to whichever repo first pushed it (e.g. argus-dev).
-# To force a re-link we use `docker buildx imagetools create` to rewrite the
-# org.opencontainers.image.source OCI annotation on the manifest to point at
-# THIS repository, then push via GITHUB_TOKEN.  GitHub reads that annotation
-# when deciding which repo to link the package to.
+# Re-pushing via GITHUB_TOKEN causes GitHub to auto-link the package to this repo.
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version tag to link (e.g. 0.1.0-beta)"
+        description: "Version tag to link (e.g. 0.3.1-beta)"
         required: true
         type: string
 
 jobs:
   link-package:
-    name: Re-annotate and re-push image to link package to Argus
+    name: Re-push image with GITHUB_TOKEN to link package
     runs-on: ubuntu-latest
     permissions:
       packages: write
@@ -31,32 +25,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Re-annotate manifest and push to link package to this repo
+      - name: Pull and re-push to link package to this repo
         run: |
           IMAGE="ghcr.io/${{ github.repository_owner }}/argus"
-          REPO_URL="https://github.com/${{ github.repository }}"
-          VERSION="${{ inputs.version }}"
-
-          # Rewrite the org.opencontainers.image.source annotation on the
-          # manifest index to point at THIS repo (Argus, not argus-dev).
-          # imagetools create overwrites the tag, so GitHub will see a fresh
-          # push via GITHUB_TOKEN with the correct source label.
-          docker buildx imagetools create \
-            --annotation "index:org.opencontainers.image.source=${REPO_URL}" \
-            --tag "${IMAGE}:${VERSION}" \
-            "${IMAGE}:${VERSION}"
-
-          # Also update :latest if it exists
-          if docker buildx imagetools inspect "${IMAGE}:latest" 2>/dev/null; then
-            docker buildx imagetools create \
-              --annotation "index:org.opencontainers.image.source=${REPO_URL}" \
-              --tag "${IMAGE}:latest" \
-              "${IMAGE}:latest"
+          docker pull "${IMAGE}:${{ inputs.version }}"
+          docker push "${IMAGE}:${{ inputs.version }}"
+          # Re-push latest too if it exists
+          if docker pull "${IMAGE}:latest" 2>/dev/null; then
+            docker push "${IMAGE}:latest"
           fi
-
-          echo "Manifest re-annotated and pushed via GITHUB_TOKEN."
-          echo "Package org.opencontainers.image.source → ${REPO_URL}"
-          echo "Package is now linked to ${{ github.repository }}"
+          echo "Package re-pushed via GITHUB_TOKEN — it is now linked to ${{ github.repository }}"

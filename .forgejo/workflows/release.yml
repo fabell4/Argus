@@ -145,50 +145,43 @@ jobs:
               --username "${{ secrets.GH_USERNAME }}" \
               --password-stdin
 
-      - name: Set image creation timestamp
-        run: echo "CREATED=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
+      - name: Build image
+        env:
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+        run: |
+          CREATED=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          docker build \
+            --build-arg APP_VERSION="${{ needs.validate.outputs.version }}" \
+            --label org.opencontainers.image.source="https://github.com/${GH_USERNAME}/Argus" \
+            --label org.opencontainers.image.version="${{ needs.validate.outputs.version }}" \
+            --label org.opencontainers.image.revision="${{ github.sha }}" \
+            --label org.opencontainers.image.created="${CREATED}" \
+            --tag registry.greenflametech.net/argus:${{ needs.validate.outputs.version }} \
+            --tag ghcr.io/${{ secrets.GH_USERNAME }}/argus:${{ needs.validate.outputs.version }} \
+            .
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+      - name: Push to private registry
+        run: |
+          TAG="${{ needs.validate.outputs.tag }}"
+          docker push registry.greenflametech.net/argus:${{ needs.validate.outputs.version }}
+          if [[ ! "${TAG}" =~ alpha|beta|rc ]]; then
+            docker tag registry.greenflametech.net/argus:${{ needs.validate.outputs.version }} registry.greenflametech.net/argus:latest
+            docker push registry.greenflametech.net/argus:latest
+          else
+            echo "Pre-release tag (${TAG}) — skipping :latest push to private registry"
+          fi
 
-      - name: Build and push image to GHCR (multi-arch with correct OCI annotations)
+      - name: Push to GHCR
         if: ${{ secrets.GH_PAT != '' && secrets.GH_USERNAME != '' }}
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          build-args: |
-            APP_VERSION=${{ needs.validate.outputs.version }}
-          labels: |
-            org.opencontainers.image.source=https://github.com/${{ secrets.GH_USERNAME }}/Argus
-            org.opencontainers.image.version=${{ needs.validate.outputs.version }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.created=${{ env.CREATED }}
-          tags: |
-            ghcr.io/${{ secrets.GH_USERNAME }}/argus:${{ needs.validate.outputs.version }}
-            ghcr.io/${{ secrets.GH_USERNAME }}/argus:latest
-          push: true
-
-      - name: Build and push to private registry (amd64 only)
-        uses: docker/build-push-action@v7
-        if: ${{ secrets.REGISTRY_USERNAME != '' }}
-        with:
-          context: .
-          platforms: linux/amd64
-          build-args: |
-            APP_VERSION=${{ needs.validate.outputs.version }}
-          labels: |
-            org.opencontainers.image.source=https://github.com/${{ secrets.GH_USERNAME }}/Argus
-            org.opencontainers.image.version=${{ needs.validate.outputs.version }}
-            org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.created=${{ env.CREATED }}
-          tags: |
-            registry.greenflametech.net/argus:${{ needs.validate.outputs.version }}
-            registry.greenflametech.net/argus:latest
-          push: true
-          registry: registry.greenflametech.net
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
+        run: |
+          TAG="${{ needs.validate.outputs.tag }}"
+          docker push ghcr.io/${{ secrets.GH_USERNAME }}/argus:${{ needs.validate.outputs.version }}
+          if [[ ! "${TAG}" =~ alpha|beta|rc ]]; then
+            docker tag ghcr.io/${{ secrets.GH_USERNAME }}/argus:${{ needs.validate.outputs.version }} ghcr.io/${{ secrets.GH_USERNAME }}/argus:latest
+            docker push ghcr.io/${{ secrets.GH_USERNAME }}/argus:latest
+          else
+            echo "Pre-release tag (${TAG}) — skipping :latest push to GHCR"
+          fi
 
       - name: Make GHCR package public
         if: ${{ secrets.GH_PAT != '' && secrets.GH_USERNAME != '' }}
