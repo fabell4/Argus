@@ -24,7 +24,27 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
+
+      - name: Preflight GHCR package access
+        env:
+          OWNER: ${{ github.repository_owner }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # If this package was originally created outside GitHub Actions,
+          # GITHUB_TOKEN may not be allowed to write until package access is granted.
+          PKG_URL="https://api.github.com/users/${OWNER}/packages/container/argus"
+          HTTP=$(curl -s -o /tmp/pkg_preflight.json -w "%{http_code}" \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "${PKG_URL}")
+          echo "GHCR package metadata check HTTP ${HTTP}"
+          if [ "${HTTP}" = "403" ]; then
+            echo "ERROR: GITHUB_TOKEN cannot access ghcr.io/${OWNER}/argus yet."
+            echo "Grant repository access in package settings or delete/recreate package once."
+            cat /tmp/pkg_preflight.json
+            exit 1
+          fi
 
       - name: Determine version
         id: meta

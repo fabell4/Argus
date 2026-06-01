@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.4-beta] - 2026-06-01
+
+### Fixed
+
+- **GHCR publish workflow failure and Node 20 deprecation warning** — upgraded
+  `actions/checkout` to `v6.0.2` in GitHub workflows and added a GHCR preflight access check
+  to fail early with actionable diagnostics when package permissions block `GITHUB_TOKEN`
+
+---
+
 ## [0.3.3-beta] - 2026-06-01
 
 ### Fixed
