@@ -273,8 +273,9 @@ jobs:
           git add -A
           git commit -m "chore: prepare public release ${TAG} (strip internal infra config)"
 
-          GITHUB_REPO_URL="https://${GH_USERNAME}:${GH_PAT}@github.com/${GH_USERNAME}/Argus.git"
-          git remote add github "${GITHUB_REPO_URL}"
+          git remote add github "https://github.com/${GH_USERNAME}/Argus.git"
+          git config http.https://github.com/.extraheader \
+            "Authorization: Basic $(printf '%s:%s' "${GH_USERNAME}" "${GH_PAT}" | base64 -w0)"
 
           git push github public-release:refs/heads/main --force
 
@@ -284,6 +285,7 @@ jobs:
             "https://api.github.com/repos/${GH_USERNAME}/Argus/git/refs/tags/${TAG}" || true
           git push github "${TAG}"
 
+          git config --unset http.https://github.com/.extraheader || true
           git remote remove github || true
           git branch -D public-release || true
 
@@ -304,7 +306,8 @@ jobs:
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
           VERSION: ${{ needs.validate.outputs.version }}
         run: |
-          sleep 15
+          # Wait for GitHub to index the workflow file pushed above.
+          sleep 30
 
           HTTP=$(curl -s -o /tmp/dispatch_resp.json -w "%{http_code}" \
             -X POST \
