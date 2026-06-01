@@ -12,6 +12,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.2.5-beta] - 2026-06-01
+
+### Fixed
+
+- **GHCR package linking** — replaced the naive `docker pull`/`docker push` approach in
+  `link-ghcr-package.yml` with `docker buildx imagetools create --annotation` which rewrites
+  the `org.opencontainers.image.source` OCI annotation on the manifest index to point at
+  the `Argus` repository before pushing via `GITHUB_TOKEN`. The old approach re-used the
+  existing manifest unchanged, so GitHub kept the package linked to `argus-dev` (the repo
+  that first pushed via `GITHUB_TOKEN`). The new approach forces GitHub to re-link by
+  updating the annotation and performing a fresh authenticated push from `Argus`.
+
+---
+
 ## [0.2.4-beta] - 2026-06-01
 
 ### Fixed
