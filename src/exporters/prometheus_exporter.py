@@ -32,8 +32,8 @@ class PrometheusExporter(BaseExporter):
                 "load_percent": Gauge(
                     "argus_load_percent", "Device load percentage", labels
                 ),
-                "voltage": Gauge(
-                    "argus_voltage_volts", "Device voltage in volts", labels
+                "input_voltage": Gauge(
+                    "argus_voltage_volts", "Input voltage in volts", labels
                 ),
                 "battery_percent": Gauge(
                     "argus_battery_percent", "UPS battery charge percentage", labels

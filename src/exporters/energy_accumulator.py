@@ -69,7 +69,7 @@ class EnergyAccumulatorExporter(BaseExporter):
             from prometheus_client import Counter
 
             self._counter = Counter(
-                "argus_energy_kwh_total",
+                "argus_energy_kwh",
                 "Cumulative energy consumed in kilowatt-hours",
                 ["device_id"],
             )
