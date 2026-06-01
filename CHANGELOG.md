@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.3-beta] - 2026-06-01
+
+### Fixed
+
+- **GHCR package not linked to repository (architectural fix)** — moved GHCR build and push
+  entirely to GitHub Actions (`link-ghcr-package.yml`), which now triggers automatically on
+  `push: tags: v*`; Forgejo only pushes to the private registry; using `GITHUB_TOKEN` on the
+  GitHub Actions runner is the only mechanism that causes GitHub to natively link the package
+
+---
+
 ## [0.3.2-beta] - 2026-06-01
 
 ### Fixed
