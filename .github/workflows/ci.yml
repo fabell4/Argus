@@ -42,7 +42,9 @@ jobs:
         run: bandit -r src -ll
 
       - name: Semgrep (SAST)
-        run: semgrep scan --config auto src --error
+        run: |
+          pip install semgrep
+          semgrep scan --config auto src --error
 
       - name: pytest (unit tests + coverage gate ≥90%)
         run: >

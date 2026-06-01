@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.2.4-beta] - 2026-06-01
+
+### Fixed
+
+- **GitHub CI** — added `pip install semgrep` before the Semgrep SAST step; the tool is not
+  pre-installed on `ubuntu-24.04` runners and was causing the Python checks job to fail with
+  exit code 127.
+
+---
+
 ## [0.2.3-beta] - 2026-06-01
 
 ### Fixed
