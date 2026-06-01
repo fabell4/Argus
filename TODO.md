@@ -177,7 +177,7 @@ _Goal: harden alerting for power-specific events and complete pre-release code r
 
 ### Quality Assurance
 
-- [ ] Comprehensive test suite expansion — target ≥200 Python tests covering:
+- [x] Comprehensive test suite expansion — target ≥200 Python tests covering:
   - `NUTPoller` (mock socket: happy path, auth, retry, parse errors)
   - `SNMPPoller` (mock pysnmp: happy path, timeout, import missing, SNMPv3 auth/priv)
   - `SQLiteExporter` (schema, write, prune by age, prune by row count, WAL checkpoint, timestamp index)

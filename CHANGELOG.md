@@ -12,6 +12,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.0-beta] - 2026-06-01
+
+### Added
+
+- **Comprehensive test suite** — 372 Python tests covering all core modules: `NUTPoller`,
+  `SNMPPoller`, `SQLiteExporter`, `CSVExporter`, `EnergyAccumulator`, `PrometheusExporter`,
+  `InfluxDBExporter`, `LokiExporter`, `EventProcessor`, `AlertManager`, alert providers,
+  all API routes, `RuntimeConfig`, and `SnapshotDispatcher`; 94% overall coverage (≥90%
+  gate met); all tests pass in 2.04 s
+
+### Fixed
+
+- **GHCR package linking** — consolidated pipeline fixes from v0.2.3-beta through v0.2.5-beta:
+  secure `extraheader` credential passing to GitHub, `pip install semgrep` on GitHub runners,
+  and `docker buildx imagetools create --annotation` to rewrite the
+  `org.opencontainers.image.source` OCI manifest annotation so the package links to
+  `Argus` instead of `argus-dev`
+
+---
+
 ## [0.2.5-beta] - 2026-06-01
 
 ### Fixed
