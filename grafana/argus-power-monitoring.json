@@ -7,6 +7,14 @@
       "type": "datasource",
       "pluginId": "prometheus",
       "pluginName": "Prometheus"
+    },
+    {
+      "name": "DS_LOKI",
+      "label": "Loki",
+      "description": "Loki datasource receiving Argus power event logs",
+      "type": "datasource",
+      "pluginId": "loki",
+      "pluginName": "Loki"
     }
   ],
   "__elements": {},
@@ -21,6 +29,12 @@
       "type": "datasource",
       "id": "prometheus",
       "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "loki",
+      "name": "Loki",
       "version": "1.0.0"
     },
     {
@@ -796,15 +810,15 @@
         "showHeader": true,
         "sortBy": [{"desc": true, "displayName": "Time"}]
       },
-      "title": "Recent Power Events — requires Loki datasource",
-      "description": "To populate this table, add a Loki datasource and replace the query below with a LogQL stream selector such as: {job=\"argus\"} | json | line_format \"{{.event_type}}\".\n\nWith the Prometheus-only setup the table is empty; the rows above still show all available real-time and historical metrics.",
+      "title": "Recent Power Events",
+      "description": "Power events shipped by Argus's LokiExporter. Each log line is a JSON object; the query extracts event_type, device_id, and severity as columns.",
       "type": "table",
       "targets": [
         {
-          "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
-          "expr": "argus_battery_percent{device_id=~\"$device_id\"} < 20",
+          "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
+          "expr": "{job=\"argus_power\"} | json | line_format \"{{.event_type}}\"",
           "instant": false,
-          "legendFormat": "battery_low",
+          "legendFormat": "",
           "refId": "A"
         }
       ]
@@ -819,11 +833,24 @@
         "current": {},
         "hide": 0,
         "includeAll": false,
-        "label": "Datasource",
+        "label": "Prometheus",
         "multi": false,
         "name": "DS_PROMETHEUS",
         "options": [],
         "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource"
+      },
+      {
+        "current": {},
+        "hide": 0,
+        "includeAll": false,
+        "label": "Loki",
+        "multi": false,
+        "name": "DS_LOKI",
+        "options": [],
+        "query": "loki",
         "refresh": 1,
         "regex": "",
         "type": "datasource"
