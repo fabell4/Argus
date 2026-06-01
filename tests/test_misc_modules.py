@@ -221,15 +221,14 @@ class TestHealthServer:
                 self._last_code = code  # noqa: SLF001
 
             def send_header(self, keyword: str, value: str) -> None:
-                # Stub — headers not needed in unit tests
-                pass
+                """Stub — headers not needed in unit tests."""
 
             def end_headers(self) -> None:
-                # Stub — no socket to flush in unit tests
-                pass
+                """Stub — no socket to flush in unit tests."""
 
             @property
             def wfile(self) -> BytesIO:
+                """Stub — returns the in-memory buffer used to capture response bytes."""
                 return self._wfile  # noqa: SLF001
 
         handler = CapturingHandler()
@@ -723,3 +722,96 @@ def test_snmp_get_no_such_object_skipped() -> None:
 
     # noSuchObject var_bind is skipped — result should be empty
     assert result == {}
+
+
+def test_snmpv3_authpriv_poll_returns_populated_snapshot() -> None:
+    """SNMPv3 authPriv (auth_key + priv_key) full round-trip → PowerSnapshot.
+
+    Verifies that when both auth_key and priv_key are configured, poll() passes
+    the v3 credentials through _snmp_get → UsmUserData, then maps the returned
+    OID values to the correct PowerSnapshot fields via _build_snapshot.
+    """
+    from src.services.snmp_poller import SNMPPoller
+
+    # OID → field name mapping (subset of _UPS_MIB)
+    battery_pct_oid = "1.3.6.1.2.1.33.1.2.4.0"
+    load_pct_oid = "1.3.6.1.2.1.33.1.4.4.1.5.1"
+    power_watts_oid = "1.3.6.1.2.1.33.1.4.4.1.4.1"
+    runtime_oid = "1.3.6.1.2.1.33.1.2.3.0"
+
+    # Build mock var_binds that look like pysnmp getCmd output
+    def _make_var_bind(oid_str: str, value_str: str) -> tuple[MagicMock, MagicMock]:
+        key = MagicMock()
+        key.__str__ = lambda s, _o=oid_str: _o
+        val = MagicMock()
+        val.prettyPrint.return_value = value_str
+        return (key, val)
+
+    mock_usm_cls = MagicMock(return_value=MagicMock())
+    mock_hlapi = MagicMock()
+    mock_hlapi.CommunityData = MagicMock(return_value=MagicMock())
+    mock_hlapi.ContextData = MagicMock(return_value=MagicMock())
+    mock_hlapi.ObjectIdentity = MagicMock(return_value=MagicMock())
+    mock_hlapi.ObjectType = MagicMock(return_value=MagicMock())
+    mock_hlapi.SnmpEngine = MagicMock(return_value=MagicMock())
+    mock_hlapi.UdpTransportTarget = MagicMock(return_value=MagicMock())
+    mock_hlapi.UsmUserData = mock_usm_cls
+    # _snmp_get calls getCmd once per OID (6 OIDs in _UPS_MIB); each call must
+    # return a fresh single-item iterator — a shared iterator would be exhausted
+    # after the first next() call.  Map each OID position to its var_bind.
+    _oid_responses: list[tuple[None, None, None, list[Any]]] = [
+        (None, None, None, []),  # input_voltage — no value returned
+        (None, None, None, []),  # output_voltage — no value returned
+        (None, None, None, [_make_var_bind(load_pct_oid, "45")]),
+        (None, None, None, [_make_var_bind(battery_pct_oid, "80")]),
+        (None, None, None, [_make_var_bind(runtime_oid, "20")]),
+        (None, None, None, [_make_var_bind(power_watts_oid, "300")]),
+    ]
+    mock_hlapi.getCmd = MagicMock(
+        side_effect=[iter([r]) for r in _oid_responses]
+    )
+    # Auth / priv protocol sentinels
+    mock_hlapi.usmHMACMD5AuthProtocol = "MD5_PROTO"
+    mock_hlapi.usmHMACSHAAuthProtocol = "SHA_PROTO"
+    mock_hlapi.usmHMAC128SHA224AuthProtocol = "SHA224_PROTO"
+    mock_hlapi.usmHMAC192SHA256AuthProtocol = "SHA256_PROTO"
+    mock_hlapi.usmNoAuthProtocol = "NONE_AUTH"
+    mock_hlapi.usmDESPrivProtocol = "DES_PROTO"
+    mock_hlapi.usmAesCfb128Protocol = "AES_PROTO"
+    mock_hlapi.usmNoPrivProtocol = "NONE_PRIV"
+    mock_rfc1905 = MagicMock()
+    mock_rfc1905.noSuchObject = type("noSuchObject", (), {})()
+
+    with patch.dict(
+        "sys.modules",
+        {
+            "pysnmp": MagicMock(),
+            "pysnmp.hlapi": mock_hlapi,
+            "pysnmp.proto": MagicMock(),
+            "pysnmp.proto.rfc1905": mock_rfc1905,
+        },
+    ):
+        poller = SNMPPoller(
+            host=_TEST_HOST,
+            v3_config=SNMPv3Config(
+                username="v3admin",
+                auth_protocol="SHA",
+                auth_key="s3cretAuth!",
+                priv_protocol="AES",
+                priv_key="s3cretPriv!",
+            ),
+        )
+        snap = poller.poll()
+
+    # UsmUserData must have been constructed (auth+priv credentials passed in)
+    mock_usm_cls.assert_called_once()
+    call_kwargs = mock_usm_cls.call_args
+    assert call_kwargs is not None
+
+    # Snapshot must be a valid PowerSnapshot with fields from OID values
+    assert isinstance(snap, PowerSnapshot)
+    assert snap.battery_percent == pytest.approx(80.0)
+    assert snap.load_percent == pytest.approx(45.0)
+    assert snap.power_watts == pytest.approx(300.0)
+    assert snap.runtime_seconds == pytest.approx(20.0 * 60)  # minutes → seconds
+    assert snap.device_id == f"snmp:{_TEST_HOST}:161"

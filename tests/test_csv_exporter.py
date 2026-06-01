@@ -30,6 +30,7 @@ def _snap(
 
 
 def test_export_creates_csv_file(tmp_path: Path) -> None:
+    """Export creates the CSV file if it does not already exist."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path)
     exporter.export(_snap())
@@ -37,6 +38,7 @@ def test_export_creates_csv_file(tmp_path: Path) -> None:
 
 
 def test_export_writes_header_on_first_write(tmp_path: Path) -> None:
+    """Header row is written on first export with timestamp, device_id, power_watts."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path)
     exporter.export(_snap())
@@ -49,6 +51,7 @@ def test_export_writes_header_on_first_write(tmp_path: Path) -> None:
 
 
 def test_export_does_not_duplicate_header(tmp_path: Path) -> None:
+    """Header is written only once across multiple exports."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path)
     exporter.export(_snap())
@@ -62,6 +65,7 @@ def test_export_does_not_duplicate_header(tmp_path: Path) -> None:
 
 
 def test_export_appends_rows(tmp_path: Path) -> None:
+    """Each export appends one data row; three exports produce three rows."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path)
     exporter.export(_snap())
@@ -74,6 +78,7 @@ def test_export_appends_rows(tmp_path: Path) -> None:
 
 
 def test_export_writes_correct_device_id(tmp_path: Path) -> None:
+    """The device_id value round-trips correctly through CSV export."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path)
     exporter.export(_snap(device_id="snmp:pdu@10.0.0.1"))
@@ -84,6 +89,7 @@ def test_export_writes_correct_device_id(tmp_path: Path) -> None:
 
 
 def test_export_writes_power_watts(tmp_path: Path) -> None:
+    """The power_watts float value round-trips correctly through CSV export."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path)
     exporter.export(_snap(power_watts=250.5))
@@ -99,6 +105,7 @@ def test_export_writes_power_watts(tmp_path: Path) -> None:
 
 
 def test_export_creates_missing_directory(tmp_path: Path) -> None:
+    """Export auto-creates a missing directory tree before writing the file."""
     nested = tmp_path / "deep" / "nested"
     path = str(nested / "argus.csv")
     exporter = CSVExporter(path=path)
@@ -112,6 +119,7 @@ def test_export_creates_missing_directory(tmp_path: Path) -> None:
 
 
 def test_export_rotates_when_file_exceeds_max_size(tmp_path: Path) -> None:
+    """Active file is rotated to a timestamped archive when it exceeds max_size_mb."""
     path = str(tmp_path / "argus.csv")
     # Set tiny max size (1 byte) so any write triggers rotation
     exporter = CSVExporter(path=path, max_size_mb=0.000001)
@@ -123,6 +131,7 @@ def test_export_rotates_when_file_exceeds_max_size(tmp_path: Path) -> None:
 
 
 def test_export_no_rotation_when_disabled(tmp_path: Path) -> None:
+    """No rotation occurs when max_size_mb=0 (rotation disabled)."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path, max_size_mb=0)  # disabled
     for _ in range(5):
@@ -137,6 +146,7 @@ def test_export_no_rotation_when_disabled(tmp_path: Path) -> None:
 
 
 def test_prune_skips_active_file(tmp_path: Path) -> None:
+    """The currently-active CSV file is never deleted during age-pruning."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path, retention_days=1)
     exporter.export(_snap())
@@ -145,7 +155,32 @@ def test_prune_skips_active_file(tmp_path: Path) -> None:
 
 
 def test_prune_does_not_run_when_retention_zero(tmp_path: Path) -> None:
+    """Pruning is skipped entirely when retention_days=0."""
     path = str(tmp_path / "argus.csv")
     exporter = CSVExporter(path=path, retention_days=0)
     exporter.export(_snap())
     assert os.path.exists(path)
+
+
+def test_prune_deletes_old_rotated_files(tmp_path: Path) -> None:
+    """Old rotated archive files are deleted when past the retention cutoff."""
+    path = str(tmp_path / "argus.csv")
+    # Use a tiny max_size_mb so the first export triggers rotation on the second
+    # export, producing a timestamped archive alongside the active file.
+    exporter = CSVExporter(path=path, max_size_mb=0.000001, retention_days=1)
+    exporter.export(_snap())  # writes the active file
+    exporter.export(_snap())  # rotates the first file; new active file written
+    # At this point there should be ≥ 2 CSV files (one rotated archive + one active).
+    files_before = list(tmp_path.glob("*.csv"))
+    archives = [f for f in files_before if str(f) != path]
+    assert len(archives) >= 1, "Expected at least one rotated archive"
+    # Back-date all archives to 2 days ago so they are past the 1-day cutoff.
+    old_mtime = datetime.now(timezone.utc).timestamp() - 2 * 86400
+    for archive in archives:
+        os.utime(str(archive), (old_mtime, old_mtime))
+    # Call _prune_old_files directly — avoids triggering a second rotation
+    # (Windows rejects os.rename to an already-existing filename).
+    exporter._prune_old_files()  # noqa: SLF001
+    files_after = list(tmp_path.glob("*.csv"))
+    assert len(files_after) == 1, "All aged-out rotated archives should be deleted"
+    assert str(files_after[0]) == path, "Only the active file should remain"

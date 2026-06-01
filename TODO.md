@@ -215,15 +215,15 @@ _Goal: harden alerting for power-specific events and complete pre-release code r
 
 ## Testing Backlog
 
-- [ ] NUTPoller integration test — mock NUT socket; verify full parse → `PowerSnapshot` round-trip
-- [ ] SNMPPoller integration test — mock pysnmp; verify OID mapping → `PowerSnapshot`
-- [ ] SQLite exporter integration test — verify schema, write, prune by days, prune by row count
-- [ ] CSV exporter integration test — verify file creation, row format, size-based rotation, and age pruning
-- [ ] Energy accumulator test — verify Wh integration across poll cycles, cumulative counter, cost calc
-- [ ] SNMPv3 integration test — verify authPriv mode connects and maps OIDs correctly
-- [ ] Scheduler persistence test — simulate restart and verify poll interval is restored from
+- [x] NUTPoller integration test — mock NUT socket; verify full parse → `PowerSnapshot` round-trip
+- [x] SNMPPoller integration test — mock pysnmp; verify OID mapping → `PowerSnapshot`
+- [x] SQLite exporter integration test — verify schema, write, prune by days, prune by row count
+- [x] CSV exporter integration test — verify file creation, row format, size-based rotation, and age pruning
+- [x] Energy accumulator test — verify Wh integration across poll cycles, cumulative counter, cost calc
+- [x] SNMPv3 integration test — verify authPriv mode connects and maps OIDs correctly
+- [x] Scheduler persistence test — simulate restart and verify poll interval is restored from
   `runtime_config.json`
-- [ ] Alert lifecycle test — record N failures, verify alert fired; record success, verify reset
+- [x] Alert lifecycle test — record N failures, verify alert fired; record success, verify reset
 
 ---
 

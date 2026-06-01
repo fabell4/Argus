@@ -592,3 +592,47 @@ def test_record_events_with_alert_manager_dispatches_recovery_events() -> None:
     mock_mgr.record_event.assert_called_once_with(regular)
     main_mod._alert_manager = None  # noqa: SLF001
     main_mod._alert_manager = None
+
+
+# ===========================================================================
+# Scheduler persistence — poll interval restored from runtime_config.json
+# ===========================================================================
+
+
+def test_scheduler_restores_poll_interval_from_runtime_config(
+    tmp_path: "pathlib.Path",
+) -> None:
+    """Simulates a scheduler restart: a saved poll interval is read from
+    runtime_config.json and used to configure the APScheduler job interval.
+
+    This exercises the startup sequence::
+
+        interval = runtime_config.get_interval_minutes()
+        _scheduler = build_scheduler(interval)
+    """
+    import json
+    import pathlib
+    import src.main as main_mod
+    from src import runtime_config as rc_mod
+
+    # Write a runtime_config.json with a non-default interval.
+    config_file = tmp_path / "runtime_config.json"
+    config_file.write_text(json.dumps({"poll_interval_minutes": 7}), encoding="utf-8")
+
+    # Patch the module-level path used by runtime_config so it reads our test file.
+    with patch.object(rc_mod, "_CONFIG_PATH", str(config_file)):
+        restored_interval = rc_mod.get_interval_minutes()
+
+    assert restored_interval == 7, (
+        f"Expected interval 7 from persisted config, got {restored_interval}"
+    )
+
+    # build_scheduler must honour that restored interval.
+    scheduler = main_mod.build_scheduler(restored_interval)
+    job = scheduler.get_job("argus_poll")
+    assert job is not None
+    # APScheduler IntervalTrigger stores the interval in job.trigger.interval
+    import datetime as dt
+    assert job.trigger.interval == dt.timedelta(minutes=7), (
+        f"Scheduler job interval should be 7 minutes, got {job.trigger.interval}"
+    )
