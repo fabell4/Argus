@@ -113,6 +113,20 @@ jobs:
           path: /tmp/changelog_notes.txt
           retention-days: 1
 
+      - name: Diagnose registry connectivity
+        run: |
+          echo "=== /etc/docker/daemon.json ==="
+          cat /etc/docker/daemon.json 2>/dev/null || echo "(not found)"
+          echo ""
+          echo "=== docker info ==="
+          docker info 2>&1 || true
+          echo ""
+          echo "=== curl -v https://ghcr.io/v2/ ==="
+          curl -v --max-time 10 https://ghcr.io/v2/ 2>&1 || true
+          echo ""
+          echo "=== nslookup ghcr.io ==="
+          nslookup ghcr.io 2>&1 || true
+
       - name: Log in to Docker Hub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | \
