@@ -129,6 +129,7 @@ jobs:
               --password-stdin
 
       - name: Log in to GHCR
+        if: ${{ secrets.GH_PAT != '' && secrets.GH_USERNAME != '' }}
         run: |
           echo "${{ secrets.GH_PAT }}" | \
             docker login ghcr.io \
@@ -159,11 +160,13 @@ jobs:
           docker push registry.greenflametech.net/argus:latest
 
       - name: Push to GHCR
+        if: ${{ secrets.GH_PAT != '' && secrets.GH_USERNAME != '' }}
         run: |
           docker push ghcr.io/${{ secrets.GH_USERNAME }}/argus:${{ needs.validate.outputs.version }}
           docker push ghcr.io/${{ secrets.GH_USERNAME }}/argus:latest
 
       - name: Make GHCR package public
+        if: ${{ secrets.GH_PAT != '' && secrets.GH_USERNAME != '' }}
         env:
           GH_PAT: ${{ secrets.GH_PAT }}
           GH_USERNAME: ${{ secrets.GH_USERNAME }}
