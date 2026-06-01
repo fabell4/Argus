@@ -16,6 +16,8 @@ _poll_lock = threading.Lock()
 
 
 class TriggerResponse(BaseModel):
+    """Response model for trigger and poll-status endpoints."""
+
     status: str
     message: str
 
@@ -37,6 +39,7 @@ def trigger_poll() -> TriggerResponse:
 
 @router.get("/trigger/status")
 def poll_status() -> TriggerResponse:
+    """Return the current poll status."""
     if runtime_config.is_running():
         return TriggerResponse(status="running", message="Poll in progress.")
     return TriggerResponse(status="idle", message="No active poll.")

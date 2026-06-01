@@ -7,6 +7,13 @@ services:
     volumes:
       - argus-data:/app/data
       - argus-logs:/app/logs
+    ports:
+      # Health endpoint — exposed so you can curl from the host.
+      - "${HEALTH_PORT:-9100}:${HEALTH_PORT:-9100}"
+      # Prometheus metrics scrape endpoint. Required when Prometheus or Alloy
+      # runs outside this compose stack. Safe to remove if the scraper is a
+      # service in the same stack (it can reach argus-scheduler:9090 directly).
+      - "${PROMETHEUS_PORT:-9090}:${PROMETHEUS_PORT:-9090}"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9100/health"]
       interval: 30s
@@ -170,28 +177,85 @@ services:
   #     retries: 3
 
   # ----------------------------------------------------------------------------
-  # Optional: Prometheus
+  # Optional: Prometheus (direct — no Alloy)
   # Uncomment to run a local Prometheus instance that scrapes Argus metrics.
-  # Set PROMETHEUS_ENABLED=true and add prometheus to ENABLED_EXPORTERS.
+  # Add prometheus to ENABLED_EXPORTERS and provide a prometheus.yml that
+  # targets argus-scheduler:9090. Host port 9091 is used here to avoid
+  # colliding with Argus's own metrics port (9090) if both are exposed.
+  #
+  # Direct:  Prometheus scrapes argus-scheduler:9090 itself.
+  # Via Alloy: comment this out and use the Alloy block below instead.
   # ----------------------------------------------------------------------------
   # prometheus:
   #   image: prom/prometheus:latest
   #   container_name: argus-prometheus
   #   restart: unless-stopped
   #   ports:
-  #     - "9090:9090"
+  #     - "9091:9090"
   #   volumes:
   #     - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
   #     - prometheus-data:/prometheus
 
   # ----------------------------------------------------------------------------
-  # Loki / Grafana — if you have these on a central server, point LOKI_URL at
-  # your existing instance and add loki to ENABLED_EXPORTERS. No local container
-  # needed.
+  # Optional: Loki (direct — no Alloy)
+  # Uncomment to run a local Loki instance. Set LOKI_URL=http://loki:3100 and
+  # add loki to ENABLED_EXPORTERS. Argus pushes directly to Loki's push API.
+  #
+  # Direct:  LOKI_URL=http://loki:3100
+  # Via Alloy: comment this out, set LOKI_URL to Alloy's Loki receiver port
+  #            (e.g. http://alloy:3500) and use the Alloy block below instead.
   # ----------------------------------------------------------------------------
+  # loki:
+  #   image: grafana/loki:latest
+  #   container_name: argus-loki
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3100:3100"
+  #   volumes:
+  #     - loki-data:/loki
+
+  # ----------------------------------------------------------------------------
+  # Optional: Grafana
+  # Uncomment to run a local Grafana instance. Import docs/grafana-dashboard.json
+  # and connect it to your Prometheus and/or Loki datasource.
+  # ----------------------------------------------------------------------------
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   container_name: argus-grafana
+  #   restart: unless-stopped
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - grafana-data:/var/lib/grafana
+  #   depends_on:
+  #     - prometheus   # remove if not using local prometheus
+  #     - loki         # remove if not using local loki
+
+  # ----------------------------------------------------------------------------
+  # Optional: Grafana Alloy (replaces standalone Prometheus + Loki above)
+  # Use Alloy when you already have a central Grafana stack (Cloud or self-hosted)
+  # and want a single collector sidecar instead of local Prometheus/Loki.
+  #
+  # Prometheus side: Alloy scrapes argus-scheduler:9090; no LOKI_URL needed.
+  # Loki side:       Set LOKI_URL=http://alloy:3500 (or whichever port your
+  #                  alloy.river exposes its loki.source.api receiver on).
+  # ----------------------------------------------------------------------------
+  # alloy:
+  #   image: grafana/alloy:latest
+  #   container_name: argus-alloy
+  #   restart: unless-stopped
+  #   ports:
+  #     - "12345:12345"   # Alloy UI
+  #     - "3500:3500"     # Loki push receiver (match LOKI_URL port)
+  #   volumes:
+  #     - ./alloy.river:/etc/alloy/config.river:ro
+  #   depends_on:
+  #     - argus-scheduler
 
 volumes:
   argus-data:
   argus-logs:
   # influxdb-data:   # uncomment when influxdb service is enabled
   # prometheus-data: # uncomment when prometheus service is enabled
+  # loki-data:       # uncomment when loki service is enabled
+  # grafana-data:    # uncomment when grafana service is enabled

@@ -13,4 +13,5 @@ router = APIRouter(tags=["diagnostics"])
 
 @router.get("/diagnostics")
 def get_diagnostics() -> dict[str, Any]:
+    """Return the last poll diagnostics from shared state."""
     return shared_state.get_last_diagnostics()
