@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.5-beta] - 2026-06-01
+
+### Fixed
+
+- **GHCR publish 403 on blob HEAD during buildx export** — disabled provenance/SBOM
+  attestation upload in the GitHub GHCR publish workflow (`provenance: false`, `sbom: false`)
+  to force a plain multi-arch image manifest push path
+
+---
+
 ## [0.3.4-beta] - 2026-06-01
 
 ### Fixed
