@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.2.3-beta] - 2026-06-01
+
+### Fixed
+
+- **CI workflow** — switched git remote authentication from PAT-in-URL to `http.extraheader`
+  (matches Hermes pattern) to prevent token exposure in git logs; increased GHCR package-link
+  dispatch sleep from 15 s to 30 s to reduce race with GitHub workflow indexing.
+
+---
+
 ## [0.2.2-beta] - 2026-06-01
 
 ### Fixed
