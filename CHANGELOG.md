@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.2.1-beta] - 2026-06-01
+
+### Fixed
+
+- **CI workflow** — added `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` secrets and guarded
+  GHCR login, push, and package-visibility steps with `if:` checks so the pipeline
+  degrades gracefully when optional registry secrets are absent.
+
+---
+
 ## [0.2.0-beta] - 2026-06-01
 
 ### Added

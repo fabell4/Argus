@@ -113,15 +113,6 @@ jobs:
           path: /tmp/changelog_notes.txt
           retention-days: 1
 
-      - name: Diagnose Docker daemon and GHCR connectivity
-        run: |
-          echo "=== Docker info (registries/mirrors) ==="
-          docker info 2>&1 | grep -A5 -E "Registry|Mirror|Insecure" || true
-          echo "=== /etc/docker/daemon.json ==="
-          cat /etc/docker/daemon.json 2>/dev/null || echo "(not found)"
-          echo "=== curl GET https://ghcr.io/v2/ ==="
-          curl -sv https://ghcr.io/v2/ 2>&1 | grep -E "< HTTP|WWW-Auth|error|denied" || true
-
       - name: Log in to Docker Hub
         run: |
           echo "${{ secrets.DOCKERHUB_TOKEN }}" | \
