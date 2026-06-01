@@ -115,17 +115,14 @@ jobs:
 
       - name: Diagnose registry connectivity
         run: |
-          echo "=== /etc/docker/daemon.json ==="
-          cat /etc/docker/daemon.json 2>/dev/null || echo "(not found)"
+          echo "=== Docker daemon proxy settings ==="
+          docker info --format 'HTTPProxy={{.HTTPProxy}}  HTTPSProxy={{.HTTPSProxy}}  NoProxy={{.NoProxy}}' 2>&1 || true
           echo ""
-          echo "=== docker info ==="
-          docker info 2>&1 || true
+          echo "=== Test GHCR reachability FROM the Docker daemon (via docker run) ==="
+          docker run --rm alpine sh -c "wget -qO- https://ghcr.io/v2/ 2>&1; echo EXIT:$?" || true
           echo ""
-          echo "=== curl -v https://ghcr.io/v2/ ==="
-          curl -v --max-time 10 https://ghcr.io/v2/ 2>&1 || true
-          echo ""
-          echo "=== nslookup ghcr.io ==="
-          nslookup ghcr.io 2>&1 || true
+          echo "=== Existing ~/.docker/config.json ==="
+          cat ~/.docker/config.json 2>/dev/null || echo "(not found)"
 
       - name: Log in to Docker Hub
         run: |
