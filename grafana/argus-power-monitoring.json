@@ -767,7 +767,6 @@
       "type": "row"
     },
     {
-      "datasource": {"type": "prometheus", "uid": "${DS_PROMETHEUS}"},
       "fieldConfig": {
         "defaults": {
           "color": {"mode": "thresholds"},
@@ -813,6 +812,7 @@
       "title": "Recent Power Events",
       "description": "Power events shipped by Argus's LokiExporter. Each log line is a JSON object; the query extracts event_type, device_id, and severity as columns.",
       "type": "table",
+      "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
       "targets": [
         {
           "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
