@@ -145,34 +145,50 @@ jobs:
               --username "${{ secrets.GH_USERNAME }}" \
               --password-stdin
 
-      - name: Build image
-        env:
-          GH_USERNAME: ${{ secrets.GH_USERNAME }}
-        run: |
-          CREATED=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          docker build \
-            --platform linux/amd64 \
-            --build-arg APP_VERSION="${{ needs.validate.outputs.version }}" \
-            --label org.opencontainers.image.source="https://github.com/${GH_USERNAME}/Argus" \
-            --label org.opencontainers.image.version="${{ needs.validate.outputs.version }}" \
-            --label org.opencontainers.image.revision="${{ github.sha }}" \
-            --label org.opencontainers.image.created="${CREATED}" \
-            --tag registry.greenflametech.net/argus:${{ needs.validate.outputs.version }} \
-            --tag registry.greenflametech.net/argus:latest \
-            --tag ghcr.io/${{ secrets.GH_USERNAME }}/argus:${{ needs.validate.outputs.version }} \
-            --tag ghcr.io/${{ secrets.GH_USERNAME }}/argus:latest \
-            .
+      - name: Set image creation timestamp
+        run: echo "CREATED=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
 
-      - name: Push to private registry
-        run: |
-          docker push registry.greenflametech.net/argus:${{ needs.validate.outputs.version }}
-          docker push registry.greenflametech.net/argus:latest
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Push to GHCR
+      - name: Build and push image to GHCR (multi-arch with correct OCI annotations)
         if: ${{ secrets.GH_PAT != '' && secrets.GH_USERNAME != '' }}
-        run: |
-          docker push ghcr.io/${{ secrets.GH_USERNAME }}/argus:${{ needs.validate.outputs.version }}
-          docker push ghcr.io/${{ secrets.GH_USERNAME }}/argus:latest
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            APP_VERSION=${{ needs.validate.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ secrets.GH_USERNAME }}/Argus
+            org.opencontainers.image.version=${{ needs.validate.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ env.CREATED }}
+          tags: |
+            ghcr.io/${{ secrets.GH_USERNAME }}/argus:${{ needs.validate.outputs.version }}
+            ghcr.io/${{ secrets.GH_USERNAME }}/argus:latest
+          push: true
+
+      - name: Build and push to private registry (amd64 only)
+        uses: docker/build-push-action@v5
+        if: ${{ secrets.REGISTRY_USERNAME != '' }}
+        with:
+          context: .
+          platforms: linux/amd64
+          build-args: |
+            APP_VERSION=${{ needs.validate.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ secrets.GH_USERNAME }}/Argus
+            org.opencontainers.image.version=${{ needs.validate.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ env.CREATED }}
+          tags: |
+            registry.greenflametech.net/argus:${{ needs.validate.outputs.version }}
+            registry.greenflametech.net/argus:latest
+          push: true
+          registry: registry.greenflametech.net
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
 
       - name: Make GHCR package public
         if: ${{ secrets.GH_PAT != '' && secrets.GH_USERNAME != '' }}
@@ -230,6 +246,27 @@ jobs:
         with:
           name: changelog-notes
           path: /tmp
+
+      - name: Save branch protection rules before release
+        id: save-protection
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+        run: |
+          # Save current branch protection and rulesets before deletion
+          mkdir -p /tmp/github-protection
+          
+          curl -s -H "Authorization: Bearer ${GH_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GH_USERNAME}/Argus/branches/main/protection" \
+            > /tmp/github-protection/main-protection.json 2>/dev/null || echo '{}' > /tmp/github-protection/main-protection.json
+          
+          curl -s -H "Authorization: Bearer ${GH_PAT}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GH_USERNAME}/Argus/rulesets?includes_parents=false" \
+            > /tmp/github-protection/rulesets.json 2>/dev/null || echo '[]' > /tmp/github-protection/rulesets.json
+          
+          echo "Branch protection rules saved for restoration after release."
 
       - name: Push sanitized release to public GitHub repo
         env:
@@ -356,3 +393,56 @@ jobs:
           tag: ${{ needs.validate.outputs.tag }}
           prerelease: ${{ contains(needs.validate.outputs.tag, 'alpha') || contains(needs.validate.outputs.tag, 'beta') || contains(needs.validate.outputs.tag, 'rc') }}
           sha-check: 'false'
+
+      - name: Restore branch protection rules on GitHub
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+          GH_USERNAME: ${{ secrets.GH_USERNAME }}
+        run: |
+          # Restore branch protection and rulesets after successful release
+          if [ -f /tmp/github-protection/main-protection.json ]; then
+            PROTECTION=$(cat /tmp/github-protection/main-protection.json)
+            if [ "$(echo "${PROTECTION}" | jq 'keys | length')" -gt 0 ]; then
+              echo "Restoring main branch protection..."
+              HTTP=$(curl -s -o /tmp/protection_resp.json -w "%{http_code}" \
+                -X PUT \
+                -H "Authorization: Bearer ${GH_PAT}" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/${GH_USERNAME}/Argus/branches/main/protection" \
+                -d "${PROTECTION}")
+              echo "PUT /branches/main/protection → HTTP ${HTTP}"
+              if [ "${HTTP}" != "200" ]; then
+                echo "WARNING: Could not fully restore branch protection (HTTP ${HTTP})."
+                cat /tmp/protection_resp.json
+              else
+                echo "✅ Main branch protection restored."
+              fi
+            fi
+          fi
+
+          # Restore rulesets if they were saved
+          if [ -f /tmp/github-protection/rulesets.json ]; then
+            RULESETS=$(cat /tmp/github-protection/rulesets.json)
+            RULESET_COUNT=$(echo "${RULESETS}" | jq 'length')
+            if [ "${RULESET_COUNT}" -gt 0 ]; then
+              echo "Restoring ${RULESET_COUNT} rulesets..."
+              echo "${RULESETS}" | jq -c '.[]' | while read -r ruleset; do
+                RULESET_ID=$(echo "${ruleset}" | jq -r '.id')
+                echo "Recreating ruleset ${RULESET_ID}..."
+                # Omit id from the payload for creation
+                RULESET_PAYLOAD=$(echo "${ruleset}" | jq 'del(.id, .created_at, .updated_at)')
+                HTTP=$(curl -s -o /tmp/ruleset_resp.json -w "%{http_code}" \
+                  -X POST \
+                  -H "Authorization: Bearer ${GH_PAT}" \
+                  -H "Accept: application/vnd.github+json" \
+                  "https://api.github.com/repos/${GH_USERNAME}/Argus/rulesets" \
+                  -d "${RULESET_PAYLOAD}")
+                if [ "${HTTP}" = "201" ]; then
+                  echo "✅ Ruleset ${RULESET_ID} restored."
+                else
+                  echo "⚠️  Ruleset ${RULESET_ID} restoration returned HTTP ${HTTP}"
+                fi
+              done
+            fi
+          fi
+

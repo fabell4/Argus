@@ -12,6 +12,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.1-beta] - 2026-06-01
+
+### Fixed
+
+- **Branch protection not restored after release** — Forgejo release pipeline now saves branch
+  protection rules and rulesets before disabling them for the force-push, then restores them
+  automatically after the Forgejo release is created
+- **GHCR container package not linked to repository** — replaced `docker build` + manual push
+  with `docker/build-push-action` which correctly sets `org.opencontainers.image.source` on
+  the pushed manifest; GitHub now auto-links the package to the Argus repository
+
+### Chore
+
+- **Remove Claude from contributors** — added `.mailmap` mapping Claude commit author to
+  the canonical maintainer identity; added `.markdownlintignore` to exclude `.mailmap` from
+  markdown linting
+
+---
+
 ## [0.3.0-beta] - 2026-06-01
 
 ### Added

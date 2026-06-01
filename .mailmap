@@ -1,0 +1,5 @@
+# Map commit authors to canonical identities
+# This removes AI assistants and automation from the contributors list
+
+Franklin Bell <fabel4@greenflametech.net> Claude <claude@anthropic.com>
+Franklin Bell <fabel4@greenflametech.net> Copilot <copilot@github.com>
