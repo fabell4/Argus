@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 
@@ -600,7 +601,7 @@ def test_record_events_with_alert_manager_dispatches_recovery_events() -> None:
 
 
 def test_scheduler_restores_poll_interval_from_runtime_config(
-    tmp_path: "pathlib.Path",
+    tmp_path: Path,
 ) -> None:
     """Simulates a scheduler restart: a saved poll interval is read from
     runtime_config.json and used to configure the APScheduler job interval.
@@ -611,7 +612,6 @@ def test_scheduler_restores_poll_interval_from_runtime_config(
         _scheduler = build_scheduler(interval)
     """
     import json
-    import pathlib
     import src.main as main_mod
     from src import runtime_config as rc_mod
 
@@ -633,6 +633,7 @@ def test_scheduler_restores_poll_interval_from_runtime_config(
     assert job is not None
     # APScheduler IntervalTrigger stores the interval in job.trigger.interval
     import datetime as dt
+
     assert job.trigger.interval == dt.timedelta(minutes=7), (
         f"Scheduler job interval should be 7 minutes, got {job.trigger.interval}"
     )

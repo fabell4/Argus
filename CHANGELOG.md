@@ -12,6 +12,37 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.2.0-beta] - 2026-06-01
+
+### Added
+
+- **Testing backlog completed** — full integration test coverage for all core subsystems:
+  `NUTPoller`, `SNMPPoller` (including SNMPv3 authPriv), `SQLiteExporter`, `CSVExporter`
+  (rotation + age pruning), `EnergyAccumulator`, and alert lifecycle (threshold, fire,
+  reset); scheduler persistence test verifies poll interval is restored from
+  `runtime_config.json` on restart.
+- **Grafana Alloy config** — `grafana/argus.alloy` starter config for scraping Argus
+  Prometheus metrics and shipping structured logs to Loki.
+
+### Fixed
+
+- **FastAPI 0.115 compatibility** — `DELETE /api/devices/{id}` (HTTP 204) now declares
+  `response_model=None` and `response_class=Response` to satisfy the stricter
+  no-response-body assertion introduced in FastAPI 0.115.
+- **Power exporter bug** — corrected calculation error in power export path.
+
+### Changed
+
+- **Grafana dashboard** — updated `argus-power-monitoring.json` with Loki log panel and
+  refined variable inputs.
+
+### Security
+
+- **Test URL scheme** — replaced all `http://` fixture URLs in `test_misc_modules.py`
+  with `https://` to resolve SonarQube Security Hotspot `python:S5332`.
+
+---
+
 ## [0.1.0-beta] - 2026-05-29
 
 ### Added

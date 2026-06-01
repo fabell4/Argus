@@ -24,7 +24,7 @@
     "alert_recovery_notifications": true,
     "recovery_cooldown_seconds": 300
   },
-  "nut_host": "localhost",
+  "nut_host": "host.docker.internal",
   "nut_port": 3493,
   "nut_username": "",
   "nut_password": "",

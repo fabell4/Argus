@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from src.api.auth import require_api_key
@@ -93,8 +94,10 @@ def update_device(device_id: str, device: DeviceSchema) -> DeviceSchema:
     "/devices/{device_id}",
     dependencies=[Depends(require_api_key)],
     status_code=status.HTTP_204_NO_CONTENT,
+    response_model=None,
+    response_class=Response,
 )
-def delete_device(device_id: str) -> None:
+def delete_device(device_id: str) -> Response:
     """Delete a device by ID; returns 404 if not found."""
     if not device_registry.remove_device(device_id):
         raise HTTPException(

@@ -394,7 +394,11 @@ class TestProvidersFromEnv:
         """GotifyProvider is skipped when GOTIFY_TOKEN is empty."""
         with patch.multiple(
             "src.config",
-            **{**_EMPTY_CFG, "GOTIFY_URL": "https://gotify.example.com", "GOTIFY_TOKEN": ""},
+            **{
+                **_EMPTY_CFG,
+                "GOTIFY_URL": "https://gotify.example.com",
+                "GOTIFY_TOKEN": "",
+            },
         ):
             result = _providers_from_env()
         assert result == []
@@ -403,7 +407,11 @@ class TestProvidersFromEnv:
         """Returns a NtfyProviderConfig when NTFY_URL and NTFY_TOPIC are set."""
         with patch.multiple(
             "src.config",
-            **{**_EMPTY_CFG, "NTFY_URL": "https://ntfy.sh", "NTFY_TOPIC": "argus-alerts"},
+            **{
+                **_EMPTY_CFG,
+                "NTFY_URL": "https://ntfy.sh",
+                "NTFY_TOPIC": "argus-alerts",
+            },
         ):
             result = _providers_from_env()
         assert len(result) == 1
@@ -467,4 +475,3 @@ class TestProvidersFromEnv:
         assert resp.status_code == 200
         body = resp.json()
         assert any(p.get("type") == "webhook" for p in body["providers"])
-

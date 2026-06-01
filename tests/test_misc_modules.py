@@ -111,7 +111,7 @@ class TestInfluxDBExporter:
 
         with patch.dict("sys.modules", {"influxdb_client": None}):
             exp = InfluxDBExporter(
-                url="http://influxdb:8086", token="tok", org="org", bucket="bkt"
+                url="https://influxdb:8086", token="tok", org="org", bucket="bkt"
             )
             # Client should be None when import fails (accessing internal for test assertion)
             assert exp._client is None  # noqa: SLF001
@@ -122,7 +122,7 @@ class TestInfluxDBExporter:
 
         with patch.dict("sys.modules", {"influxdb_client": None}):
             exp = InfluxDBExporter(
-                url="http://influxdb:8086", token="tok", org="org", bucket="bkt"
+                url="https://influxdb:8086", token="tok", org="org", bucket="bkt"
             )
         # Should not raise
         exp.export(_snap())
@@ -154,7 +154,7 @@ class TestInfluxDBExporter:
             },
         ):
             exp = InfluxDBExporter(
-                url="http://influxdb:8086", token="tok", org="org", bucket="bkt"
+                url="https://influxdb:8086", token="tok", org="org", bucket="bkt"
             )
             exp.export(_snap())
 
@@ -619,7 +619,7 @@ def test_build_influxdb_returns_none_when_token_missing() -> None:
     from src.exporter_registry import _build_influxdb
 
     with patch("src.exporter_registry.config") as mock_cfg:
-        mock_cfg.INFLUXDB_URL = "http://influxdb:8086"
+        mock_cfg.INFLUXDB_URL = "https://influxdb:8086"
         mock_cfg.INFLUXDB_TOKEN = ""
         result = _build_influxdb()
     assert result is None
@@ -767,9 +767,7 @@ def test_snmpv3_authpriv_poll_returns_populated_snapshot() -> None:
         (None, None, None, [_make_var_bind(runtime_oid, "20")]),
         (None, None, None, [_make_var_bind(power_watts_oid, "300")]),
     ]
-    mock_hlapi.getCmd = MagicMock(
-        side_effect=[iter([r]) for r in _oid_responses]
-    )
+    mock_hlapi.getCmd = MagicMock(side_effect=[iter([r]) for r in _oid_responses])
     # Auth / priv protocol sentinels
     mock_hlapi.usmHMACMD5AuthProtocol = "MD5_PROTO"
     mock_hlapi.usmHMACSHAAuthProtocol = "SHA_PROTO"
