@@ -12,6 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.2-beta] - 2026-06-01
+
+### Fixed
+
+- **GHCR package still not linked after v0.3.1-beta** — reverted Forgejo build-and-push job
+  from `docker/build-push-action` (incompatible with container-based Forgejo runners) back to
+  plain `docker build` / `docker push`; replaced `imagetools create --annotation` approach in
+  `link-ghcr-package.yml` with a simple `docker pull` + `docker push` via `GITHUB_TOKEN`,
+  which is the only mechanism GitHub recognises for auto-linking a GHCR package to a repository
+
+---
+
 ## [0.3.1-beta] - 2026-06-01
 
 ### Fixed
