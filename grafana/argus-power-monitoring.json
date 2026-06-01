@@ -816,7 +816,7 @@
       "targets": [
         {
           "datasource": {"type": "loki", "uid": "${DS_LOKI}"},
-          "expr": "{job=\"argus_power\"} | json | line_format \"{{.event_type}}\"",
+          "expr": "{job=\"argus_power\"} | json",
           "instant": false,
           "legendFormat": "",
           "refId": "A"
