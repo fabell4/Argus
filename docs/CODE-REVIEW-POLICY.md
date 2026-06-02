@@ -3,7 +3,6 @@ layout: default
 title: "Code Review Policy"
 ---
 
-# Code Review Policy
 
 **Projects:** Argus / Hermes (shared policy)
 **Format:** Human-readable reference. The machine-readable version for AI agents is

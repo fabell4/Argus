@@ -3,7 +3,6 @@ layout: default
 title: "Architecture"
 ---
 
-# 🏗️ Architecture Overview
 
 Argus is designed as a two-container system that continuously monitors power infrastructure via NUT
 and SNMP, exports telemetry to multiple observability destinations, and serves a React frontend

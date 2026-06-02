@@ -1,0 +1,47 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Serve Docs (Jekyll)",
+			"type": "shell",
+			"command": "Set-Location 'C:\\Users\\psywa\\source\\repos\\projects\\Argus\\Argus\\docs'; bundle exec jekyll serve --port 4002 --livereload",
+			"options": {
+				"cwd": "C:\\Users\\psywa\\source\\repos\\projects\\Argus\\Argus\\docs"
+			},
+			"isBackground": true,
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": true
+			},
+			"problemMatcher": {
+				"owner": "jekyll",
+				"pattern": {
+					"regexp": "^.*$",
+					"message": 1
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "Generating\\.\\.\\.",
+					"endsPattern": "Server running\\.\\.\\."
+				}
+			}
+		},
+		{
+			"label": "Build Docs (Jekyll)",
+			"type": "shell",
+			"command": "Set-Location 'C:\\Users\\psywa\\source\\repos\\projects\\Argus\\Argus\\docs'; bundle exec jekyll build",
+			"options": {
+				"cwd": "C:\\Users\\psywa\\source\\repos\\projects\\Argus\\Argus\\docs"
+			},
+			"group": "build",
+			"presentation": {
+				"reveal": "always",
+				"panel": "dedicated",
+				"clear": true
+			},
+			"problemMatcher": []
+		}
+	]
+}

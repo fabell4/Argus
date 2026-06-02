@@ -3,7 +3,6 @@ layout: default
 title: "Alert Configuration"
 ---
 
-# 🔔 Alert Configuration
 
 Argus can send notifications when power events occur — UPS battery transitions, device going
 offline, load/temperature thresholds exceeded, and more. Alerts are configurable via the UI

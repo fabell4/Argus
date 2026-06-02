@@ -3,7 +3,6 @@ layout: default
 title: "Security Guide"
 ---
 
-# 🔒 Security Guide
 
 Argus implements multiple layers of security for production deployments. This guide covers
 security features, configuration best practices, and hardening recommendations.

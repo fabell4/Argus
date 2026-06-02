@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Architecture — Argus Documentation</title>
+  <!-- SEO tag plugin -->
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Architecture | Argus Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Architecture" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<link rel="canonical" href="http://localhost:4002/architecture.html" />
+<meta property="og:url" content="http://localhost:4002/architecture.html" />
+<meta property="og:site_name" content="Argus Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Architecture" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration","headline":"Architecture","url":"http://localhost:4002/architecture.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration">
+
+<title>
+  
+    Architecture — Argus Documentation
+  
+</title>
+
+<!-- Favicon — add your icon to assets/img/favicon.png to enable -->
+
+
+
+<link rel="icon" type="image/png" href="/assets/argus.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<!-- Rouge syntax highlight (dark theme override handled in _sass/_code.scss) -->
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="http://localhost:4002" class="nav-brand">
+    <span class="brand-name">
+      Argus
+      <span>Documentation</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/observability"
+                 >
+                Observability
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/CODE-REVIEW-POLICY"
+                 >
+                Code Review Policy
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Architecture</h1>
+
+            
+          </header>
+        
+
+        <p>Argus is designed as a two-container system that continuously monitors power infrastructure via NUT
+and SNMP, exports telemetry to multiple observability destinations, and serves a React frontend
+through a FastAPI backend.</p>
+
+<hr />
+
+<h2 id="️-system-architecture">🏗️ System Architecture</h2>
+
+<h3 id="data-flow">Data Flow</h3>
+
+<pre><code class="language-mermaid">flowchart TD
+    subgraph API_CONTAINER["argus-api container"]
+        API["**FastAPI REST API**\nsrc/api/main.py\n:8000"]
+        REACT["**React Frontend**\nfrontend/dist\n(served by FastAPI)"]
+    end
+
+    subgraph SCHED_CONTAINER["argus-scheduler container"]
+        MAIN["**main.py**\nEntry point + APScheduler"]
+        NUT["**NUTPoller**\nsrc/services/nut_poller.py"]
+        SNMP["**SNMPPoller**\nsrc/services/snmp_poller.py"]
+        MODEL["**PowerSnapshot**\nsrc/models/power_snapshot.py"]
+        DISP["**SnapshotDispatcher**\nsrc/snapshot_dispatcher.py"]
+        EVT["**EventProcessor**\nsrc/services/event_processor.py"]
+        ALERT["**AlertManager**\nsrc/services/alert_manager.py"]
+        HEALTH["**HealthServer**\n:9100/health"]
+        SQLITE["SQLiteExporter"]
+        PROM["PrometheusExporter\n:9090/metrics"]
+        INFLUX["InfluxDBExporter"]
+        LOKI["LokiExporter"]
+        CSV["CSVExporter"]
+        ENERGY["EnergyAccumulator"]
+    end
+
+    DEVICES[("**Power Devices**\nUPS (NUT)\nPDU / Sensors (SNMP)")]
+    DATA_VOL[("**Shared Volume**\nargus.db\nruntime_config.json")]
+    ALERT_DEST[("**Alert Destinations**\nWebhook, Gotify,\nntfy, Apprise")]
+
+    REACT -- "HTTP GET/POST" --&gt; API
+    API -- "POST /api/trigger\nPUT /api/config\nPUT /api/alerts\nPOST /api/devices" --&gt; DATA_VOL
+    API -- "GET /api/snapshots\nGET /api/events\nGET /api/energy" --&gt; DATA_VOL
+    MAIN -- "polls on schedule" --&gt; NUT
+    MAIN -- "polls on schedule" --&gt; SNMP
+    NUT -- "PowerSnapshot" --&gt; MODEL
+    SNMP -- "PowerSnapshot" --&gt; MODEL
+    DEVICES -- "NUT protocol / SNMP" --&gt; NUT
+    DEVICES -- "SNMP" --&gt; SNMP
+    MODEL --&gt; DISP
+    MODEL --&gt; EVT
+    EVT -- "event detected" --&gt; ALERT
+    DISP --&gt; SQLITE
+    DISP --&gt; PROM
+    DISP --&gt; INFLUX
+    DISP --&gt; LOKI
+    DISP --&gt; CSV
+    DISP --&gt; ENERGY
+    SQLITE -- "writes" --&gt; DATA_VOL
+    ENERGY -- "writes" --&gt; DATA_VOL
+    ALERT -- "on threshold" --&gt; ALERT_DEST
+
+    style API fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style REACT fill:#1565c0,stroke:#90caf9,color:#ffffff
+    style MAIN fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style NUT fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style SNMP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style MODEL fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style DISP fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style EVT fill:#6a1b9a,stroke:#ce93d8,color:#ffffff
+    style ALERT fill:#c62828,stroke:#ef5350,color:#ffffff
+    style HEALTH fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style SQLITE fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style PROM fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style INFLUX fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style LOKI fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style CSV fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style ENERGY fill:#2e7d32,stroke:#a5d6a7,color:#ffffff
+    style DATA_VOL fill:#f57c00,stroke:#ffb74d,color:#ffffff
+    style ALERT_DEST fill:#c62828,stroke:#ef5350,color:#ffffff
+    style DEVICES fill:#0277bd,stroke:#81d4fa,color:#ffffff
+</code></pre>
+
+<h3 id="-deployment-topology">🌐 Deployment Topology</h3>
+
+<pre><code class="language-mermaid">flowchart LR
+    subgraph ARGUS_HOST["Argus Host"]
+        subgraph SCHED["argus-scheduler"]
+            PROM_EP["PrometheusExporter\n:9090/metrics"]
+            HEALTH_EP["HealthServer\n:9100/health"]
+            LOKI_EXP["LokiExporter"]
+            ALERT_MGR["AlertManager"]
+        end
+        subgraph API_C["argus-api"]
+            API["FastAPI + React UI\n:8000"]
+        end
+        SHARED_VOL[("argus-data volume\nargus.db\nruntime_config.json")]
+    end
+
+    subgraph POWER_INFRA["Power Infrastructure"]
+        NUT_DAEMON["NUT Daemon\n:3493"]
+        SNMP_DEV["PDU / Sensors\n(SNMP)"]
+    end
+
+    subgraph OBS_HOST["Observability Host"]
+        PROMETHEUS["Prometheus\n:9090"]
+        LOKI["Loki\n:3100"]
+        INFLUX["InfluxDB\n:8086"]
+        GRAFANA["Grafana\n:3000"]
+    end
+
+    subgraph ALERT_SVCS["Alert Services (optional)"]
+        GOTIFY["Gotify"]
+        NTFY["ntfy"]
+        APPRISE["Apprise API"]
+        WEBHOOK["Custom Webhook"]
+    end
+
+    SCHED -- "polls every N min" --&gt; NUT_DAEMON
+    SCHED -- "SNMP polls" --&gt; SNMP_DEV
+    SCHED -- "reads/writes" --&gt; SHARED_VOL
+    API -- "reads" --&gt; SHARED_VOL
+    PROMETHEUS -- "scrapes :9090/metrics" --&gt; PROM_EP
+    LOKI_EXP -- "pushes logs" --&gt; LOKI
+    ALERT_MGR -- "HTTPS POST" --&gt; GOTIFY
+    ALERT_MGR -- "HTTPS POST" --&gt; NTFY
+    ALERT_MGR -- "HTTPS POST" --&gt; APPRISE
+    ALERT_MGR -- "HTTPS POST" --&gt; WEBHOOK
+    GRAFANA -- "queries" --&gt; PROMETHEUS
+    GRAFANA -- "queries" --&gt; LOKI
+    GRAFANA -- "queries" --&gt; INFLUX
+</code></pre>
+
+<hr />
+
+<h2 id="-component-reference">🔧 Component Reference</h2>
+
+<h3 id="argus-scheduler">argus-scheduler</h3>
+
+<p>The long-running background process responsible for all data collection.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Path</th>
+      <th>Responsibility</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">main.py</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/main.py</code></td>
+      <td>Entry point, APScheduler setup, signal handling</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NUTPoller</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/services/nut_poller.py</code></td>
+      <td>Queries NUT daemon via <code class="language-plaintext highlighter-rouge">PyNUTClient</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMPPoller</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/services/snmp_poller.py</code></td>
+      <td>Queries SNMP devices via PySNMP</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SnapshotDispatcher</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/snapshot_dispatcher.py</code></td>
+      <td>Fans out <code class="language-plaintext highlighter-rouge">PowerSnapshot</code> to all enabled exporters</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">EventProcessor</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/services/event_processor.py</code></td>
+      <td>Detects state transitions; emits <code class="language-plaintext highlighter-rouge">PowerEvent</code> records</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">AlertManager</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/services/alert_manager.py</code></td>
+      <td>Fires notifications when event conditions are met</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">DeviceRegistry</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/services/device_registry.py</code></td>
+      <td>Persistent device catalogue (JSON-backed)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HealthServer</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/services/health_server.py</code></td>
+      <td>Lightweight HTTP health endpoint on <code class="language-plaintext highlighter-rouge">HEALTH_PORT</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="argus-api">argus-api</h3>
+
+<p>The HTTP server that serves both the REST API and the React SPA.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Component</th>
+      <th>Path</th>
+      <th>Responsibility</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">main.py</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/main.py</code></td>
+      <td>FastAPI app factory, middleware, static file serving</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">auth.py</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/auth.py</code></td>
+      <td>API key validation, rate limiting</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">routes/snapshots</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/routes/snapshots.py</code></td>
+      <td>Paginated power snapshot history</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">routes/events</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/routes/events.py</code></td>
+      <td>Paginated power event history</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">routes/devices</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/routes/devices.py</code></td>
+      <td>Device registry CRUD</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">routes/alerts</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/routes/alerts.py</code></td>
+      <td>Alert provider configuration</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">routes/config</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/routes/config.py</code></td>
+      <td>Runtime scheduler configuration</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">routes/energy</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/routes/energy.py</code></td>
+      <td>Cumulative kWh totals</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">routes/trigger</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/routes/trigger.py</code></td>
+      <td>Manual poll trigger</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">routes/diagnostics</code></td>
+      <td><code class="language-plaintext highlighter-rouge">src/api/routes/diagnostics.py</code></td>
+      <td>Last-poll diagnostics</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="-exporters">📤 Exporters</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Exporter</th>
+      <th>Key</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SQLiteExporter</code></td>
+      <td><code class="language-plaintext highlighter-rouge">sqlite</code></td>
+      <td>Writes snapshots to <code class="language-plaintext highlighter-rouge">argus.db</code>; enforces retention</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">PrometheusExporter</code></td>
+      <td><code class="language-plaintext highlighter-rouge">prometheus</code></td>
+      <td>Exposes Gauge metrics at <code class="language-plaintext highlighter-rouge">/metrics</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">InfluxDBExporter</code></td>
+      <td><code class="language-plaintext highlighter-rouge">influxdb</code></td>
+      <td>Writes points to InfluxDB v2</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LokiExporter</code></td>
+      <td><code class="language-plaintext highlighter-rouge">loki</code></td>
+      <td>Pushes structured log lines to Loki</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CSVExporter</code></td>
+      <td><code class="language-plaintext highlighter-rouge">csv</code></td>
+      <td>Appends rows to a rotating CSV file</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">EnergyAccumulatorExporter</code></td>
+      <td><code class="language-plaintext highlighter-rouge">energy</code></td>
+      <td>Accumulates kWh from watt-second snapshots</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Enable exporters via <code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS=sqlite,prometheus,influxdb</code> (comma-separated).</p>
+
+<hr />
+
+<h2 id="️-runtime-configuration">⚙️ Runtime Configuration</h2>
+
+<p>Both containers share the <code class="language-plaintext highlighter-rouge">argus-data</code> volume. The scheduler watches
+<code class="language-plaintext highlighter-rouge">data/runtime_config.json</code> for changes written by the API, enabling zero-restart
+reconfiguration of:</p>
+
+<ul>
+  <li>Poll interval</li>
+  <li>Enabled exporters</li>
+  <li>NUT connection settings</li>
+  <li>Alert provider configuration</li>
+  <li>Scheduler pause / resume</li>
+</ul>
+
+<hr />
+
+<h2 id="-grafana-dashboard">📊 Grafana Dashboard</h2>
+
+<p><strong>Import pre-built dashboard:</strong></p>
+
+<ol>
+  <li>Download <code class="language-plaintext highlighter-rouge">docs/grafana-dashboard.json</code></li>
+  <li>In Grafana: <strong>+ → Import → Upload JSON file</strong></li>
+  <li>Select Prometheus as the datasource</li>
+  <li>
+    <p>Dashboard includes:</p>
+
+    <ul>
+      <li>Per-device power draw and load percentage charts</li>
+      <li>Battery charge and runtime remaining panels</li>
+      <li>UPS status and event timeline</li>
+      <li>Input/output voltage and temperature gauges</li>
+    </ul>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="-ports-summary">🌐 Ports Summary</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Container</th>
+      <th>Port</th>
+      <th>Protocol</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus-api</code></td>
+      <td><code class="language-plaintext highlighter-rouge">8000</code></td>
+      <td>HTTP</td>
+      <td>REST API + React UI</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus-scheduler</code></td>
+      <td><code class="language-plaintext highlighter-rouge">9090</code></td>
+      <td>HTTP</td>
+      <td>Prometheus <code class="language-plaintext highlighter-rouge">/metrics</code> (when enabled)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus-scheduler</code></td>
+      <td><code class="language-plaintext highlighter-rouge">9100</code></td>
+      <td>HTTP</td>
+      <td>Health check <code class="language-plaintext highlighter-rouge">/health</code></td>
+    </tr>
+  </tbody>
+</table>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/argus" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Architecture
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

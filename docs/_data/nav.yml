@@ -1,0 +1,29 @@
+- title: Documentation
+  links:
+    - title: Home
+      url: /
+    - title: Getting Started
+      url: /getting-started
+    - title: Architecture
+      url: /architecture
+    - title: API Reference
+      url: /api-reference
+    - title: Observability
+      url: /observability
+    - title: Runbook
+      url: /runbook
+
+- title: Alerts
+  links:
+    - title: Alert Configuration
+      url: /alerts
+
+- title: Security
+  links:
+    - title: Security Guide
+      url: /security
+
+- title: Reference
+  links:
+    - title: Code Review Policy
+      url: /CODE-REVIEW-POLICY

@@ -3,7 +3,6 @@ layout: default
 title: "Runbook"
 ---
 
-# 📖 Argus Runbook
 
 Operational guide for diagnosing and resolving production issues using logs and metrics.
 

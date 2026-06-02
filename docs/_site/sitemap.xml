@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+<loc>http://localhost:4002/CODE-REVIEW-POLICY.html</loc>
+</url>
+<url>
+<loc>http://localhost:4002/alerts.html</loc>
+</url>
+<url>
+<loc>http://localhost:4002/api-reference.html</loc>
+</url>
+<url>
+<loc>http://localhost:4002/architecture.html</loc>
+</url>
+<url>
+<loc>http://localhost:4002/getting-started.html</loc>
+</url>
+<url>
+<loc>http://localhost:4002/</loc>
+</url>
+<url>
+<loc>http://localhost:4002/observability.html</loc>
+</url>
+<url>
+<loc>http://localhost:4002/runbook.html</loc>
+</url>
+<url>
+<loc>http://localhost:4002/security.html</loc>
+</url>
+</urlset>

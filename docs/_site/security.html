@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Security Guide — Argus Documentation</title>
+  <!-- SEO tag plugin -->
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Security Guide | Argus Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Security Guide" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<link rel="canonical" href="http://localhost:4002/security.html" />
+<meta property="og:url" content="http://localhost:4002/security.html" />
+<meta property="og:site_name" content="Argus Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Security Guide" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration","headline":"Security Guide","url":"http://localhost:4002/security.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration">
+
+<title>
+  
+    Security Guide — Argus Documentation
+  
+</title>
+
+<!-- Favicon — add your icon to assets/img/favicon.png to enable -->
+
+
+
+<link rel="icon" type="image/png" href="/assets/argus.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<!-- Rouge syntax highlight (dark theme override handled in _sass/_code.scss) -->
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="http://localhost:4002" class="nav-brand">
+    <span class="brand-name">
+      Argus
+      <span>Documentation</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/observability"
+                 >
+                Observability
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/CODE-REVIEW-POLICY"
+                 >
+                Code Review Policy
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Security Guide</h1>
+
+            
+          </header>
+        
+
+        <p>Argus implements multiple layers of security for production deployments. This guide covers
+security features, configuration best practices, and hardening recommendations.</p>
+
+<hr />
+
+<h2 id="️-security-features">🛡️ Security Features</h2>
+
+<h3 id="-api-key-authentication">🔑 API Key Authentication</h3>
+
+<p><strong>Purpose:</strong> Protect write endpoints from unauthorized access.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li>Optional <code class="language-plaintext highlighter-rouge">API_KEY</code> environment variable</li>
+  <li><strong>32-character minimum</strong> enforced at startup (application exits if too short)</li>
+  <li>Timing-safe comparison using <code class="language-plaintext highlighter-rouge">secrets.compare_digest()</code> to prevent timing attacks</li>
+  <li><code class="language-plaintext highlighter-rouge">X-Api-Key</code> header required on all protected endpoints</li>
+</ul>
+
+<p><strong>Protected Endpoints:</strong></p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">POST /api/trigger</code> — Manual poll trigger</li>
+  <li><code class="language-plaintext highlighter-rouge">PUT /api/config</code> — Configuration updates</li>
+  <li><code class="language-plaintext highlighter-rouge">PUT /api/alerts</code> — Alert configuration</li>
+  <li><code class="language-plaintext highlighter-rouge">POST /api/alerts/test</code> — Test alert notifications</li>
+  <li><code class="language-plaintext highlighter-rouge">POST /api/devices</code> — Add device</li>
+  <li><code class="language-plaintext highlighter-rouge">PUT /api/devices</code> — Replace device list</li>
+  <li><code class="language-plaintext highlighter-rouge">PUT /api/devices/{id}</code> — Update device</li>
+  <li><code class="language-plaintext highlighter-rouge">DELETE /api/devices/{id}</code> — Remove device</li>
+</ul>
+
+<p><strong>Public Endpoints:</strong> (no authentication required)</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/health</code> — Health check</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/snapshots</code> — Power snapshot history</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/events</code> — Power event history</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/devices</code> — Device list</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/energy</code> — Energy totals</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/config</code> — Current runtime configuration</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/alerts</code> — Alert configuration</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/trigger/status</code> — Poll status</li>
+  <li><code class="language-plaintext highlighter-rouge">GET /api/diagnostics</code> — Last-poll diagnostics</li>
+</ul>
+
+<p><strong>Generate a Secure Key:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Recommended</span>
+python <span class="nt">-c</span> <span class="s1">'import secrets; print(secrets.token_urlsafe(32))'</span>
+
+<span class="c"># Alternative</span>
+openssl rand <span class="nt">-hex</span> 32
+</code></pre></div></div>
+
+<p><strong>Startup validation failure message:</strong></p>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ERROR: API_KEY must be at least 32 characters long
+Suggestion: Generate a secure key with:
+  python -c 'import secrets; print(secrets.token_urlsafe(32))'
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="-rate-limiting">🚦 Rate Limiting</h3>
+
+<p><strong>Purpose:</strong> Prevent abuse and DoS via request flooding.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li>Per-API-key sliding window rate limiting</li>
+  <li><strong>Default:</strong> 60 requests per 60-second window (configurable via <code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code>)</li>
+  <li>Applies to all protected endpoints</li>
+  <li>Returns <code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> with <code class="language-plaintext highlighter-rouge">Retry-After</code> header</li>
+</ul>
+
+<hr />
+
+<h3 id="️-ssrf-protection-on-alert-urls">🛡️ SSRF Protection on Alert URLs</h3>
+
+<p><strong>Purpose:</strong> Prevent Server-Side Request Forgery through alert provider URLs.</p>
+
+<p><strong>Implementation:</strong></p>
+
+<ul>
+  <li>All alert provider URLs are validated at configuration time</li>
+  <li>Only <code class="language-plaintext highlighter-rouge">https://</code> scheme is accepted — <code class="language-plaintext highlighter-rouge">http://</code> is rejected</li>
+  <li>Validation is enforced at both the Pydantic model layer and runtime</li>
+</ul>
+
+<p><strong>Rejected configuration:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">WEBHOOK_URL</span><span class="o">=</span>http://internal-host/secret   <span class="c"># rejected — not HTTPS</span>
+<span class="nv">GOTIFY_URL</span><span class="o">=</span>http://gotify.example.com      <span class="c"># rejected — not HTTPS</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="-security-headers">🔐 Security Headers</h3>
+
+<p>Every API response includes the following headers:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Header</th>
+      <th>Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">X-Content-Type-Options</code></td>
+      <td><code class="language-plaintext highlighter-rouge">nosniff</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">X-Frame-Options</code></td>
+      <td><code class="language-plaintext highlighter-rouge">DENY</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Referrer-Policy</code></td>
+      <td><code class="language-plaintext highlighter-rouge">strict-origin-when-cross-origin</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Permissions-Policy</code></td>
+      <td><code class="language-plaintext highlighter-rouge">geolocation=(), microphone=(), camera=()</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Content-Security-Policy</code></td>
+      <td><code class="language-plaintext highlighter-rouge">default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; …</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="-request-size-limits">📏 Request Size Limits</h3>
+
+<p>All requests are limited to <strong>1 MB</strong>. Requests with a <code class="language-plaintext highlighter-rouge">Content-Length</code> exceeding this return
+<code class="language-plaintext highlighter-rouge">413 Request Entity Too Large</code> immediately, before the body is read.</p>
+
+<hr />
+
+<h3 id="-cors-restrictions">🌐 CORS Restrictions</h3>
+
+<p>The API restricts cross-origin requests to explicitly allowed origins configured via
+<code class="language-plaintext highlighter-rouge">ALLOWED_ORIGINS</code>. The default allows only local development origins.</p>
+
+<p><strong>Production example:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">ALLOWED_ORIGINS</span><span class="o">=</span>https://argus.example.com
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-production-hardening-checklist">✅ Production Hardening Checklist</h2>
+
+<ul class="task-list">
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Set <code class="language-plaintext highlighter-rouge">API_KEY</code> to a randomly generated 32+ character secret</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Set <code class="language-plaintext highlighter-rouge">ALLOWED_ORIGINS</code> to your actual UI domain (not <code class="language-plaintext highlighter-rouge">*</code>)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Set <code class="language-plaintext highlighter-rouge">APP_ENV=production</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Use HTTPS in front of the API (reverse proxy with TLS)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Set <code class="language-plaintext highlighter-rouge">API_HOST=127.0.0.1</code> and expose via reverse proxy rather than binding to <code class="language-plaintext highlighter-rouge">0.0.0.0</code></li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Restrict Docker port bindings (<code class="language-plaintext highlighter-rouge">127.0.0.1:8000:8000</code>)</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Use read-only filesystem mounts where possible</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Rotate <code class="language-plaintext highlighter-rouge">API_KEY</code> regularly</li>
+  <li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled="disabled" />Enable <code class="language-plaintext highlighter-rouge">ALERT_ON_DEVICE_OFFLINE</code> to detect monitoring gaps</li>
+</ul>
+
+<hr />
+
+<h2 id="-reverse-proxy-with-tls-nginx-example">🔐 Reverse Proxy with TLS (Nginx Example)</h2>
+
+<div class="language-nginx highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">server</span> <span class="p">{</span>
+    <span class="kn">listen</span> <span class="mi">443</span> <span class="s">ssl</span> <span class="s">http2</span><span class="p">;</span>
+    <span class="kn">server_name</span> <span class="s">argus.example.com</span><span class="p">;</span>
+
+    <span class="kn">ssl_certificate</span>     <span class="n">/etc/letsencrypt/live/argus.example.com/fullchain.pem</span><span class="p">;</span>
+    <span class="kn">ssl_certificate_key</span> <span class="n">/etc/letsencrypt/live/argus.example.com/privkey.pem</span><span class="p">;</span>
+
+    <span class="kn">location</span> <span class="n">/</span> <span class="p">{</span>
+        <span class="kn">proxy_pass</span>         <span class="s">http://127.0.0.1:8000</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span>   <span class="s">Host</span> <span class="nv">$host</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span>   <span class="s">X-Real-IP</span> <span class="nv">$remote_addr</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span>   <span class="s">X-Forwarded-For</span> <span class="nv">$proxy_add_x_forwarded_for</span><span class="p">;</span>
+        <span class="kn">proxy_set_header</span>   <span class="s">X-Forwarded-Proto</span> <span class="nv">$scheme</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="k">server</span> <span class="p">{</span>
+    <span class="kn">listen</span> <span class="mi">80</span><span class="p">;</span>
+    <span class="kn">server_name</span> <span class="s">argus.example.com</span><span class="p">;</span>
+    <span class="kn">return</span> <span class="mi">301</span> <span class="s">https://</span><span class="nv">$host$request_uri</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-nut-credential-security">🔑 NUT Credential Security</h2>
+
+<p>NUT username and password (<code class="language-plaintext highlighter-rouge">NUT_USERNAME</code>, <code class="language-plaintext highlighter-rouge">NUT_PASSWORD</code>) are transmitted in plaintext over
+the NUT TCP protocol. Mitigations:</p>
+
+<ul>
+  <li>Keep NUT and Argus on the same private network or Docker bridge</li>
+  <li>Use a dedicated read-only NUT user (<code class="language-plaintext highlighter-rouge">upsmon</code>) with minimal permissions</li>
+  <li>Do not expose port 3493 to the public internet</li>
+</ul>
+
+<p><strong>Minimal NUT <code class="language-plaintext highlighter-rouge">upsd.users</code> entry:</strong></p>
+
+<div class="language-ini highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nn">[argus]</span><span class="w">
+  </span><span class="py">password</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">&lt;strong-random-password&gt;</span>
+<span class="w">  </span><span class="na">upsmon</span><span class="w"> </span><span class="na">primary</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="-snmpv3-security">📡 SNMPv3 Security</h2>
+
+<p>For SNMP devices, prefer SNMPv3 with authentication and privacy encryption over the
+default community-string-based v2c:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">SNMP_VERSION</span><span class="o">=</span>3
+<span class="nv">SNMP_V3_USERNAME</span><span class="o">=</span>argus-monitor
+<span class="nv">SNMP_V3_AUTH_PROTOCOL</span><span class="o">=</span>SHA          <span class="c"># stronger than MD5</span>
+<span class="nv">SNMP_V3_AUTH_KEY</span><span class="o">=</span>&lt;strong-key&gt;
+<span class="nv">SNMP_V3_PRIV_PROTOCOL</span><span class="o">=</span>AES          <span class="c"># stronger than DES</span>
+<span class="nv">SNMP_V3_PRIV_KEY</span><span class="o">=</span>&lt;strong-key&gt;
+</code></pre></div></div>
+
+<p>Do not store these values in version-controlled files — use Docker secrets or a secrets manager.</p>
+
+<hr />
+
+<h2 id="-reporting-vulnerabilities">📢 Reporting Vulnerabilities</h2>
+
+<p>Please report security vulnerabilities privately via the process described in
+<a href="https://github.com/fabell4/argus/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/argus" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Security Guide
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

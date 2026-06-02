@@ -3,7 +3,6 @@ layout: default
 title: "Observability"
 ---
 
-# 📊 Observability — Metrics & Logs
 
 Argus supports two patterns for shipping metrics and logs to Grafana, Grafana Cloud, or a
 self-hosted Grafana stack.  Both are optional and can be mixed: for example, you might send

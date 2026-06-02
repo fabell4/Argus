@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Observability — Argus Documentation</title>
+  <!-- SEO tag plugin -->
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Observability | Argus Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Observability" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<link rel="canonical" href="http://localhost:4002/observability.html" />
+<meta property="og:url" content="http://localhost:4002/observability.html" />
+<meta property="og:site_name" content="Argus Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Observability" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration","headline":"Observability","url":"http://localhost:4002/observability.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration">
+
+<title>
+  
+    Observability — Argus Documentation
+  
+</title>
+
+<!-- Favicon — add your icon to assets/img/favicon.png to enable -->
+
+
+
+<link rel="icon" type="image/png" href="/assets/argus.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<!-- Rouge syntax highlight (dark theme override handled in _sass/_code.scss) -->
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="http://localhost:4002" class="nav-brand">
+    <span class="brand-name">
+      Argus
+      <span>Documentation</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/observability"
+                 >
+                Observability
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/CODE-REVIEW-POLICY"
+                 >
+                Code Review Policy
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Observability</h1>
+
+            
+          </header>
+        
+
+        <p>Argus supports two patterns for shipping metrics and logs to Grafana, Grafana Cloud, or a
+self-hosted Grafana stack.  Both are optional and can be mixed: for example, you might send
+metrics through Alloy but push logs directly to Loki.</p>
+
+<hr />
+
+<h2 id="choosing-a-mode">Choosing a mode</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th> </th>
+      <th><strong>Direct mode</strong></th>
+      <th><strong>Alloy relay mode</strong></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Argus pushes logs to</td>
+      <td>Loki directly</td>
+      <td>Alloy (Alloy forwards to Loki)</td>
+    </tr>
+    <tr>
+      <td>Metrics scraped by</td>
+      <td>Prometheus / Mimir directly</td>
+      <td>Alloy (Alloy remote-writes)</td>
+    </tr>
+    <tr>
+      <td>Extra component required</td>
+      <td>No</td>
+      <td>Alloy ≥ v1.0</td>
+    </tr>
+    <tr>
+      <td>Good for</td>
+      <td>Existing Prometheus + Loki setups</td>
+      <td>Grafana Cloud or Alloy-first stacks</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">grafana/argus.alloy</code> needed</td>
+      <td>No</td>
+      <td>Yes</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="mode-a--direct-no-alloy">Mode A — Direct (no Alloy)</h2>
+
+<p>Argus exports metrics and logs directly to Prometheus and Loki.  No additional file is needed.</p>
+
+<h3 id="1-enable-exporters">1. Enable exporters</h3>
+
+<p>In your <code class="language-plaintext highlighter-rouge">.env</code> or <code class="language-plaintext highlighter-rouge">docker-compose.yml</code> environment block:</p>
+
+<pre><code class="language-env"># Enable the Prometheus scrape endpoint and the Loki push exporter
+ENABLED_EXPORTERS=sqlite,prometheus
+PROMETHEUS_ENABLED=true
+PROMETHEUS_PORT=9090          # default — Argus /metrics is on this port
+
+# Point directly at your Loki instance
+LOKI_URL=http://loki:3100
+LOKI_JOB_LABEL=argus_power    # appears as the `job` stream label in Loki
+LOKI_TIMEOUT_SECONDS=5
+</code></pre>
+
+<h3 id="2-configure-a-prometheus-scrape-job">2. Configure a Prometheus scrape job</h3>
+
+<p>Add a job to your <code class="language-plaintext highlighter-rouge">prometheus.yml</code>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">scrape_configs</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">job_name</span><span class="pi">:</span> <span class="s">argus</span>
+    <span class="na">scrape_interval</span><span class="pi">:</span> <span class="s">1m</span>
+    <span class="na">static_configs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">targets</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">argus-scheduler:9090</span>   <span class="c1"># adjust host if Prometheus is outside Compose</span>
+</code></pre></div></div>
+
+<h3 id="3-exposed-metrics">3. Exposed metrics</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Labels</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_power_watts</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code>, <code class="language-plaintext highlighter-rouge">device_type</code></td>
+      <td>Instantaneous power draw (W)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_load_percent</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code>, <code class="language-plaintext highlighter-rouge">device_type</code></td>
+      <td>Device load (%)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_voltage_volts</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code>, <code class="language-plaintext highlighter-rouge">device_type</code></td>
+      <td>Input/output voltage (V)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_battery_percent</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code>, <code class="language-plaintext highlighter-rouge">device_type</code></td>
+      <td>UPS battery charge (%)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_runtime_seconds</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code>, <code class="language-plaintext highlighter-rouge">device_type</code></td>
+      <td>UPS estimated runtime (s)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_temperature_celsius</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code>, <code class="language-plaintext highlighter-rouge">device_type</code></td>
+      <td>Device temperature (°C)</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Label-free mode</strong> — If you have many devices and want to avoid high cardinality, set
+<code class="language-plaintext highlighter-rouge">PROMETHEUS_DISABLE_LABELS=true</code>.  All gauges will be published without <code class="language-plaintext highlighter-rouge">device_id</code> /
+<code class="language-plaintext highlighter-rouge">device_type</code> labels.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="mode-b--alloy-relay">Mode B — Alloy relay</h2>
+
+<p>Use this mode when you already run Grafana Alloy or prefer an Alloy-first pipeline (e.g.
+Grafana Cloud with the Alloy collector).  Alloy scrapes Argus and remote-writes metrics; it
+also opens a Loki-compatible HTTP endpoint so Argus can push logs through Alloy instead of
+directly to Loki.</p>
+
+<h3 id="architecture">Architecture</h3>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Argus scheduler
+  ├─ /metrics (Prometheus scrape endpoint)  ──────► Alloy ──► Prometheus / Mimir / Grafana Cloud
+  └─ LokiExporter → HTTP push to Alloy :12345  ──► Alloy ──► Loki / Grafana Cloud Logs
+</code></pre></div></div>
+
+<h3 id="1-copy-argusalloy-into-your-alloy-config-directory">1. Copy <code class="language-plaintext highlighter-rouge">argus.alloy</code> into your Alloy config directory</h3>
+
+<p>The file lives at <code class="language-plaintext highlighter-rouge">grafana/argus.alloy</code> in this repository.</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp </span>grafana/argus.alloy /etc/alloy/argus.alloy
+</code></pre></div></div>
+
+<h3 id="2-load-it-from-your-primary-alloy-config">2. Load it from your primary Alloy config</h3>
+
+<h4 id="option-a--glob-path-recommended">Option A — glob path (recommended)</h4>
+
+<p>Pass multiple paths to the Alloy binary so it loads every <code class="language-plaintext highlighter-rouge">.alloy</code> file in the directory:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># systemd unit or container command</span>
+alloy run /etc/alloy/<span class="k">*</span>.alloy
+</code></pre></div></div>
+
+<h4 id="option-b--explicit-import">Option B — explicit import</h4>
+
+<p>In your existing <code class="language-plaintext highlighter-rouge">config.alloy</code>:</p>
+
+<pre><code class="language-alloy">import.file "argus" {
+  filename = "/etc/alloy/argus.alloy"
+}
+</code></pre>
+
+<blockquote>
+  <p><strong>Component name collisions</strong> — <code class="language-plaintext highlighter-rouge">argus.alloy</code> uses the component labels <code class="language-plaintext highlighter-rouge">"argus"</code> and
+<code class="language-plaintext highlighter-rouge">"grafana"</code>.  If your existing config already has <code class="language-plaintext highlighter-rouge">prometheus.remote_write "grafana"</code> or
+<code class="language-plaintext highlighter-rouge">loki.write "grafana"</code>, either rename the components in <code class="language-plaintext highlighter-rouge">argus.alloy</code> or use the import
+approach (imports are namespaced and cannot collide).</p>
+</blockquote>
+
+<h3 id="3-set-environment-variables">3. Set environment variables</h3>
+
+<p>Alloy reads these at startup.  Set them in the Alloy service environment, a <code class="language-plaintext highlighter-rouge">.env</code> file, or
+Docker Compose:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Required</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ARGUS_METRICS_ADDRESS</code></td>
+      <td>No</td>
+      <td><code class="language-plaintext highlighter-rouge">argus-scheduler:9090</code></td>
+      <td><code class="language-plaintext highlighter-rouge">host:port</code> of Argus metrics endpoint</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">REMOTE_WRITE_URL</code></td>
+      <td><strong>Yes</strong></td>
+      <td>—</td>
+      <td>Prometheus remote write URL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">REMOTE_WRITE_USERNAME</code></td>
+      <td>No</td>
+      <td>—</td>
+      <td>Basic-auth username (Grafana Cloud: instance ID)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">REMOTE_WRITE_PASSWORD</code></td>
+      <td>No</td>
+      <td>—</td>
+      <td>Basic-auth password / API key</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOKI_PUSH_URL</code></td>
+      <td><strong>Yes</strong></td>
+      <td>—</td>
+      <td>Loki push URL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOKI_USERNAME</code></td>
+      <td>No</td>
+      <td>—</td>
+      <td>Loki basic-auth username</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOKI_PASSWORD</code></td>
+      <td>No</td>
+      <td>—</td>
+      <td>Loki basic-auth password / API key</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALLOY_CLUSTER_LABEL</code></td>
+      <td>No</td>
+      <td><code class="language-plaintext highlighter-rouge">argus</code></td>
+      <td>Value of the <code class="language-plaintext highlighter-rouge">cluster</code> external label</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Grafana Cloud example:</strong></p>
+
+<pre><code class="language-env">REMOTE_WRITE_URL=https://prometheus-prod-01-eu-west-0.grafana.net/api/prom/push
+REMOTE_WRITE_USERNAME=123456
+REMOTE_WRITE_PASSWORD=glc_xxxxxxxxxxxxxxxxxxxx
+
+LOKI_PUSH_URL=https://logs-prod-eu-west-0.grafana.net/loki/api/v1/push
+LOKI_USERNAME=123456
+LOKI_PASSWORD=glc_xxxxxxxxxxxxxxxxxxxx
+
+ALLOY_CLUSTER_LABEL=home-lab
+</code></pre>
+
+<p><strong>Self-hosted Mimir + Loki example:</strong></p>
+
+<pre><code class="language-env">REMOTE_WRITE_URL=http://mimir:9009/api/v1/push
+LOKI_PUSH_URL=http://loki:3100/loki/api/v1/push
+ALLOY_CLUSTER_LABEL=argus
+</code></pre>
+
+<h3 id="4-configure-argus-to-point-at-alloy">4. Configure Argus to point at Alloy</h3>
+
+<p>In your Argus <code class="language-plaintext highlighter-rouge">.env</code>:</p>
+
+<pre><code class="language-env">ENABLED_EXPORTERS=sqlite,prometheus
+PROMETHEUS_ENABLED=true
+
+# Point LokiExporter at Alloy's receiver port, NOT at real Loki
+LOKI_URL=http://alloy:12345
+</code></pre>
+
+<p>If Alloy runs in a separate container, expose port 12345:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># docker-compose.override.yml</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">alloy</span><span class="pi">:</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">12345:12345"</span>
+</code></pre></div></div>
+
+<h3 id="5-reload-alloy">5. Reload Alloy</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># systemd</span>
+<span class="nb">sudo </span>systemctl reload alloy
+
+<span class="c"># Docker</span>
+docker compose restart alloy
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="logs-only-or-metrics-only-alloy">Logs-only or metrics-only Alloy</h2>
+
+<p><code class="language-plaintext highlighter-rouge">argus.alloy</code> can be trimmed to only what you need.</p>
+
+<p><strong>Metrics only (no log relay)</strong> — delete the <code class="language-plaintext highlighter-rouge">loki.source.api</code> and <code class="language-plaintext highlighter-rouge">loki.write</code> blocks and
+point <code class="language-plaintext highlighter-rouge">LOKI_URL</code> directly at Loki.</p>
+
+<p><strong>Logs only (no Alloy scraping)</strong> — delete the <code class="language-plaintext highlighter-rouge">prometheus.scrape</code> and
+<code class="language-plaintext highlighter-rouge">prometheus.remote_write</code> blocks and add a standard Prometheus scrape job as shown in Mode A.</p>
+
+<hr />
+
+<h2 id="verifying-the-pipeline">Verifying the pipeline</h2>
+
+<h3 id="check-alloy-component-health">Check Alloy component health</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Alloy UI (default port 12345 conflicts — Alloy's own UI is on 12345 by default.</span>
+<span class="c"># If using the log receiver, set --server.http.listen-addr to a different port,</span>
+<span class="c"># e.g. --server.http.listen-addr=0.0.0.0:12346)</span>
+open http://alloy-host:12346
+</code></pre></div></div>
+
+<p>Navigate to <strong>Graph</strong> to see whether <code class="language-plaintext highlighter-rouge">prometheus.scrape.argus</code> and <code class="language-plaintext highlighter-rouge">loki.source.api.argus_receiver</code>
+are healthy (green).</p>
+
+<h3 id="verify-metrics-are-arriving">Verify metrics are arriving</h3>
+
+<p>In Grafana Explore, run:</p>
+
+<pre><code class="language-promql">{job="argus"}
+argus_power_watts
+</code></pre>
+
+<h3 id="verify-logs-are-arriving">Verify logs are arriving</h3>
+
+<p>In Grafana Explore (Loki datasource):</p>
+
+<pre><code class="language-logql">{job="argus_power"}
+</code></pre>
+
+<hr />
+
+<h2 id="grafana-dashboard">Grafana dashboard</h2>
+
+<p>A pre-built dashboard is included at <code class="language-plaintext highlighter-rouge">grafana/argus-power-monitoring.json</code>.  Import it via
+<strong>Dashboards → Import</strong> and select your Prometheus and Loki datasources.</p>
+
+<hr />
+
+<h2 id="port-reference">Port reference</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Port</th>
+      <th>Service</th>
+      <th>Protocol</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>9090</td>
+      <td>Argus scheduler</td>
+      <td>HTTP</td>
+      <td>Prometheus <code class="language-plaintext highlighter-rouge">/metrics</code> scrape endpoint</td>
+    </tr>
+    <tr>
+      <td>9100</td>
+      <td>Argus scheduler</td>
+      <td>HTTP</td>
+      <td>Health endpoint (<code class="language-plaintext highlighter-rouge">/health</code>)</td>
+    </tr>
+    <tr>
+      <td>8000</td>
+      <td>Argus API</td>
+      <td>HTTP</td>
+      <td>REST API + React frontend</td>
+    </tr>
+    <tr>
+      <td>12345</td>
+      <td>Alloy log receiver</td>
+      <td>HTTP</td>
+      <td>Loki-compatible push endpoint (Alloy relay mode only)</td>
+    </tr>
+  </tbody>
+</table>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/argus" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Observability
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

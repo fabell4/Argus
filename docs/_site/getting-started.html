@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Getting Started — Argus Documentation</title>
+  <!-- SEO tag plugin -->
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Getting Started | Argus Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Getting Started" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<link rel="canonical" href="http://localhost:4002/getting-started.html" />
+<meta property="og:url" content="http://localhost:4002/getting-started.html" />
+<meta property="og:site_name" content="Argus Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Getting Started" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration","headline":"Getting Started","url":"http://localhost:4002/getting-started.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration">
+
+<title>
+  
+    Getting Started — Argus Documentation
+  
+</title>
+
+<!-- Favicon — add your icon to assets/img/favicon.png to enable -->
+
+
+
+<link rel="icon" type="image/png" href="/assets/argus.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<!-- Rouge syntax highlight (dark theme override handled in _sass/_code.scss) -->
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="http://localhost:4002" class="nav-brand">
+    <span class="brand-name">
+      Argus
+      <span>Documentation</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/observability"
+                 >
+                Observability
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/CODE-REVIEW-POLICY"
+                 >
+                Code Review Policy
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Getting Started</h1>
+
+            
+          </header>
+        
+
+        <p>This guide covers deployment, configuration, and first steps with Argus.</p>
+
+<hr />
+
+<h2 id="-quick-start-with-docker-compose">🐳 Quick Start with Docker Compose</h2>
+
+<p>The fastest way to get Argus running:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Create docker-compose.yml</span>
+curl <span class="nt">-o</span> docker-compose.yml <span class="se">\</span>
+  https://raw.githubusercontent.com/fabell4/argus/main/docker-compose.yml
+
+<span class="c"># Create .env file</span>
+curl <span class="nt">-o</span> .env <span class="se">\</span>
+  https://raw.githubusercontent.com/fabell4/argus/main/.env.example
+
+<span class="c"># Edit NUT_HOST to point at your NUT daemon (see note below)</span>
+<span class="c"># Start containers</span>
+docker compose up <span class="nt">-d</span>
+
+<span class="c"># Access the UI</span>
+open http://localhost:8000
+</code></pre></div></div>
+
+<blockquote>
+  <p><strong>Docker networking note:</strong> <code class="language-plaintext highlighter-rouge">NUT_HOST=localhost</code> refers to the Argus container itself,
+not your host machine. Use your host’s LAN IP, <code class="language-plaintext highlighter-rouge">host.docker.internal</code> (macOS/Windows),
+or the Docker service name if NUT runs in the same compose stack.</p>
+</blockquote>
+
+<p><img src="/assets/Argus-devices.png" alt="Argus device list" /></p>
+
+<hr />
+
+<h2 id="-self-hosting-guide">🐳 Self-Hosting Guide</h2>
+
+<p>Argus runs as two containers from the same Docker image:</p>
+
+<ul>
+  <li><strong>argus-scheduler</strong> — Background worker that polls devices and dispatches telemetry</li>
+  <li><strong>argus-api</strong> — FastAPI REST API serving the React frontend</li>
+</ul>
+
+<h3 id="minimal-docker-composeyml">Minimal docker-compose.yml</h3>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
+  <span class="na">argus-scheduler</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">registry.greenflametech.net/argus:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">argus-scheduler</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">unless-stopped</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="s">python -m src.main</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">argus-data:/app/data</span>
+      <span class="pi">-</span> <span class="s">argus-logs:/app/logs</span>
+    <span class="na">extra_hosts</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">host.docker.internal:host-gateway"</span>   <span class="c1"># Linux: reach host NUT daemon</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="na">NUT_HOST</span><span class="pi">:</span> <span class="s2">"</span><span class="s">host.docker.internal"</span>         <span class="c1"># adjust to your NUT address</span>
+      <span class="na">NUT_AUTO_DISCOVER</span><span class="pi">:</span> <span class="s2">"</span><span class="s">true"</span>
+      <span class="na">POLL_INTERVAL_MINUTES</span><span class="pi">:</span> <span class="s2">"</span><span class="s">5"</span>
+      <span class="na">ENABLED_EXPORTERS</span><span class="pi">:</span> <span class="s2">"</span><span class="s">sqlite,prometheus"</span>
+      <span class="na">PROMETHEUS_PORT</span><span class="pi">:</span> <span class="s2">"</span><span class="s">9090"</span>
+    <span class="na">env_file</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">path</span><span class="pi">:</span> <span class="s">.env</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="kc">false</span>
+
+  <span class="na">argus-api</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">registry.greenflametech.net/argus:latest</span>
+    <span class="na">container_name</span><span class="pi">:</span> <span class="s">argus-api</span>
+    <span class="na">restart</span><span class="pi">:</span> <span class="s">unless-stopped</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="s">uvicorn src.api.main:app --host 0.0.0.0 --port </span><span class="m">8000</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">8000:8000"</span>
+    <span class="na">volumes</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">argus-data:/app/data</span>
+    <span class="na">depends_on</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s">argus-scheduler</span>
+    <span class="na">env_file</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">path</span><span class="pi">:</span> <span class="s">.env</span>
+        <span class="na">required</span><span class="pi">:</span> <span class="kc">false</span>
+
+<span class="na">volumes</span><span class="pi">:</span>
+  <span class="na">argus-data</span><span class="pi">:</span>
+  <span class="na">argus-logs</span><span class="pi">:</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="️-environment-variables">⚙️ Environment Variables</h2>
+
+<p>Copy <code class="language-plaintext highlighter-rouge">.env.example</code> to <code class="language-plaintext highlighter-rouge">.env</code> and adjust as needed.</p>
+
+<h3 id="application">Application</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">APP_ENV</code></td>
+      <td><code class="language-plaintext highlighter-rouge">production</code></td>
+      <td>Runtime environment (<code class="language-plaintext highlighter-rouge">production</code> / <code class="language-plaintext highlighter-rouge">development</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOG_LEVEL</code></td>
+      <td><code class="language-plaintext highlighter-rouge">INFO</code></td>
+      <td>Log verbosity (<code class="language-plaintext highlighter-rouge">DEBUG</code> / <code class="language-plaintext highlighter-rouge">INFO</code> / <code class="language-plaintext highlighter-rouge">WARNING</code> / <code class="language-plaintext highlighter-rouge">ERROR</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">TZ</code></td>
+      <td><code class="language-plaintext highlighter-rouge">UTC</code></td>
+      <td>IANA timezone (e.g. <code class="language-plaintext highlighter-rouge">America/New_York</code>)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="polling">Polling</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">POLL_INTERVAL_MINUTES</code></td>
+      <td><code class="language-plaintext highlighter-rouge">5</code></td>
+      <td>How often to poll all devices</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">POLL_ON_STARTUP</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Run an immediate poll when the scheduler starts</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-nut-network-ups-tools">🔌 NUT (Network UPS Tools)</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NUT_HOST</code></td>
+      <td><code class="language-plaintext highlighter-rouge">localhost</code></td>
+      <td>Hostname or IP of the NUT daemon</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NUT_PORT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">3493</code></td>
+      <td>NUT TCP port</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NUT_USERNAME</code></td>
+      <td><em>(empty)</em></td>
+      <td>NUT authentication username</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NUT_PASSWORD</code></td>
+      <td><em>(empty)</em></td>
+      <td>NUT authentication password</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NUT_UPS_NAME</code></td>
+      <td><code class="language-plaintext highlighter-rouge">ups</code></td>
+      <td>UPS device name (ignored when <code class="language-plaintext highlighter-rouge">NUT_AUTO_DISCOVER=true</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NUT_AUTO_DISCOVER</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Auto-discover all UPS units from the NUT daemon</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-snmp">📡 SNMP</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_COMMUNITY</code></td>
+      <td><code class="language-plaintext highlighter-rouge">public</code></td>
+      <td>SNMPv1/v2c community string</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_VERSION</code></td>
+      <td><code class="language-plaintext highlighter-rouge">2c</code></td>
+      <td>SNMP version (<code class="language-plaintext highlighter-rouge">1</code> / <code class="language-plaintext highlighter-rouge">2c</code> / <code class="language-plaintext highlighter-rouge">3</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_TIMEOUT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">5</code></td>
+      <td>Per-request timeout in seconds</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_RETRIES</code></td>
+      <td><code class="language-plaintext highlighter-rouge">2</code></td>
+      <td>Retry count per request</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_V3_USERNAME</code></td>
+      <td><em>(empty)</em></td>
+      <td>SNMPv3 username (leave blank for v1/v2c)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_V3_AUTH_PROTOCOL</code></td>
+      <td><code class="language-plaintext highlighter-rouge">MD5</code></td>
+      <td>SNMPv3 auth protocol (<code class="language-plaintext highlighter-rouge">MD5</code> / <code class="language-plaintext highlighter-rouge">SHA</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_V3_AUTH_KEY</code></td>
+      <td><em>(empty)</em></td>
+      <td>SNMPv3 authentication key</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_V3_PRIV_PROTOCOL</code></td>
+      <td><code class="language-plaintext highlighter-rouge">DES</code></td>
+      <td>SNMPv3 privacy protocol (<code class="language-plaintext highlighter-rouge">DES</code> / <code class="language-plaintext highlighter-rouge">AES</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP_V3_PRIV_KEY</code></td>
+      <td><em>(empty)</em></td>
+      <td>SNMPv3 privacy key</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-exporters">📤 Exporters</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">sqlite</code></td>
+      <td>Comma-separated list: <code class="language-plaintext highlighter-rouge">sqlite</code>, <code class="language-plaintext highlighter-rouge">prometheus</code>, <code class="language-plaintext highlighter-rouge">influxdb</code>, <code class="language-plaintext highlighter-rouge">loki</code>, <code class="language-plaintext highlighter-rouge">csv</code>, <code class="language-plaintext highlighter-rouge">energy</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SQLITE_PATH</code></td>
+      <td><code class="language-plaintext highlighter-rouge">data/argus.db</code></td>
+      <td>SQLite database path</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SQLITE_RETENTION_DAYS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">90</code></td>
+      <td>Delete snapshots older than this many days</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SQLITE_MAX_ROWS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">100000</code></td>
+      <td>Hard cap on snapshot rows</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">9090</code></td>
+      <td>Prometheus metrics port (scheduler container)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">PROMETHEUS_DISABLE_LABELS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">false</code></td>
+      <td>Reduce cardinality by omitting device labels</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">INFLUXDB_URL</code></td>
+      <td><em>(empty)</em></td>
+      <td>InfluxDB v2 URL (e.g. <code class="language-plaintext highlighter-rouge">http://influxdb:8086</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">INFLUXDB_TOKEN</code></td>
+      <td><em>(empty)</em></td>
+      <td>InfluxDB API token</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">INFLUXDB_ORG</code></td>
+      <td><em>(empty)</em></td>
+      <td>InfluxDB organisation</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">INFLUXDB_BUCKET</code></td>
+      <td><code class="language-plaintext highlighter-rouge">argus</code></td>
+      <td>InfluxDB bucket name</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOKI_URL</code></td>
+      <td><em>(empty)</em></td>
+      <td>Loki push API URL (e.g. <code class="language-plaintext highlighter-rouge">http://loki:3100</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">LOKI_JOB_LABEL</code></td>
+      <td><code class="language-plaintext highlighter-rouge">argus_power</code></td>
+      <td>Loki job label</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CSV_PATH</code></td>
+      <td><code class="language-plaintext highlighter-rouge">data/argus.csv</code></td>
+      <td>CSV output path</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CSV_MAX_SIZE_MB</code></td>
+      <td><code class="language-plaintext highlighter-rouge">10</code></td>
+      <td>Roll CSV file when it exceeds this size</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">CSV_RETENTION_DAYS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">30</code></td>
+      <td>Remove CSV rows older than this many days</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ENERGY_RATE_PER_KWH</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code></td>
+      <td>Cost per kWh for energy cost calculations (0 = disabled)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-event-thresholds">⚡ Event Thresholds</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">DEVICE_OFFLINE_MISSED_POLLS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">3</code></td>
+      <td>Missed polls before a <code class="language-plaintext highlighter-rouge">device_offline</code> event fires</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SHUTDOWN_BATTERY_FLOOR_PCT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">5</code></td>
+      <td>Battery % that triggers <code class="language-plaintext highlighter-rouge">shutdown_initiated</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">THRESHOLD_LOAD_PERCENT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">90</code></td>
+      <td>Load % that triggers a <code class="language-plaintext highlighter-rouge">threshold_crossed</code> event</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">THRESHOLD_TEMP_CELSIUS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">50</code></td>
+      <td>Temperature (°C) that triggers a <code class="language-plaintext highlighter-rouge">threshold_crossed</code> event</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="api">API</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">API_HOST</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0.0.0.0</code></td>
+      <td>Bind address for the API server</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">API_PORT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">8000</code></td>
+      <td>API server port</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">API_KEY</code></td>
+      <td><em>(empty)</em></td>
+      <td>Secret API key — minimum 32 characters; leave blank to disable auth</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALLOWED_ORIGINS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">http://localhost:3000,http://localhost:5173</code></td>
+      <td>CORS allowed origins</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code></td>
+      <td><code class="language-plaintext highlighter-rouge">60</code></td>
+      <td>Max requests per 60-second window per API key</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-health-server">🩺 Health Server</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">HEALTH_PORT</code></td>
+      <td><code class="language-plaintext highlighter-rouge">9100</code></td>
+      <td>Scheduler health-check HTTP port</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-alerting">🔔 Alerting</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_FAILURE_THRESHOLD</code></td>
+      <td><code class="language-plaintext highlighter-rouge">3</code></td>
+      <td>Consecutive failures before alerting</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_SECONDS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">3600</code></td>
+      <td>Minimum seconds between repeated alerts</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_ON_BATTERY</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Alert when UPS switches to battery</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_ON_BATTERY_LOW</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Alert on low battery condition</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_ON_DEVICE_OFFLINE</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Alert when a device goes offline</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_RECOVERY_NOTIFICATIONS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Send recovery notifications when conditions clear</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">WEBHOOK_URL</code></td>
+      <td><em>(empty)</em></td>
+      <td>Generic webhook URL (must be HTTPS)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">GOTIFY_URL</code></td>
+      <td><em>(empty)</em></td>
+      <td>Gotify server URL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">GOTIFY_TOKEN</code></td>
+      <td><em>(empty)</em></td>
+      <td>Gotify application token</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">GOTIFY_PRIORITY</code></td>
+      <td><code class="language-plaintext highlighter-rouge">0</code></td>
+      <td>Gotify message priority</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NTFY_URL</code></td>
+      <td><em>(empty)</em></td>
+      <td>ntfy server URL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NTFY_TOPIC</code></td>
+      <td><em>(empty)</em></td>
+      <td>ntfy topic</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NTFY_TOKEN</code></td>
+      <td><em>(empty)</em></td>
+      <td>ntfy authentication token</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NTFY_PRIORITY</code></td>
+      <td><em>(empty)</em></td>
+      <td>ntfy message priority</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NTFY_TAGS</code></td>
+      <td><em>(empty)</em></td>
+      <td>Comma-separated ntfy tags</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">APPRISE_URL</code></td>
+      <td><em>(empty)</em></td>
+      <td>Apprise API URL</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><img src="/assets/Argus-settings.png" alt="Argus settings" /></p>
+
+<hr />
+
+<h2 id="-nut-prerequisites">🔌 NUT Prerequisites</h2>
+
+<p>Argus connects to an existing NUT daemon — it does not ship NUT itself.</p>
+
+<h3 id="-installing-nut">📦 Installing NUT</h3>
+
+<p><strong>Debian/Ubuntu:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>apt <span class="nb">install </span>nut nut-client
+</code></pre></div></div>
+
+<p><strong>Home Assistant OS:</strong> Install the <strong>Network UPS Tools</strong> add-on from the add-on store.</p>
+
+<p><strong>Docker (community image):</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">services</span><span class="pi">:</span>
+  <span class="na">nut-upsd</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">instantlinux/nut-upsd:latest</span>
+    <span class="na">devices</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">/dev/bus/usb:/dev/bus/usb"</span>
+    <span class="na">environment</span><span class="pi">:</span>
+      <span class="na">API_USER</span><span class="pi">:</span> <span class="s">monuser</span>
+      <span class="na">API_PASSWORD</span><span class="pi">:</span> <span class="s">secret</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">3493:3493"</span>
+</code></pre></div></div>
+
+<h3 id="-verifying-nut-connectivity">✅ Verifying NUT Connectivity</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># List all UPS units on the NUT daemon</span>
+upsc <span class="nt">-l</span> &lt;nut-host&gt;
+
+<span class="c"># Query a specific UPS</span>
+upsc ups@&lt;nut-host&gt;
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="️-local-development">🛠️ Local Development</h2>
+
+<h3 id="backend">Backend</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>python <span class="nt">-m</span> venv .venv
+.venv<span class="se">\S</span>cripts<span class="se">\a</span>ctivate        <span class="c"># Windows</span>
+<span class="c"># source .venv/bin/activate   # Linux/macOS</span>
+pip <span class="nb">install</span> <span class="nt">-r</span> requirements-dev.txt
+
+<span class="c"># Scheduler process</span>
+python <span class="nt">-m</span> src.main
+
+<span class="c"># API process (separate terminal)</span>
+uvicorn src.api.main:app <span class="nt">--reload</span> <span class="nt">--port</span> 8000
+</code></pre></div></div>
+
+<h3 id="frontend">Frontend</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>frontend
+npm ci
+npm run dev   <span class="c"># Vite dev server proxies /api/* to http://localhost:8000</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-running-tests">🧪 Running Tests</h2>
+
+<h3 id="python">Python</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pytest <span class="nt">--cov</span><span class="o">=</span>src <span class="nt">--cov-report</span><span class="o">=</span>term-missing <span class="nt">-q</span>
+</code></pre></div></div>
+
+<h3 id="frontend-1">Frontend</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cd </span>frontend
+npm run <span class="nb">test</span>:coverage
+</code></pre></div></div>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/argus" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Getting Started
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

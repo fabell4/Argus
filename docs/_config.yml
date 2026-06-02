@@ -1,33 +1,31 @@
-# Jekyll configuration for GitHub Pages
+# Jekyll configuration for Argus Docs
 
 title: Argus Documentation
 description: Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration
 url: https://argus-docs.greenflametech.com
 baseurl: ""
 
-remote_theme: fabell4/green-flame-jekyll
+favicon: /assets/argus.png
 
-# Navigation
-navigation:
+# Top navbar links
+nav_links:
   - title: Home
     url: /
   - title: Getting Started
     url: /getting-started
-  - title: Architecture
-    url: /architecture
   - title: API Reference
     url: /api-reference
-  - title: Alerts
-    url: /alerts
-  - title: Security Guide
+  - title: Security
     url: /security
-  - title: Runbook
-    url: /runbook
+
+# Footer links
+footer:
+  github: https://github.com/fabell4/argus
+  linkedin: https://www.linkedin.com/in/alex-bell-iv
+  main_site: https://www.greenflametech.com
 
 # GitHub metadata
 repository: fabell4/argus
-github:
-  repository_url: https://github.com/fabell4/argus
 
 # Build settings
 markdown: kramdown
@@ -37,6 +35,14 @@ kramdown:
 
 # Plugins
 plugins:
+  - jekyll-seo-tag
+  - jekyll-sitemap
   - jekyll-github-metadata
   - jekyll-relative-links
-  - jekyll-remote-theme
+
+exclude:
+  - zeniscal.yml
+  - Gemfile
+  - Gemfile.lock
+  - grafana-dashboard.json
+  - "*.json"

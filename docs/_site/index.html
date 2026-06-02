@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Argus Documentation</title>
+  <!-- SEO tag plugin -->
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Argus Documentation | Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Argus Documentation" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<link rel="canonical" href="http://localhost:4002/" />
+<meta property="og:url" content="http://localhost:4002/" />
+<meta property="og:site_name" content="Argus Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Argus Documentation" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebSite","description":"Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration","headline":"Argus Documentation","name":"Argus Documentation","url":"http://localhost:4002/"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration">
+
+<title>
+  
+    Argus Documentation
+  
+</title>
+
+<!-- Favicon — add your icon to assets/img/favicon.png to enable -->
+
+
+
+<link rel="icon" type="image/png" href="/assets/argus.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<!-- Rouge syntax highlight (dark theme override handled in _sass/_code.scss) -->
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="http://localhost:4002" class="nav-brand">
+    <span class="brand-name">
+      Argus
+      <span>Documentation</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           class="active" aria-current="page">
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <!-- Hero section for doc home page -->
+  <section class="doc-hero">
+    <div class="doc-hero__inner">
+      <div class="doc-hero__eyebrow">Documentation</div>
+      <h1 class="doc-hero__title">Argus Docs</h1>
+      <p class="doc-hero__subtitle">Self-hosted power monitoring for UPS devices (NUT), PDUs, and sensors (SNMP) with multi-destination export, event-driven alerting, and full observability stack integration.</p>
+
+      
+        <div class="doc-hero__ctas">
+          
+            <a href="/getting-started"
+               class="btn btn--primary">
+              Get Started
+            </a>
+          
+            <a href="https://github.com/fabell4/argus"
+               class="btn btn--outline">
+              View on GitHub
+            </a>
+          
+        </div>
+      
+    </div>
+  </section>
+
+  <!-- Quick links grid -->
+  
+    <section class="quick-links">
+      <div class="quick-links__inner">
+        
+          <a href="/getting-started" class="quick-card">
+            <div class="quick-card__icon">🚀</div>
+            <div class="quick-card__title">Getting Started</div>
+            <div class="quick-card__desc">Deploy with Docker, configure NUT/SNMP, and run your first poll cycle.</div>
+          </a>
+        
+          <a href="/architecture" class="quick-card">
+            <div class="quick-card__icon">🏗️</div>
+            <div class="quick-card__title">Architecture</div>
+            <div class="quick-card__desc">System design, data flow, and two-container deployment topology.</div>
+          </a>
+        
+          <a href="/api-reference" class="quick-card">
+            <div class="quick-card__icon">🔌</div>
+            <div class="quick-card__title">API Reference</div>
+            <div class="quick-card__desc">REST endpoints, authentication, and request/response examples.</div>
+          </a>
+        
+          <a href="/alerts" class="quick-card">
+            <div class="quick-card__icon">🔔</div>
+            <div class="quick-card__title">Alert Configuration</div>
+            <div class="quick-card__desc">Webhook, Gotify, ntfy, and Apprise notification setup.</div>
+          </a>
+        
+          <a href="/security" class="quick-card">
+            <div class="quick-card__icon">🔐</div>
+            <div class="quick-card__title">Security Guide</div>
+            <div class="quick-card__desc">API key auth, rate limiting, SSRF protection, and best practices.</div>
+          </a>
+        
+          <a href="/runbook" class="quick-card">
+            <div class="quick-card__icon">📖</div>
+            <div class="quick-card__title">Runbook</div>
+            <div class="quick-card__desc">Operational guide for diagnosing and resolving production issues.</div>
+          </a>
+        
+      </div>
+    </section>
+  
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 class="active" aria-current="page">
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/observability"
+                 >
+                Observability
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/CODE-REVIEW-POLICY"
+                 >
+                Code Review Policy
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+        <h2 id="quick-start">Quick Start</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1. Pull the compose file</span>
+curl <span class="nt">-o</span> docker-compose.yml <span class="se">\</span>
+  https://raw.githubusercontent.com/fabell4/argus/main/docker-compose.yml
+
+<span class="c"># 2. Create your .env</span>
+curl <span class="nt">-o</span> .env <span class="se">\</span>
+  https://raw.githubusercontent.com/fabell4/argus/main/.env.example
+
+<span class="c"># 3. Edit .env — set NUT_HOST to your NUT daemon address</span>
+<span class="c"># 4. Start</span>
+docker compose up <span class="nt">-d</span>
+
+<span class="c"># 5. Access the UI</span>
+open http://localhost:8000
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="key-features">Key Features</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Device Support</strong></td>
+      <td>UPS via NUT, PDUs and sensors via SNMP</td>
+    </tr>
+    <tr>
+      <td><strong>Auto Discovery</strong></td>
+      <td>Automatically discovers all UPS units from a NUT daemon</td>
+    </tr>
+    <tr>
+      <td><strong>Export Destinations</strong></td>
+      <td>SQLite, Prometheus, InfluxDB, Loki, CSV, energy accumulator</td>
+    </tr>
+    <tr>
+      <td><strong>Alert Providers</strong></td>
+      <td>Webhook, Gotify, ntfy, Apprise (100+ services)</td>
+    </tr>
+    <tr>
+      <td><strong>Security</strong></td>
+      <td>API key auth, per-key rate limiting, SSRF protection</td>
+    </tr>
+    <tr>
+      <td><strong>Frontend</strong></td>
+      <td>React + Vite UI with real-time charts and device dashboards</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>See <a href="/getting-started">Getting Started</a> for the full environment variable reference.</p>
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/argus" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Argus Documentation
+    </p>
+  </div>
+</footer>
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

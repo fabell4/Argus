@@ -1,79 +1,46 @@
 ---
-layout: default
+layout: home
 title: "Argus Documentation"
+description: "Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration"
+show_header: false
+
+hero_title: "Argus Docs"
+hero_subtitle: "Self-hosted power monitoring for UPS devices (NUT), PDUs, and sensors (SNMP) with multi-destination export, event-driven alerting, and full observability stack integration."
+hero_cta:
+  - label: "Get Started"
+    url: /getting-started
+    primary: true
+  - label: "View on GitHub"
+    url: https://github.com/fabell4/argus
+
+quick_links:
+  - title: "Getting Started"
+    url: /getting-started
+    icon: "🚀"
+    description: "Deploy with Docker, configure NUT/SNMP, and run your first poll cycle."
+  - title: "Architecture"
+    url: /architecture
+    icon: "🏗️"
+    description: "System design, data flow, and two-container deployment topology."
+  - title: "API Reference"
+    url: /api-reference
+    icon: "🔌"
+    description: "REST endpoints, authentication, and request/response examples."
+  - title: "Alert Configuration"
+    url: /alerts
+    icon: "🔔"
+    description: "Webhook, Gotify, ntfy, and Apprise notification setup."
+  - title: "Security Guide"
+    url: /security
+    icon: "🔐"
+    description: "API key auth, rate limiting, SSRF protection, and best practices."
+  - title: "Runbook"
+    url: /runbook
+    icon: "📖"
+    description: "Operational guide for diagnosing and resolving production issues."
 ---
 
-<img src="assets/argus.png" width="80" alt="Argus logo">
-
-**Argus** is a self-hosted power monitoring platform for UPS devices (via NUT), PDUs, and sensors
-(via SNMP). It periodically polls your power infrastructure, exports telemetry to multiple
-destinations, fires structured events on state transitions, and sends alert notifications through
-your preferred channels.
-
-![Argus dashboard](assets/Argus-home.png)
-
----
-
-## ✨ Features
-
-### 🚀 Core Capabilities
-
-- **Multi-Device Polling** — NUT (UPS/battery) and SNMP (PDU/sensor) with configurable intervals
-- **Automatic Discovery** — Auto-discovers all UPS units from a NUT daemon
-- **Multi-Destination Export** — SQLite, Prometheus, InfluxDB, Loki, CSV, Energy accumulator
-- **Modern Web UI** — React + Vite frontend with real-time charts and device dashboards
-- **REST API** — Full-featured FastAPI backend for automation and integration
-- **Alert Notifications** — Webhook, Gotify, ntfy, Apprise (100+ services)
-- **Production-Ready** — Docker deployment, health checks, data retention policies
-
-### 📊 Data Collection
-
-Each poll cycle captures per-device:
-
-- Power draw (watts)
-- Load percentage
-- Input/output voltage
-- Battery charge percentage
-- Estimated runtime remaining (seconds)
-- UPS status flags (`OL`, `OB`, `LB`, `CHRG`, …)
-- Temperature (°C, where available)
-
-### 🔔 Event System
-
-Argus detects and records state transitions as structured events:
-
-| Event | Description |
-| --- | --- |
-| `on_battery` | UPS switched to battery power |
-| `power_restored` | AC power returned |
-| `battery_low` | Battery charge below low threshold |
-| `shutdown_initiated` | Battery floor reached — graceful shutdown triggered |
-| `threshold_crossed` | Load % or temperature exceeded configured limit |
-| `device_offline` | Device missed consecutive poll attempts |
-| `device_online` | Device reachable again after offline period |
-
-### 🚨 Alert System
-
-Send notifications on critical power events:
-
-- Configurable failure threshold and cooldown
-- Per-severity routing (`low` / `medium` / `high` / `critical`)
-- Recovery notifications when conditions clear
-- Multiple provider support (Webhook, Gotify, ntfy, Apprise)
-- Test notifications before deploying
-
-### 🔒 Security
-
-- API key authentication with timing-attack prevention
-- Per-key rate limiting with sliding windows
-- SSRF protection on alert URLs (HTTPS-only)
-- Request size limits
-- Security headers (X-Frame-Options, CSP, etc.)
-- Input validation on all endpoints
-
----
-
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # 1. Pull the compose file
@@ -94,11 +61,15 @@ open http://localhost:8000
 
 ---
 
-## 📚 Documentation
+## Key Features
 
-- [Getting Started](getting-started) — Docker deployment, configuration, first steps
-- [Architecture](architecture) — System design, data flow, deployment topology
-- [API Reference](api-reference) — Complete REST API documentation
-- [Alerts](alerts) — Notification provider setup guides
-- [Security Guide](security) — Authentication, rate limiting, hardening
-- [Runbook](runbook) — Operational guidance, log patterns, troubleshooting
+| Feature | Details |
+| --- | --- |
+| **Device Support** | UPS via NUT, PDUs and sensors via SNMP |
+| **Auto Discovery** | Automatically discovers all UPS units from a NUT daemon |
+| **Export Destinations** | SQLite, Prometheus, InfluxDB, Loki, CSV, energy accumulator |
+| **Alert Providers** | Webhook, Gotify, ntfy, Apprise (100+ services) |
+| **Security** | API key auth, per-key rate limiting, SSRF protection |
+| **Frontend** | React + Vite UI with real-time charts and device dashboards |
+
+See [Getting Started](/getting-started) for the full environment variable reference.

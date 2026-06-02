@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>API Reference — Argus Documentation</title>
+  <!-- SEO tag plugin -->
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>API Reference | Argus Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="API Reference" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<link rel="canonical" href="http://localhost:4002/api-reference.html" />
+<meta property="og:url" content="http://localhost:4002/api-reference.html" />
+<meta property="og:site_name" content="Argus Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="API Reference" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration","headline":"API Reference","url":"http://localhost:4002/api-reference.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration">
+
+<title>
+  
+    API Reference — Argus Documentation
+  
+</title>
+
+<!-- Favicon — add your icon to assets/img/favicon.png to enable -->
+
+
+
+<link rel="icon" type="image/png" href="/assets/argus.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<!-- Rouge syntax highlight (dark theme override handled in _sass/_code.scss) -->
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="http://localhost:4002" class="nav-brand">
+    <span class="brand-name">
+      Argus
+      <span>Documentation</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/observability"
+                 >
+                Observability
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/CODE-REVIEW-POLICY"
+                 >
+                Code Review Policy
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>API Reference</h1>
+
+            
+          </header>
+        
+
+        <p>Complete REST API documentation for the Argus FastAPI backend.</p>
+
+<hr />
+
+<h2 id="-base-url">🔗 Base URL</h2>
+
+<div class="language-text highlighter-rouge"><div class="highlight"><pre class="highlight"><code>http://localhost:8000/api
+</code></pre></div></div>
+
+<p>Replace <code class="language-plaintext highlighter-rouge">localhost:8000</code> with your server address.</p>
+
+<hr />
+
+<h2 id="-authentication">🔑 Authentication</h2>
+
+<h3 id="api-key-authentication">API Key Authentication</h3>
+
+<p>When <code class="language-plaintext highlighter-rouge">API_KEY</code> is set, <strong>protected endpoints</strong> require an <code class="language-plaintext highlighter-rouge">X-Api-Key</code> header:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8000/api/trigger <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key-here"</span>
+</code></pre></div></div>
+
+<p><strong>Public endpoints</strong> (most GET requests) do not require authentication.</p>
+
+<h3 id="generate-a-secure-api-key">Generate a Secure API Key</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Option 1: Python secrets module (recommended)</span>
+python <span class="nt">-c</span> <span class="s1">'import secrets; print(secrets.token_urlsafe(32))'</span>
+
+<span class="c"># Option 2: OpenSSL</span>
+openssl rand <span class="nt">-hex</span> 32
+</code></pre></div></div>
+
+<p><strong>Requirements:</strong></p>
+
+<ul>
+  <li>Minimum 32 characters enforced at startup</li>
+  <li>Application exits with an error message if <code class="language-plaintext highlighter-rouge">API_KEY</code> is set but too short</li>
+</ul>
+
+<h3 id="disabling-authentication">Disabling Authentication</h3>
+
+<p>Leave <code class="language-plaintext highlighter-rouge">API_KEY</code> unset in <code class="language-plaintext highlighter-rouge">.env</code>. <strong>Not recommended for production.</strong></p>
+
+<hr />
+
+<h2 id="-rate-limiting">🚦 Rate Limiting</h2>
+
+<p>Protected endpoints are rate-limited per API key:</p>
+
+<ul>
+  <li><strong>Default:</strong> 60 requests per 60-second sliding window</li>
+  <li><strong>Configurable:</strong> <code class="language-plaintext highlighter-rouge">RATE_LIMIT_PER_MINUTE</code> in <code class="language-plaintext highlighter-rouge">.env</code></li>
+  <li><strong>Response on limit:</strong> <code class="language-plaintext highlighter-rouge">429 Too Many Requests</code> with <code class="language-plaintext highlighter-rouge">Retry-After</code> header</li>
+</ul>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">HTTP</span><span class="o">/</span><span class="m">1.1</span> <span class="m">429</span> <span class="ne">Too Many Requests</span>
+<span class="na">Retry-After</span><span class="p">:</span> <span class="s">60</span>
+<span class="na">Content-Type</span><span class="p">:</span> <span class="s">application/json</span>
+
+<span class="p">{</span><span class="w"> </span><span class="nl">"detail"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Rate limit exceeded. Try again in 60 seconds."</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="-public-endpoints">🌐 Public Endpoints</h2>
+
+<h3 id="-health-check">🩺 Health Check</h3>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/health
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"healthy"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"scheduler_running"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"uptime_seconds"</span><span class="p">:</span><span class="w"> </span><span class="mi">3600</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h3 id="-snapshots">📊 Snapshots</h3>
+
+<h4 id="list-snapshots">List Snapshots</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/snapshots
+</span></code></pre></div></div>
+
+<p><strong>Query parameters:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">page</code></td>
+      <td>integer</td>
+      <td><code class="language-plaintext highlighter-rouge">1</code></td>
+      <td>Page number (≥ 1)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">page_size</code></td>
+      <td>integer</td>
+      <td><code class="language-plaintext highlighter-rouge">50</code></td>
+      <td>Items per page (1–200)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code></td>
+      <td>string</td>
+      <td><em>(none)</em></td>
+      <td>Filter by device ID</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"page"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"page_size"</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">1234</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-05-27T10:00:00Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"device_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ups-main"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"device_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ups"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"power_watts"</span><span class="p">:</span><span class="w"> </span><span class="mf">450.0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"load_percent"</span><span class="p">:</span><span class="w"> </span><span class="mf">55.0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"voltage"</span><span class="p">:</span><span class="w"> </span><span class="mf">120.0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"battery_percent"</span><span class="p">:</span><span class="w"> </span><span class="mf">100.0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"runtime_seconds"</span><span class="p">:</span><span class="w"> </span><span class="mf">3600.0</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"ups_status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"OL"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"temperature_c"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="latest-snapshot">Latest Snapshot</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/snapshots/latest
+</span></code></pre></div></div>
+
+<p>Returns the most recent snapshot (all devices) or filtered by <code class="language-plaintext highlighter-rouge">?device_id=</code>.</p>
+
+<hr />
+
+<h3 id="-events">🔔 Events</h3>
+
+<h4 id="list-events">List Events</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/events
+</span></code></pre></div></div>
+
+<p><strong>Query parameters:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Parameter</th>
+      <th>Type</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">page</code></td>
+      <td>integer</td>
+      <td><code class="language-plaintext highlighter-rouge">1</code></td>
+      <td>Page number</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">page_size</code></td>
+      <td>integer</td>
+      <td><code class="language-plaintext highlighter-rouge">50</code></td>
+      <td>Items per page (1–200)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code></td>
+      <td>string</td>
+      <td><em>(none)</em></td>
+      <td>Filter by device</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">event_type</code></td>
+      <td>string</td>
+      <td><em>(none)</em></td>
+      <td>Filter by type (e.g. <code class="language-plaintext highlighter-rouge">on_battery</code>)</td>
+    </tr>
+  </tbody>
+</table>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"page"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"page_size"</span><span class="p">:</span><span class="w"> </span><span class="mi">50</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"total"</span><span class="p">:</span><span class="w"> </span><span class="mi">42</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w">
+    </span><span class="p">{</span><span class="w">
+      </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-05-27T09:00:00Z"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"device_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ups-main"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"event_type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"on_battery"</span><span class="p">,</span><span class="w">
+      </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nl">"previous_status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"OL"</span><span class="p">,</span><span class="w"> </span><span class="nl">"battery_percent"</span><span class="p">:</span><span class="w"> </span><span class="mf">100.0</span><span class="w"> </span><span class="p">}</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+  </span><span class="p">]</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p><strong>Event types:</strong></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Value</th>
+      <th>Trigger</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">on_battery</code></td>
+      <td>UPS switched from AC to battery</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">power_restored</code></td>
+      <td>AC power returned</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">battery_low</code></td>
+      <td>Battery charge below low threshold</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">shutdown_initiated</code></td>
+      <td>Battery hit floor percentage (<code class="language-plaintext highlighter-rouge">SHUTDOWN_BATTERY_FLOOR_PCT</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">threshold_crossed</code></td>
+      <td>Load % or temperature exceeded configured limit</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">device_offline</code></td>
+      <td>Device missed <code class="language-plaintext highlighter-rouge">DEVICE_OFFLINE_MISSED_POLLS</code> consecutive polls</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">device_online</code></td>
+      <td>Device reachable again after offline period</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="️-devices">🖥️ Devices</h3>
+
+<h4 id="list-devices">List Devices</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/devices
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ups-main"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Main UPS"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ups"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"poller"</span><span class="p">:</span><span class="w"> </span><span class="s2">"nut"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"192.168.1.10"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"port"</span><span class="p">:</span><span class="w"> </span><span class="mi">3493</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"enabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"connection_config"</span><span class="p">:</span><span class="w"> </span><span class="p">{},</span><span class="w">
+    </span><span class="nl">"model"</span><span class="p">:</span><span class="w"> </span><span class="s2">"SmartUPS 1500"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"firmware"</span><span class="p">:</span><span class="w"> </span><span class="s2">"1.0.0"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"serial"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ABC123"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"manufacturer"</span><span class="p">:</span><span class="w"> </span><span class="s2">"APC"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"last_seen"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-05-27T10:00:00Z"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="get-device">Get Device</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/devices/{device_id}
+</span></code></pre></div></div>
+
+<p>Returns <code class="language-plaintext highlighter-rouge">404</code> if the device does not exist.</p>
+
+<hr />
+
+<h3 id="-energy">⚡ Energy</h3>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/energy
+</span></code></pre></div></div>
+
+<p>Returns cumulative kWh totals per device. Requires <code class="language-plaintext highlighter-rouge">energy</code> in <code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code>.</p>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">[</span><span class="w">
+  </span><span class="p">{</span><span class="w">
+    </span><span class="nl">"device_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ups-main"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"kwh_total"</span><span class="p">:</span><span class="w"> </span><span class="mf">12.34</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"cost_total"</span><span class="p">:</span><span class="w"> </span><span class="mf">1.85</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"currency"</span><span class="p">:</span><span class="w"> </span><span class="s2">"USD"</span><span class="w">
+  </span><span class="p">}</span><span class="w">
+</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h3 id="️-trigger-status">▶️ Trigger Status</h3>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/trigger/status
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"idle"</span><span class="p">,</span><span class="w"> </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"No poll in progress."</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<hr />
+
+<h3 id="-diagnostics">🔍 Diagnostics</h3>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/diagnostics
+</span></code></pre></div></div>
+
+<p>Returns last-poll diagnostics from the scheduler’s shared state (device counts, errors, timing).</p>
+
+<hr />
+
+<h2 id="-protected-endpoints">🔒 Protected Endpoints</h2>
+
+<p>All protected endpoints require <code class="language-plaintext highlighter-rouge">X-Api-Key</code> when <code class="language-plaintext highlighter-rouge">API_KEY</code> is set.</p>
+
+<h3 id="️-trigger-manual-poll">▶️ Trigger Manual Poll</h3>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST /api/trigger
+X-Api-Key: &lt;key&gt;
+</span></code></pre></div></div>
+
+<p><strong>Response (<code class="language-plaintext highlighter-rouge">202 Accepted</code>):</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w"> </span><span class="nl">"status"</span><span class="p">:</span><span class="w"> </span><span class="s2">"accepted"</span><span class="p">,</span><span class="w"> </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Poll trigger queued."</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Returns <code class="language-plaintext highlighter-rouge">409 Conflict</code> if a poll is already in progress.</p>
+
+<hr />
+
+<h3 id="️-configuration">⚙️ Configuration</h3>
+
+<h4 id="get-runtime-config">Get Runtime Config</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/config
+</span></code></pre></div></div>
+
+<p><strong>Response:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"poll_interval_minutes"</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"enabled_exporters"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"sqlite"</span><span class="p">],</span><span class="w">
+  </span><span class="nl">"scanning_disabled"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"scheduler_paused"</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"nut_host"</span><span class="p">:</span><span class="w"> </span><span class="s2">"192.168.1.10"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"nut_port"</span><span class="p">:</span><span class="w"> </span><span class="mi">3493</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<h4 id="update-runtime-config">Update Runtime Config</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT /api/config
+X-Api-Key: &lt;key&gt;
+Content-Type: application/json
+
+{
+  "poll_interval_minutes": 10,
+  "enabled_exporters": ["sqlite", "prometheus"],
+  "scanning_disabled": false,
+  "scheduler_paused": false,
+  "nut_host": "192.168.1.10",
+  "nut_port": 3493
+}
+</span></code></pre></div></div>
+
+<p>Changes take effect on the next poll cycle without a container restart.</p>
+
+<hr />
+
+<h3 id="-alerts">🔔 Alerts</h3>
+
+<h4 id="get-alert-configuration">Get Alert Configuration</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">GET /api/alerts
+</span></code></pre></div></div>
+
+<h4 id="update-alert-configuration">Update Alert Configuration</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT /api/alerts
+X-Api-Key: &lt;key&gt;
+Content-Type: application/json
+
+{
+  "providers": [
+    {
+      "type": "webhook",
+      "enabled": true,
+      "url": "https://hooks.example.com/argus",
+      "min_severity": "medium"
+    }
+  ]
+}
+</span></code></pre></div></div>
+
+<h4 id="test-alert-notification">Test Alert Notification</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST /api/alerts/test
+X-Api-Key: &lt;key&gt;
+</span></code></pre></div></div>
+
+<p>Sends a test notification through all enabled providers.</p>
+
+<hr />
+
+<h3 id="️-devices-write">🖥️ Devices (write)</h3>
+
+<h4 id="add-device">Add Device</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">POST /api/devices
+X-Api-Key: &lt;key&gt;
+Content-Type: application/json
+
+{
+  "id": "pdu-rack1",
+  "name": "Rack 1 PDU",
+  "type": "pdu",
+  "poller": "snmp",
+  "host": "192.168.1.20",
+  "port": 161,
+  "enabled": true,
+  "connection_config": { "community": "public" }
+}
+</span></code></pre></div></div>
+
+<p>Returns <code class="language-plaintext highlighter-rouge">409 Conflict</code> if the device ID already exists.</p>
+
+<h4 id="update-device">Update Device</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT /api/devices/{device_id}
+X-Api-Key: &lt;key&gt;
+Content-Type: application/json
+</span></code></pre></div></div>
+
+<h4 id="delete-device">Delete Device</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">DELETE /api/devices/{device_id}
+X-Api-Key: &lt;key&gt;
+</span></code></pre></div></div>
+
+<p>Returns <code class="language-plaintext highlighter-rouge">404</code> if not found.</p>
+
+<h4 id="replace-all-devices">Replace All Devices</h4>
+
+<div class="language-http highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="err">PUT /api/devices
+X-Api-Key: &lt;key&gt;
+Content-Type: application/json
+
+[ { "id": "...", ... } ]
+</span></code></pre></div></div>
+
+<hr />
+
+<h2 id="️-error-responses">⚠️ Error Responses</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Status</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">400 Bad Request</code></td>
+      <td>Invalid request body or parameters</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">401 Unauthorized</code></td>
+      <td>Missing or invalid <code class="language-plaintext highlighter-rouge">X-Api-Key</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">404 Not Found</code></td>
+      <td>Resource does not exist</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">409 Conflict</code></td>
+      <td>Resource already exists (device) or poll in progress</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">413 Request Entity Too Large</code></td>
+      <td>Body exceeds 1 MB</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">422 Unprocessable Entity</code></td>
+      <td>Pydantic validation failed</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">429 Too Many Requests</code></td>
+      <td>Rate limit exceeded</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">503 Service Unavailable</code></td>
+      <td>SQLite database not reachable</td>
+    </tr>
+  </tbody>
+</table>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/argus" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; API Reference
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

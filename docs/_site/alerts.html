@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Alert Configuration — Argus Documentation</title>
+  <!-- SEO tag plugin -->
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Alert Configuration | Argus Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Alert Configuration" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<link rel="canonical" href="http://localhost:4002/alerts.html" />
+<meta property="og:url" content="http://localhost:4002/alerts.html" />
+<meta property="og:site_name" content="Argus Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Alert Configuration" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration","headline":"Alert Configuration","url":"http://localhost:4002/alerts.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration">
+
+<title>
+  
+    Alert Configuration — Argus Documentation
+  
+</title>
+
+<!-- Favicon — add your icon to assets/img/favicon.png to enable -->
+
+
+
+<link rel="icon" type="image/png" href="/assets/argus.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<!-- Rouge syntax highlight (dark theme override handled in _sass/_code.scss) -->
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="http://localhost:4002" class="nav-brand">
+    <span class="brand-name">
+      Argus
+      <span>Documentation</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/observability"
+                 >
+                Observability
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/CODE-REVIEW-POLICY"
+                 >
+                Code Review Policy
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Alert Configuration</h1>
+
+            
+          </header>
+        
+
+        <p>Argus can send notifications when power events occur — UPS battery transitions, device going
+offline, load/temperature thresholds exceeded, and more. Alerts are configurable via the UI
+Settings page or environment variables.</p>
+
+<hr />
+
+<h2 id="-supported-alert-providers">📢 Supported Alert Providers</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Provider</th>
+      <th>Description</th>
+      <th>Setup Complexity</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>Webhook</strong></td>
+      <td>POST JSON to any HTTPS endpoint</td>
+      <td>⭐ Simple</td>
+    </tr>
+    <tr>
+      <td><strong>Gotify</strong></td>
+      <td>Self-hosted push notifications (<a href="https://gotify.net">gotify.net</a>)</td>
+      <td>⭐⭐ Moderate</td>
+    </tr>
+    <tr>
+      <td><strong>ntfy</strong></td>
+      <td>Simple pub-sub notifications (<a href="https://ntfy.sh">ntfy.sh</a>)</td>
+      <td>⭐ Simple</td>
+    </tr>
+    <tr>
+      <td><strong>Apprise</strong></td>
+      <td>100+ services via Apprise API (<a href="https://github.com/caronc/apprise-api">caronc/apprise-api</a>)</td>
+      <td>⭐⭐⭐ Advanced</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="-alert-triggers">⚡ Alert Triggers</h2>
+
+<p>Configure which events fire alerts via environment variables:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Variable</th>
+      <th>Default</th>
+      <th>Trigger</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_ON_BATTERY</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>UPS switches to battery power</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_ON_BATTERY_LOW</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Battery charge reaches low threshold</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_ON_DEVICE_OFFLINE</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Device misses consecutive polls</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_RECOVERY_NOTIFICATIONS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">true</code></td>
+      <td>Send recovery notification when conditions clear</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_FAILURE_THRESHOLD</code></td>
+      <td><code class="language-plaintext highlighter-rouge">3</code></td>
+      <td>Consecutive poll failures before alerting</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_SECONDS</code></td>
+      <td><code class="language-plaintext highlighter-rouge">3600</code></td>
+      <td>Minimum seconds between repeated alerts for the same device</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="️-alert-severity-levels">⚠️ Alert Severity Levels</h2>
+
+<p>Each alert is classified with a severity level. Providers can be configured with a
+<code class="language-plaintext highlighter-rouge">min_severity</code> filter so high-noise providers only receive critical alerts.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Severity</th>
+      <th>Use</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">low</code></td>
+      <td>Informational — threshold crossed, minor event</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">medium</code></td>
+      <td>Degraded — on battery, device briefly offline</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">high</code></td>
+      <td>Serious — battery low, extended offline</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">critical</code></td>
+      <td>Imminent data loss — shutdown initiated</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h2 id="️-configuration-methods">⚙️ Configuration Methods</h2>
+
+<h3 id="️-method-1-ui-settings-recommended">🖥️ Method 1: UI Settings (Recommended)</h3>
+
+<ol>
+  <li>Navigate to <strong>Settings → Alerts</strong> in the web UI</li>
+  <li>Enable desired providers and fill in their settings</li>
+  <li>Use <strong>“Send Test Notification”</strong> to verify before saving</li>
+  <li>Click <strong>“Save Settings”</strong> — changes are written to <code class="language-plaintext highlighter-rouge">runtime_config.json</code> immediately (no restart required)</li>
+</ol>
+
+<p><img src="/assets/Argus-alerts.png" alt="Argus alert configuration" /></p>
+
+<h3 id="️-method-2-environment-variables">⚙️ Method 2: Environment Variables</h3>
+
+<p>Add to <code class="language-plaintext highlighter-rouge">.env</code> before the first container start:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Triggers</span>
+<span class="nv">ALERT_ON_BATTERY</span><span class="o">=</span><span class="nb">true
+</span><span class="nv">ALERT_ON_BATTERY_LOW</span><span class="o">=</span><span class="nb">true
+</span><span class="nv">ALERT_ON_DEVICE_OFFLINE</span><span class="o">=</span><span class="nb">true
+</span><span class="nv">ALERT_FAILURE_THRESHOLD</span><span class="o">=</span>3
+<span class="nv">ALERT_COOLDOWN_SECONDS</span><span class="o">=</span>3600
+
+<span class="c"># Provider</span>
+<span class="nv">WEBHOOK_URL</span><span class="o">=</span>https://webhook.example.com/argus
+</code></pre></div></div>
+
+<p>Requires a container restart to take effect.</p>
+
+<hr />
+
+<h2 id="-provider-setup-guides">📖 Provider Setup Guides</h2>
+
+<h3 id="-webhook">🪝 Webhook</h3>
+
+<p>POST JSON payload to any HTTPS endpoint.</p>
+
+<p><strong>Environment variables:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">WEBHOOK_URL</span><span class="o">=</span>https://hooks.example.com/argus-alerts
+</code></pre></div></div>
+
+<p><strong>Payload example:</strong></p>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="p">{</span><span class="w">
+  </span><span class="nl">"event"</span><span class="p">:</span><span class="w"> </span><span class="s2">"on_battery"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"device_id"</span><span class="p">:</span><span class="w"> </span><span class="s2">"ups-main"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"severity"</span><span class="p">:</span><span class="w"> </span><span class="s2">"medium"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"timestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2026-05-27T10:00:00Z"</span><span class="p">,</span><span class="w">
+  </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"UPS 'ups-main' switched to battery power."</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<blockquote>
+  <p>All alert URLs must use <code class="language-plaintext highlighter-rouge">https://</code>. HTTP endpoints are rejected to prevent credential leakage.</p>
+</blockquote>
+
+<hr />
+
+<h3 id="-gotify">📨 Gotify</h3>
+
+<p>Self-hosted push notification server.</p>
+
+<p><strong>1. Deploy Gotify:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">-p</span> 80:80 <span class="se">\</span>
+  <span class="nt">-v</span> <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/gotify-data:/app/data <span class="se">\</span>
+  gotify/server
+</code></pre></div></div>
+
+<p><strong>2. Create an application</strong> in the Gotify UI and copy the token.</p>
+
+<p><strong>3. Configure Argus:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">GOTIFY_URL</span><span class="o">=</span>https://gotify.example.com
+<span class="nv">GOTIFY_TOKEN</span><span class="o">=</span>your-app-token
+<span class="nv">GOTIFY_PRIORITY</span><span class="o">=</span>5
+</code></pre></div></div>
+
+<p><strong>Priority guide:</strong> 1 = low, 5 = normal, 8 = high, 10 = critical.</p>
+
+<hr />
+
+<h3 id="-ntfy">📱 ntfy</h3>
+
+<p>Simple HTTP-based pub/sub for push notifications.</p>
+
+<p><strong>Using ntfy.sh (public):</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">NTFY_URL</span><span class="o">=</span>https://ntfy.sh
+<span class="nv">NTFY_TOPIC</span><span class="o">=</span>argus-alerts-myhost
+</code></pre></div></div>
+
+<p><strong>Self-hosted ntfy:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">-p</span> 80:80 <span class="se">\</span>
+  <span class="nt">-v</span> <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/ntfy-data:/var/cache/ntfy <span class="se">\</span>
+  binwiederhier/ntfy serve
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">NTFY_URL</span><span class="o">=</span>https://ntfy.example.com
+<span class="nv">NTFY_TOPIC</span><span class="o">=</span>argus-power
+<span class="nv">NTFY_TOKEN</span><span class="o">=</span>your-access-token      <span class="c"># optional, for authenticated topics</span>
+<span class="nv">NTFY_PRIORITY</span><span class="o">=</span>urgent              <span class="c"># min / low / default / high / urgent</span>
+<span class="nv">NTFY_TAGS</span><span class="o">=</span>warning,electric_plug
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="-apprise-recommended-for-multiple-recipients">🌐 Apprise (Recommended for Multiple Recipients)</h3>
+
+<p>Apprise supports 100+ services: Discord, Telegram, Slack, Email, SMS, PagerDuty, and more.</p>
+
+<p><strong>1. Deploy Apprise API:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">-p</span> 8000:8000 <span class="se">\</span>
+  <span class="nt">-v</span> <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>/apprise-config:/config <span class="se">\</span>
+  caronc/apprise-api
+</code></pre></div></div>
+
+<p><strong>2. Create a persistent configuration</strong> at <code class="language-plaintext highlighter-rouge">http://apprise:8000/add/argus-alerts</code>:</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">urls</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="s">discord://webhook_id/webhook_token</span>
+  <span class="pi">-</span> <span class="s">tgram://bot_token/chat_id</span>
+  <span class="pi">-</span> <span class="s">mailto://user:pass@gmail.com</span>
+</code></pre></div></div>
+
+<p><strong>3. Configure Argus:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">APPRISE_URL</span><span class="o">=</span>https://apprise.example.com/notify/argus-alerts
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-testing-alert-configuration">🧪 Testing Alert Configuration</h2>
+
+<p>Send a test notification through all currently enabled providers:</p>
+
+<p><strong>Via UI:</strong> Settings → Alerts → Send Test Notification</p>
+
+<p><strong>Via API:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8000/api/alerts/test <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: your-api-key"</span>
+</code></pre></div></div>
+
+<p>A successful test logs <code class="language-plaintext highlighter-rouge">Alert sent successfully via &lt;provider&gt;</code> at INFO level.</p>
+
+<hr />
+
+<h2 id="-troubleshooting">🔧 Troubleshooting</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Symptom</th>
+      <th>Likely Cause</th>
+      <th>Fix</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>No alerts received</td>
+      <td>Provider disabled or threshold not met</td>
+      <td>Check UI Settings; verify <code class="language-plaintext highlighter-rouge">ALERT_ON_BATTERY=true</code></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">URL must use https://</code> error</td>
+      <td>HTTP URL provided</td>
+      <td>Use an HTTPS endpoint or self-signed cert proxy</td>
+    </tr>
+    <tr>
+      <td>Alert fires repeatedly</td>
+      <td>Cooldown too short</td>
+      <td>Increase <code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_SECONDS</code></td>
+    </tr>
+    <tr>
+      <td>Recovery alert not sent</td>
+      <td><code class="language-plaintext highlighter-rouge">ALERT_RECOVERY_NOTIFICATIONS=false</code></td>
+      <td>Set to <code class="language-plaintext highlighter-rouge">true</code></td>
+    </tr>
+    <tr>
+      <td>Gotify: 401 Unauthorized</td>
+      <td>Invalid token</td>
+      <td>Recreate the Gotify application and update the token</td>
+    </tr>
+    <tr>
+      <td>ntfy: message not delivered</td>
+      <td>Wrong topic or server URL</td>
+      <td>Verify <code class="language-plaintext highlighter-rouge">NTFY_TOPIC</code> and <code class="language-plaintext highlighter-rouge">NTFY_URL</code></td>
+    </tr>
+  </tbody>
+</table>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/argus" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Alert Configuration
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Runbook — Argus Documentation</title>
+  <!-- SEO tag plugin -->
+<!-- Begin Jekyll SEO tag v2.9.0 -->
+<title>Runbook | Argus Documentation</title>
+<meta name="generator" content="Jekyll v4.4.1" />
+<meta property="og:title" content="Runbook" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<meta name="twitter:description" property="og:description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration" />
+<link rel="canonical" href="http://localhost:4002/runbook.html" />
+<meta property="og:url" content="http://localhost:4002/runbook.html" />
+<meta property="og:site_name" content="Argus Documentation" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta name="twitter:title" content="Runbook" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration","headline":"Runbook","url":"http://localhost:4002/runbook.html"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration">
+
+<title>
+  
+    Runbook — Argus Documentation
+  
+</title>
+
+<!-- Favicon — add your icon to assets/img/favicon.png to enable -->
+
+
+
+<link rel="icon" type="image/png" href="/assets/argus.png">
+
+
+<!-- Theme stylesheet -->
+<link rel="stylesheet" href="/assets/css/style.css">
+
+<!-- Rouge syntax highlight (dark theme override handled in _sass/_code.scss) -->
+
+
+
+</head>
+<body>
+
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <nav class="site-nav" aria-label="Main navigation">
+  <a href="http://localhost:4002" class="nav-brand">
+    <span class="brand-name">
+      Argus
+      <span>Documentation</span>
+    </span>
+  </a>
+
+  <ul class="nav-links">
+    
+      <li>
+        <a href="/"
+           >
+          Home
+        </a>
+      </li>
+    
+      <li>
+        <a href="/getting-started"
+           >
+          Getting Started
+        </a>
+      </li>
+    
+      <li>
+        <a href="/api-reference"
+           >
+          API Reference
+        </a>
+      </li>
+    
+      <li>
+        <a href="/security"
+           >
+          Security
+        </a>
+      </li>
+    
+  </ul>
+
+  
+    <a href="https://www.greenflametech.com" class="nav-back-link" title="Back to Green Flame Tech">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+      greenflametech.com
+    </a>
+  
+</nav>
+
+
+  <div class="page-wrapper">
+    <aside class="sidebar" aria-label="Page navigation">
+  
+
+  
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Documentation</h3>
+        <ul>
+          
+            <li>
+              <a href="/"
+                 >
+                Home
+              </a>
+            </li>
+          
+            <li>
+              <a href="/getting-started"
+                 >
+                Getting Started
+              </a>
+            </li>
+          
+            <li>
+              <a href="/architecture"
+                 >
+                Architecture
+              </a>
+            </li>
+          
+            <li>
+              <a href="/api-reference"
+                 >
+                API Reference
+              </a>
+            </li>
+          
+            <li>
+              <a href="/observability"
+                 >
+                Observability
+              </a>
+            </li>
+          
+            <li>
+              <a href="/runbook"
+                 >
+                Runbook
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Alerts</h3>
+        <ul>
+          
+            <li>
+              <a href="/alerts"
+                 >
+                Alert Configuration
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Security</h3>
+        <ul>
+          
+            <li>
+              <a href="/security"
+                 >
+                Security Guide
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+      <div class="sidebar-section">
+        <h3 class="sidebar-section-title">Reference</h3>
+        <ul>
+          
+            <li>
+              <a href="/CODE-REVIEW-POLICY"
+                 >
+                Code Review Policy
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    
+
+  
+</aside>
+
+
+    <main id="main-content" class="main-content">
+      <article class="prose">
+
+        
+          <header class="page-header">
+            
+
+            <h1>Runbook</h1>
+
+            
+          </header>
+        
+
+        <p>Operational guide for diagnosing and resolving production issues using logs and metrics.</p>
+
+<h2 id="table-of-contents">Table of Contents</h2>
+
+<ul>
+  <li><a href="#-log-interpretation">Log Interpretation</a></li>
+  <li><a href="#-metric-thresholds">Metric Thresholds</a></li>
+  <li><a href="#-alert-investigation">Alert Investigation</a></li>
+  <li><a href="#-event-investigation">Event Investigation</a></li>
+  <li><a href="#-sqlite-health">SQLite Health</a></li>
+  <li><a href="#-common-failure-scenarios">Common Failure Scenarios</a></li>
+  <li><a href="#-escalation">Escalation</a></li>
+</ul>
+
+<hr />
+
+<h2 id="-log-interpretation">📋 Log Interpretation</h2>
+
+<p>Argus uses structured log lines at <code class="language-plaintext highlighter-rouge">INFO</code>, <code class="language-plaintext highlighter-rouge">WARNING</code>, and <code class="language-plaintext highlighter-rouge">ERROR</code> levels.</p>
+
+<h3 id="-key-log-patterns">🔍 Key Log Patterns</h3>
+
+<table>
+  <thead>
+    <tr>
+      <th>Pattern</th>
+      <th>Level</th>
+      <th>Meaning</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Poll complete: N devices, N snapshots</code></td>
+      <td>INFO</td>
+      <td>Normal poll cycle finished</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">NUT poll failed</code></td>
+      <td>ERROR</td>
+      <td>Cannot reach NUT daemon</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">SNMP poll failed</code></td>
+      <td>ERROR</td>
+      <td>SNMP device unreachable or timeout</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Exporter 'X' failed</code></td>
+      <td>WARNING</td>
+      <td>Exporter skipped this cycle</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Alert sent successfully via X</code></td>
+      <td>INFO</td>
+      <td>Alert provider delivered</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Alert provider 'X' failed</code></td>
+      <td>ERROR</td>
+      <td>Provider could not send alert</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">Runtime config saved</code></td>
+      <td>INFO</td>
+      <td>UI-driven config change persisted</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">EventProcessor: on_battery</code></td>
+      <td>INFO</td>
+      <td>UPS switched to battery</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">EventProcessor: power_restored</code></td>
+      <td>INFO</td>
+      <td>AC power returned</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">EventProcessor: device_offline</code></td>
+      <td>WARNING</td>
+      <td>Device missed consecutive polls</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">EventProcessor: battery_low</code></td>
+      <td>WARNING</td>
+      <td>UPS battery critically low</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">EventProcessor: shutdown_initiated</code></td>
+      <td>CRITICAL</td>
+      <td>Battery floor reached — shutdown event fired</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3 id="-log-levels-summary">📊 Log Levels Summary</h3>
+
+<ul>
+  <li><strong>INFO</strong> — Normal operational events; no action required.</li>
+  <li><strong>WARNING</strong> — Degraded operation (e.g., exporter skipped, device briefly offline). Monitor for recurrence.</li>
+  <li><strong>ERROR</strong> — Failed operation; investigate root cause. App continues running.</li>
+  <li><strong>CRITICAL</strong> — Severe condition (e.g., battery floor reached, startup failure). Immediate attention required.</li>
+</ul>
+
+<hr />
+
+<h2 id="-metric-thresholds">📊 Metric Thresholds</h2>
+
+<p>Prometheus metrics are exposed on <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> (default <code class="language-plaintext highlighter-rouge">9090</code>). Suggested alert rules:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Metric</th>
+      <th>Label</th>
+      <th>Warning</th>
+      <th>Critical</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_battery_percent</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code></td>
+      <td>&lt; 50 %</td>
+      <td>&lt; 20 %</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_load_percent</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code></td>
+      <td>&gt; 70 %</td>
+      <td>&gt; 90 % (<code class="language-plaintext highlighter-rouge">THRESHOLD_LOAD_PERCENT</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_runtime_seconds</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code></td>
+      <td>&lt; 600 s</td>
+      <td>&lt; 120 s</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_power_watts</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code></td>
+      <td>baseline ± 30 %</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_temperature_c</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code></td>
+      <td>&gt; 40 °C</td>
+      <td>&gt; 50 °C (<code class="language-plaintext highlighter-rouge">THRESHOLD_TEMP_CELSIUS</code>)</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">argus_device_online</code></td>
+      <td><code class="language-plaintext highlighter-rouge">device_id</code></td>
+      <td>—</td>
+      <td>= 0 (offline)</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p><strong>Tip:</strong> Set <code class="language-plaintext highlighter-rouge">PROMETHEUS_DISABLE_LABELS=true</code> to reduce label cardinality when monitoring many
+devices in a high-cardinality environment.</p>
+</blockquote>
+
+<hr />
+
+<h2 id="-alert-investigation">🔍 Alert Investigation</h2>
+
+<p>When an alert fires:</p>
+
+<ol>
+  <li>
+    <p><strong>Identify the event type</strong> from the alert payload (<code class="language-plaintext highlighter-rouge">event_type</code> field).</p>
+  </li>
+  <li>
+    <p><strong>Check recent logs</strong> for the triggering condition:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker logs argus-scheduler <span class="nt">--tail</span> 100 | <span class="nb">grep</span> <span class="nt">-i</span> <span class="s2">"event</span><span class="se">\|</span><span class="s2">battery</span><span class="se">\|</span><span class="s2">offline"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Query the events API</strong> for the device’s event history:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="s2">"http://localhost:8000/api/events?device_id=ups-main&amp;page_size=20"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Check device status</strong> via NUT directly:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>upsc ups@&lt;nut-host&gt;
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Trigger a manual poll</strong> to get fresh telemetry:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl <span class="nt">-X</span> POST http://localhost:8000/api/trigger <span class="se">\</span>
+  <span class="nt">-H</span> <span class="s2">"X-Api-Key: &lt;key&gt;"</span>
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p><strong>Confirm alert provider config</strong> is enabled and URLs are correct:</p>
+
+    <div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>curl http://localhost:8000/api/alerts
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<hr />
+
+<h2 id="-event-investigation">🔍 Event Investigation</h2>
+
+<p><img src="/assets/Argus-events.png" alt="Argus event log" /></p>
+
+<h3 id="on_battery"><code class="language-plaintext highlighter-rouge">on_battery</code></h3>
+
+<p>UPS switched from AC to battery power.</p>
+
+<ol>
+  <li>Check AC power status at the UPS location.</li>
+  <li>Verify <code class="language-plaintext highlighter-rouge">upsc ups@&lt;host&gt;</code> shows <code class="language-plaintext highlighter-rouge">ups.status: OB</code>.</li>
+  <li>Monitor <code class="language-plaintext highlighter-rouge">battery_percent</code> — if dropping, prepare for potential shutdown.</li>
+  <li>Expected recovery: <code class="language-plaintext highlighter-rouge">power_restored</code> event when AC returns.</li>
+</ol>
+
+<h3 id="battery_low"><code class="language-plaintext highlighter-rouge">battery_low</code></h3>
+
+<p>Battery charge is below the NUT <code class="language-plaintext highlighter-rouge">battery.charge.low</code> threshold.</p>
+
+<ol>
+  <li>Verify load on the UPS — shed non-critical loads if possible.</li>
+  <li>Runtime is likely &lt; 5–10 minutes. Initiate graceful shutdowns.</li>
+  <li>If <code class="language-plaintext highlighter-rouge">SHUTDOWN_BATTERY_FLOOR_PCT</code> is reached, a <code class="language-plaintext highlighter-rouge">shutdown_initiated</code> event fires.</li>
+</ol>
+
+<h3 id="device_offline"><code class="language-plaintext highlighter-rouge">device_offline</code></h3>
+
+<p>Device missed <code class="language-plaintext highlighter-rouge">DEVICE_OFFLINE_MISSED_POLLS</code> consecutive polls.</p>
+
+<ol>
+  <li>Check network connectivity to the device host.</li>
+  <li>For NUT: verify <code class="language-plaintext highlighter-rouge">upsc -l &lt;host&gt;</code> responds.</li>
+  <li>For SNMP: <code class="language-plaintext highlighter-rouge">snmpwalk -v2c -c public &lt;host&gt;</code> to confirm reachability.</li>
+  <li>Check for NUT daemon restarts: <code class="language-plaintext highlighter-rouge">systemctl status nut-server</code>.</li>
+  <li>If using Docker: check <code class="language-plaintext highlighter-rouge">host.docker.internal</code> resolves correctly on Linux.</li>
+</ol>
+
+<h3 id="threshold_crossed"><code class="language-plaintext highlighter-rouge">threshold_crossed</code></h3>
+
+<p>Load % or temperature exceeded the configured limit.</p>
+
+<ol>
+  <li>For load: identify processes/devices consuming power — shed non-critical loads.</li>
+  <li>For temperature: check cooling/airflow around the device.</li>
+  <li>Review <code class="language-plaintext highlighter-rouge">THRESHOLD_LOAD_PERCENT</code> and <code class="language-plaintext highlighter-rouge">THRESHOLD_TEMP_CELSIUS</code> settings.</li>
+</ol>
+
+<hr />
+
+<h2 id="-sqlite-health">💾 SQLite Health</h2>
+
+<h3 id="checking-database-size">Checking Database Size</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">du</span> <span class="nt">-sh</span> data/argus.db
+</code></pre></div></div>
+
+<h3 id="checking-row-count">Checking Row Count</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sqlite3 data/argus.db <span class="s2">"SELECT COUNT(*) FROM power_snapshots;"</span>
+</code></pre></div></div>
+
+<h3 id="manual-retention-cleanup">Manual Retention Cleanup</h3>
+
+<p>The SQLiteExporter runs retention automatically. To trigger manually:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sqlite3 data/argus.db <span class="se">\</span>
+  <span class="s2">"DELETE FROM power_snapshots WHERE timestamp &lt; datetime('now', '-90 days');"</span>
+sqlite3 data/argus.db <span class="s2">"VACUUM;"</span>
+</code></pre></div></div>
+
+<h3 id="wal-mode">WAL Mode</h3>
+
+<p>Argus uses WAL (Write-Ahead Logging) for SQLite to allow concurrent reads during writes.
+WAL checkpoints happen automatically. If the WAL file grows unexpectedly large:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sqlite3 data/argus.db <span class="s2">"PRAGMA wal_checkpoint(TRUNCATE);"</span>
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="-common-failure-scenarios">🚧 Common Failure Scenarios</h2>
+
+<h3 id="nut-connection-refused-in-docker">NUT Connection Refused in Docker</h3>
+
+<p><strong>Symptom:</strong> <code class="language-plaintext highlighter-rouge">NUT poll failed: Connection refused</code> when <code class="language-plaintext highlighter-rouge">NUT_HOST=localhost</code></p>
+
+<p><strong>Cause:</strong> <code class="language-plaintext highlighter-rouge">localhost</code> inside the container refers to the container, not the host.</p>
+
+<p><strong>Fix:</strong></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># Linux</span>
+<span class="nv">NUT_HOST</span><span class="o">=</span>host.docker.internal
+<span class="c"># (ensure extra_hosts: host.docker.internal:host-gateway in docker-compose.yml)</span>
+
+<span class="c"># macOS/Windows</span>
+<span class="nv">NUT_HOST</span><span class="o">=</span>host.docker.internal
+
+<span class="c"># Preferred: use host LAN IP</span>
+<span class="nv">NUT_HOST</span><span class="o">=</span>192.168.1.10
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="prometheus-metrics-not-appearing">Prometheus Metrics Not Appearing</h3>
+
+<p><strong>Symptom:</strong> No data in Grafana / <code class="language-plaintext highlighter-rouge">curl http://localhost:9090/metrics</code> returns nothing</p>
+
+<p><strong>Checks:</strong></p>
+
+<ol>
+  <li>Confirm <code class="language-plaintext highlighter-rouge">prometheus</code> is in <code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code>.</li>
+  <li>Verify <code class="language-plaintext highlighter-rouge">PROMETHEUS_PORT</code> matches the Prometheus scrape target.</li>
+  <li>Check scheduler logs: <code class="language-plaintext highlighter-rouge">Exporter 'prometheus' initialized</code>.</li>
+</ol>
+
+<hr />
+
+<h3 id="snapshots-not-written-to-sqlite">Snapshots Not Written to SQLite</h3>
+
+<p><strong>Symptom:</strong> <code class="language-plaintext highlighter-rouge">GET /api/snapshots</code> returns an empty list or 503</p>
+
+<p><strong>Checks:</strong></p>
+
+<ol>
+  <li>Confirm <code class="language-plaintext highlighter-rouge">sqlite</code> is in <code class="language-plaintext highlighter-rouge">ENABLED_EXPORTERS</code>.</li>
+  <li>Verify the <code class="language-plaintext highlighter-rouge">argus-data</code> volume is mounted on both containers.</li>
+  <li>Check scheduler logs for <code class="language-plaintext highlighter-rouge">SQLiteExporter</code> errors.</li>
+  <li>Check disk space: <code class="language-plaintext highlighter-rouge">df -h</code>.</li>
+</ol>
+
+<hr />
+
+<h3 id="alert-not-delivered">Alert Not Delivered</h3>
+
+<p><strong>Symptom:</strong> Event fired but no notification received</p>
+
+<p><strong>Checks:</strong></p>
+
+<ol>
+  <li>Verify the provider is enabled in <code class="language-plaintext highlighter-rouge">GET /api/alerts</code>.</li>
+  <li>Confirm the provider URL is HTTPS and reachable from the container.</li>
+  <li>Check logs for <code class="language-plaintext highlighter-rouge">Alert provider 'X' failed</code> and the error message.</li>
+  <li>Use the test endpoint: <code class="language-plaintext highlighter-rouge">POST /api/alerts/test</code>.</li>
+  <li>Verify <code class="language-plaintext highlighter-rouge">ALERT_COOLDOWN_SECONDS</code> — the cooldown may be suppressing repeated alerts.</li>
+</ol>
+
+<hr />
+
+<h3 id="scheduler-container-exits-immediately">Scheduler Container Exits Immediately</h3>
+
+<p><strong>Symptom:</strong> <code class="language-plaintext highlighter-rouge">argus-scheduler</code> restarts in a loop</p>
+
+<p><strong>Checks:</strong></p>
+
+<ol>
+  <li>View exit logs: <code class="language-plaintext highlighter-rouge">docker logs argus-scheduler --tail 50</code>.</li>
+  <li>Look for <code class="language-plaintext highlighter-rouge">CRITICAL</code> messages — usually a bad <code class="language-plaintext highlighter-rouge">API_KEY</code> length or missing required config.</li>
+  <li>Fix the environment variable and restart.</li>
+</ol>
+
+<hr />
+
+<h2 id="-escalation">🆘 Escalation</h2>
+
+<p>If the runbook steps do not resolve the issue:</p>
+
+<ol>
+  <li>Collect full container logs: <code class="language-plaintext highlighter-rouge">docker logs argus-scheduler &gt; scheduler.log 2&gt;&amp;1</code></li>
+  <li>Export last-poll diagnostics: <code class="language-plaintext highlighter-rouge">curl http://localhost:8000/api/diagnostics</code></li>
+  <li>Open an issue at <a href="https://github.com/fabell4/argus">github.com/fabell4/argus</a> with logs attached.</li>
+</ol>
+
+
+        
+
+      </article>
+    </main>
+  </div>
+
+  <footer class="site-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      Green Flame <span>Tech</span>
+    </div>
+
+    <ul class="footer-links">
+      
+        <li><a href="https://www.greenflametech.com">Main Site</a></li>
+      
+      
+        <li><a href="https://github.com/fabell4/argus" target="_blank" rel="noopener">GitHub</a></li>
+      
+      
+        <li><a href="https://www.linkedin.com/in/alex-bell-iv" target="_blank" rel="noopener">LinkedIn</a></li>
+      
+    </ul>
+
+    <p class="footer-copy">
+      &copy; 2026 Green Flame Tech. All rights reserved.
+       &mdash; Runbook
+    </p>
+  </div>
+</footer>
+
+
+  <script src="/assets/js/main.js"></script>
+</body>
+</html>
