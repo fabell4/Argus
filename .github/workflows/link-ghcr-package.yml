@@ -27,12 +27,14 @@ jobs:
         uses: actions/checkout@v6.0.2
 
       - name: Preflight GHCR package access
+        if: ${{ secrets.GHCR_PAT == '' }}
         env:
           OWNER: ${{ github.repository_owner }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # If this package was originally created outside GitHub Actions,
           # GITHUB_TOKEN may not be allowed to write until package access is granted.
+          # Note: GHCR may return 404 for unauthorized package metadata requests.
           PKG_URL="https://api.github.com/users/${OWNER}/packages/container/argus"
           HTTP=$(curl -s -o /tmp/pkg_preflight.json -w "%{http_code}" \
             -H "Authorization: Bearer ${GH_TOKEN}" \
@@ -41,9 +43,13 @@ jobs:
           echo "GHCR package metadata check HTTP ${HTTP}"
           if [ "${HTTP}" = "403" ]; then
             echo "ERROR: GITHUB_TOKEN cannot access ghcr.io/${OWNER}/argus yet."
-            echo "Grant repository access in package settings or delete/recreate package once."
+            echo "Grant repository access in package settings, or set GHCR_PAT secret as fallback."
             cat /tmp/pkg_preflight.json
             exit 1
+          fi
+          if [ "${HTTP}" = "404" ]; then
+            echo "INFO: Package metadata not visible with GITHUB_TOKEN (may be new package or ACL-hidden existing package)."
+            echo "If push fails with 403, create GHCR_PAT (write:packages) and add it as repository secret."
           fi
 
       - name: Determine version
@@ -66,11 +72,20 @@ jobs:
             echo "latest=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Log in to GHCR
+      - name: Log in to GHCR (PAT fallback)
+        if: ${{ secrets.GHCR_PAT != '' }}
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GHCR_PAT }}
+
+      - name: Log in to GHCR (GITHUB_TOKEN)
+        if: ${{ secrets.GHCR_PAT == '' }}
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU

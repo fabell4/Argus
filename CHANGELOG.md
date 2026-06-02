@@ -12,6 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.6-beta] - 2026-06-01
+
+### Fixed
+
+- **GHCR publish token fallback for package ACL mismatches** — updated
+  `link-ghcr-package.yml` to use `GHCR_PAT` (if configured) as a fallback to
+  `GITHUB_TOKEN`, standardised GHCR login to `github.repository_owner`, and
+  improved preflight diagnostics for GHCR `404` metadata responses that can
+  mask package-level permission issues.
+
+---
+
 ## [0.3.5-beta] - 2026-06-01
 
 ### Fixed
