@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.11-beta] - 2026-06-01
+
+### Fixed
+
+- **GitHub Pages custom domain** — added `docs/CNAME` with `argus-docs.greenflametech.com`
+  and updated `docs/_config.yml` to set `url: https://argus-docs.greenflametech.com` and
+  `baseurl: ""` so Jekyll asset paths resolve correctly under the custom domain.
+
+---
+
 ## [0.3.10-beta] - 2026-06-01
 
 ### Fixed
