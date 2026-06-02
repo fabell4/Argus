@@ -5,7 +5,7 @@ description: Self-hosted power monitoring for UPS devices, PDUs, and sensors wit
 url: https://argus-docs.greenflametech.com
 baseurl: ""
 
-theme: jekyll-theme-hacker
+remote_theme: fabell4/green-flame-jekyll
 
 # Navigation
 navigation:
@@ -39,3 +39,4 @@ kramdown:
 plugins:
   - jekyll-github-metadata
   - jekyll-relative-links
+  - jekyll-remote-theme
