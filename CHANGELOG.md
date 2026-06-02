@@ -12,6 +12,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.10-beta] - 2026-06-01
+
+### Fixed
+
+- **`create_github_release.py` lint errors** — renamed module-level variables to `UPPER_CASE`
+  constants, added explicit `encoding="utf-8"` to all `open()` calls, narrowed broad
+  `Exception` catch to `OSError`, and added explicit `check=False` to the initial
+  `subprocess.run` call to satisfy `W1510:subprocess-run-check`.
+
+---
+
 ## [0.3.9-beta] - 2026-06-01
 
 ### Added
