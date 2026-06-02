@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.7-beta] - 2026-06-01
+
+### Fixed
+
+- **Release republish via non-public remotes** — incremented release to `v0.3.7-beta`
+  to retrigger downstream release/publish automation without direct pushes to the
+  public GitHub `Argus` repository.
+
+---
+
 ## [0.3.6-beta] - 2026-06-01
 
 ### Fixed
