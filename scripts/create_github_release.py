@@ -6,40 +6,40 @@ import subprocess
 import sys
 import tempfile
 
-tag = os.environ["TAG"]
-version = os.environ["VERSION"]
-gh_user = os.environ["GH_USERNAME"]
-gh_pat = os.environ["GH_PAT"]
+TAG = os.environ["TAG"]
+VERSION = os.environ["VERSION"]
+GH_USER = os.environ["GH_USERNAME"]
+GH_PAT = os.environ["GH_PAT"]
 _tmpdir = tempfile.gettempdir()
-notes_file = os.environ.get("NOTES_FILE", os.path.join(_tmpdir, "changelog_notes.txt"))
-payload_file = os.environ.get(
+NOTES_FILE = os.environ.get("NOTES_FILE", os.path.join(_tmpdir, "changelog_notes.txt"))
+PAYLOAD_FILE = os.environ.get(
     "PAYLOAD_FILE", os.path.join(_tmpdir, "gh_release_payload.json")
 )
-response_file = os.environ.get(
+RESPONSE_FILE = os.environ.get(
     "RESPONSE_FILE", os.path.join(_tmpdir, "gh_response.json")
 )
 
-is_pre = any(x in tag for x in ("alpha", "beta", "rc"))
+IS_PRE = any(x in TAG for x in ("alpha", "beta", "rc"))
 
 try:
-    with open(notes_file) as fh:
-        notes = fh.read().strip()
-except Exception:
-    notes = ""
+    with open(NOTES_FILE, encoding="utf-8") as fh:
+        NOTES = fh.read().strip()
+except OSError:
+    NOTES = ""
 
-docker_line = f"**Docker image:** `docker pull ghcr.io/{gh_user}/argus:{version}`"
-body = f"{notes}\n\n---\n\n{docker_line}" if notes else docker_line
+DOCKER_LINE = f"**Docker image:** `docker pull ghcr.io/{GH_USER}/argus:{VERSION}`"
+BODY = f"{NOTES}\n\n---\n\n{DOCKER_LINE}" if NOTES else DOCKER_LINE
 
-payload = {"tag_name": tag, "name": tag, "prerelease": is_pre, "body": body}
+payload = {"tag_name": TAG, "name": TAG, "prerelease": IS_PRE, "body": BODY}
 
-fd = os.open(payload_file, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
-with os.fdopen(fd, "w") as f:
+fd = os.open(PAYLOAD_FILE, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+with os.fdopen(fd, "w", encoding="utf-8") as f:
     json.dump(payload, f)
 
-base_url = f"https://api.github.com/repos/{gh_user}/argus/releases"
-headers = [
+BASE_URL = f"https://api.github.com/repos/{GH_USER}/argus/releases"
+HEADERS = [
     "-H",
-    f"Authorization: Bearer {gh_pat}",
+    f"Authorization: Bearer {GH_PAT}",
     "-H",
     "Content-Type: application/json",
 ]
@@ -49,26 +49,28 @@ r = subprocess.run(
         "curl",
         "-s",
         "-o",
-        response_file,
+        RESPONSE_FILE,
         "-w",
         "%{http_code}",
         "-X",
         "POST",
-        *headers,
-        base_url,
+        *HEADERS,
+        BASE_URL,
         "-d",
-        f"@{payload_file}",
+        f"@{PAYLOAD_FILE}",
     ],
     capture_output=True,
     text=True,
+    check=False,
 )
 code = r.stdout.strip()
 
 if code == "422":
     r2 = subprocess.run(
-        ["curl", "-fsSL", *headers, f"{base_url}/tags/{tag}"],
+        ["curl", "-fsSL", *HEADERS, f"{BASE_URL}/tags/{TAG}"],
         capture_output=True,
         text=True,
+        check=True,
     )
     release_id = json.loads(r2.stdout)["id"]
     subprocess.run(
@@ -77,10 +79,10 @@ if code == "422":
             "-fsSL",
             "-X",
             "PATCH",
-            *headers,
-            f"{base_url}/{release_id}",
+            *HEADERS,
+            f"{BASE_URL}/{release_id}",
             "-d",
-            f"@{payload_file}",
+            f"@{PAYLOAD_FILE}",
         ],
         check=True,
     )
