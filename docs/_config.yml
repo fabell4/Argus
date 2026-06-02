@@ -38,3 +38,4 @@ kramdown:
 # Plugins
 plugins:
   - jekyll-github-metadata
+  - jekyll-relative-links
