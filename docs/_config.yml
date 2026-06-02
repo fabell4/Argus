@@ -2,8 +2,8 @@
 
 title: Argus Documentation
 description: Self-hosted power monitoring for UPS devices, PDUs, and sensors with full observability stack integration
-url: https://argus-docs.greenflametech.com
-baseurl: ""
+url: https://fabell4.github.io
+baseurl: "/Argus"
 
 theme: jekyll-theme-hacker
 
