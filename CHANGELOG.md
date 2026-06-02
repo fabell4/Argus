@@ -12,6 +12,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.8-beta] - 2026-06-01
+
+### Fixed
+
+- **GitHub Actions workflow validation failure** — replaced invalid `secrets.*`
+  references in `if:` expressions with job-level `env.GHCR_PAT` checks in
+  `link-ghcr-package.yml` to satisfy workflow expression context rules.
+
+---
+
 ## [0.3.7-beta] - 2026-06-01
 
 ### Fixed

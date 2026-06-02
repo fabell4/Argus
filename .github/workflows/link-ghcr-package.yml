@@ -18,6 +18,8 @@ jobs:
   publish-ghcr:
     name: Build and push to GHCR
     runs-on: ubuntu-latest
+    env:
+      GHCR_PAT: ${{ secrets.GHCR_PAT }}
     permissions:
       contents: read
       packages: write
@@ -27,7 +29,7 @@ jobs:
         uses: actions/checkout@v6.0.2
 
       - name: Preflight GHCR package access
-        if: ${{ secrets.GHCR_PAT == '' }}
+        if: ${{ env.GHCR_PAT == '' }}
         env:
           OWNER: ${{ github.repository_owner }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -73,7 +75,7 @@ jobs:
           fi
 
       - name: Log in to GHCR (PAT fallback)
-        if: ${{ secrets.GHCR_PAT != '' }}
+        if: ${{ env.GHCR_PAT != '' }}
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
@@ -81,7 +83,7 @@ jobs:
           password: ${{ secrets.GHCR_PAT }}
 
       - name: Log in to GHCR (GITHUB_TOKEN)
-        if: ${{ secrets.GHCR_PAT == '' }}
+        if: ${{ env.GHCR_PAT == '' }}
         uses: docker/login-action@v4
         with:
           registry: ghcr.io
