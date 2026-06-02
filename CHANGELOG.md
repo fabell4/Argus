@@ -12,6 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.9-beta] - 2026-06-01
+
+### Added
+
+- **GitHub Pages Jekyll deployment workflow** — added `.github/workflows/docs.yml` to build
+  and publish the `docs/` site via `actions/jekyll-build-pages` so the hacker theme and
+  layout are applied correctly on GitHub Pages.
+- **Jekyll plugins config fix** — added `jekyll-relative-links` to the `plugins` list in
+  `docs/_config.yml` to match the Gemfile and enable relative link resolution.
+
+---
+
 ## [0.3.8-beta] - 2026-06-01
 
 ### Fixed
