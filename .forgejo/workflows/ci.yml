@@ -878,9 +878,9 @@ jobs:
           CID=$(docker run -d \
             -v marion_docs_content:/docs \
             registry.greenflametech.net/alpine sleep 60)
-          docker exec "$CID" rm -rf /docs/hermes
-          docker exec "$CID" mkdir -p /docs/hermes
-          docker cp _site/. "$CID:/docs/hermes/"
+          docker exec "$CID" rm -rf /docs/argus
+          docker exec "$CID" mkdir -p /docs/argus
+          docker cp _site/. "$CID:/docs/argus/"
           docker rm -f "$CID"
 
   notify:
