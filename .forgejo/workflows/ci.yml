@@ -836,7 +836,7 @@ jobs:
           retention-days: 7
 
   # ---------------------------------------------------------------------------
-  # publish-docs: copies the docs/ folder into the shared mkdocs volume so the
+  # publish-docs: builds the Jekyll site from docs/ and copies it into the shared docs volume so the
   # Argus tab on the hub is always up to date. Depends only on sonarqube so it
   # runs as soon as quality gates pass, independently of docker-publish.
   # ---------------------------------------------------------------------------

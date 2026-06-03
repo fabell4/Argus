@@ -12,6 +12,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [0.3.13-beta] - 2026-06-03
+
+### Fixed
+
+- **External docs publish on release tags** — updated `.github/workflows/docs.yml` to trigger
+  on `v*` tags so GitHub Pages documentation deploys as part of release pushes.
+- **Forgejo docs job wording clarity** — corrected the `publish-docs` comment in
+  `.forgejo/workflows/ci.yml` to reflect that the internal site is built with Jekyll output
+  (`_site`) and then copied into the internal docs volume.
+
+---
+
 ## [0.3.12-beta] - 2026-06-01
 
 ### Changed
